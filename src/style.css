@@ -1,79 +1,162 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import 'tailwindcss';
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* 朝暮主题 CSS 变量定义 */
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+/* 默认朝 (Dawn) 主题 */
+:root,
+:root[data-theme="dawn"] {
+  --color-primary: #F5B041;
+  --color-primary-hover: #E09D2B;
+  --color-bg: #FCF9F2;
+  --color-bg-secondary: #F7F3E8;
+  --color-text: #5D4037;
+  --color-text-secondary: #8D6E63;
+  --color-border: #E0D5C5;
+  --color-accent: #8B5A2B;
+  --color-shadow: rgba(93, 64, 55, 0.1);
+
+  color-scheme: light;
+}
+
+/* 暮 (Dusk) 主题 */
+:root[data-theme="dusk"] {
+  --color-primary: #FAD7A0;
+  --color-primary-hover: #F5C06A;
+  --color-bg: #1A2530;
+  --color-bg-secondary: #243342;
+  --color-text: #ECF0F1;
+  --color-text-secondary: #B8C5CC;
+  --color-border: #3D4F5F;
+  --color-accent: #E8C78B;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+
+  color-scheme: dark;
+}
+
+/* 基础样式重置与全局样式 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
   min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  line-height: 1.5;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* 链接样式 */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* 按钮基础样式 */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5em 1em;
+  font-size: 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 输入框基础样式 */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-shadow);
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-secondary);
+}
+
+/* 选中文本样式 */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+/* 工具类 - 主题过渡动画 */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
