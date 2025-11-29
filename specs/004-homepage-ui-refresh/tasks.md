@@ -22,25 +22,25 @@
 
 ### 1.1 Baseline Review and Design Gap Analysis
 
-- [ ] T001 Audit current HomeView.vue structure and identify sections to replace in `src/views/HomeView.vue`
-- [ ] T002 [P] Audit current theme CSS variables in `src/style.css` against V2.0 Dawn/Dusk palettes
-- [ ] T003 [P] Verify theme store supports auto/manual/persistence behaviors in `src/stores/theme.ts`
-- [ ] T004 [P] Identify missing API modules for products and user points in `src/api/`
+- [x] T001 Audit current HomeView.vue structure and identify sections to replace in `src/views/HomeView.vue`
+- [x] T002 [P] Audit current theme CSS variables in `src/style.css` against V2.0 Dawn/Dusk palettes
+- [x] T003 [P] Verify theme store supports auto/manual/persistence behaviors in `src/stores/theme.ts`
+- [x] T004 [P] Identify missing API modules for products and user points in `src/api/`
 
 ### 1.2 Theme System Enhancement
 
-- [ ] T005 Add glassmorphism CSS utility classes (glass-card, glass-nav, blur levels) in `src/style.css`
-- [ ] T006 [P] Define Dawn-specific glassmorphism variables (white glass, warm tint, soft shadow) in `src/style.css`
-- [ ] T007 [P] Define Dusk-specific glassmorphism variables (dark glass, cool tint, subtle shadow) in `src/style.css`
-- [ ] T008 Add CSS transition rules for smooth theme switching (300-500ms) in `src/style.css`
-- [ ] T009 [P] Extend Tailwind config with glassmorphism utilities if needed in `tailwind.config.js`
-- [ ] T010 Update theme store time ranges to 06:00-17:59 Dawn, 18:00-05:59 Dusk in `src/stores/theme.ts`
+- [x] T005 Add glassmorphism CSS utility classes (glass-card, glass-nav, blur levels) in `src/style.css`
+- [x] T006 [P] Define Dawn-specific glassmorphism variables (white glass, warm tint, soft shadow) in `src/style.css`
+- [x] T007 [P] Define Dusk-specific glassmorphism variables (dark glass, cool tint, subtle shadow) in `src/style.css`
+- [x] T008 Add CSS transition rules for smooth theme switching (300-500ms) in `src/style.css`
+- [x] T009 [P] Extend Tailwind config with glassmorphism utilities if needed in `tailwind.config.js`
+- [x] T010 Update theme store time ranges to 06:00-17:59 Dawn, 18:00-05:59 Dusk in `src/stores/theme.ts`
 
 ### 1.3 Background Assets Preparation
 
-- [ ] T011 [P] Add Dawn mode background image (bright cafe interior) to `public/images/backgrounds/dawn-bg.webp`
-- [ ] T012 [P] Add Dusk mode background image (night cafe, city lights) to `public/images/backgrounds/dusk-bg.webp`
-- [ ] T013 Create fallback solid colors for browsers without image support in `src/style.css`
+- [x] T011 [P] Add Dawn mode background image (bright cafe interior) to `public/images/backgrounds/dawn-bg.webp`
+- [x] T012 [P] Add Dusk mode background image (night cafe, city lights) to `public/images/backgrounds/dusk-bg.webp`
+- [x] T013 Create fallback solid colors for browsers without image support in `src/style.css`
 
 **Checkpoint**: Theme foundation ready - glassmorphism utilities and backgrounds available
 
@@ -52,20 +52,20 @@
 
 ### 2.1 TypeScript Types
 
-- [ ] T014 Define TypeScript types for Product, Category, Recommendation, TimeSlot in `src/types/product.ts`
+- [x] T014 Define TypeScript types for Product, Category, Recommendation, TimeSlot in `src/types/product.ts`
 
 ### 2.2 Product API Module
 
-- [ ] T015 [P] Create products API module with getRecommendations, getCategories, getProductsByCategory in `src/api/products.ts`
-- [ ] T016 [P] Create user API module for getUserPoints (光阴值 display) in `src/api/user.ts`
+- [x] T015 [P] Create products API module with getRecommendations, getCategories, getProductsByCategory in `src/api/products.ts`
+- [x] T016 [P] Create user API module for getUserPoints (光阴值 display) in `src/api/user.ts`
 
 ### 2.3 Product Store
 
-- [ ] T017 Create product store with state: recommendations, categories, selectedCategory, products in `src/stores/product.ts`
-- [ ] T018 Implement fetchRecommendations action (calls /api/products/recommend) in `src/stores/product.ts`
-- [ ] T019 Implement fetchCategories action (calls /api/categories) in `src/stores/product.ts`
-- [ ] T020 Implement fetchProductsByCategory action (calls /api/products?categoryId=X) in `src/stores/product.ts`
-- [ ] T021 Add computed for current timeSlotName from recommendations response in `src/stores/product.ts`
+- [x] T017 Create product store with state: recommendations, categories, selectedCategory, products in `src/stores/product.ts`
+- [x] T018 Implement fetchRecommendations action (calls /api/products/recommend) in `src/stores/product.ts`
+- [x] T019 Implement fetchCategories action (calls /api/categories) in `src/stores/product.ts`
+- [x] T020 Implement fetchProductsByCategory action (calls /api/products?categoryId=X) in `src/stores/product.ts`
+- [x] T021 Add computed for current timeSlotName from recommendations response in `src/stores/product.ts`
 
 **Checkpoint**: Data layer ready - API calls and store available for components
 
@@ -77,58 +77,58 @@
 
 ### 3.1 Top Status Bar (HomeHeader) - US1, US2, US3, US5
 
-- [ ] T022 [P] [US1] Create HomeHeader component structure with glassmorphism styling in `src/components/layout/HomeHeader.vue`
-- [ ] T023 [US1] Add brand logo/text "朝暮 Dawn & Dusk" on left side in `src/components/layout/HomeHeader.vue`
-- [ ] T024 [US5] Add "光阴值 [number]" display with hourglass icon (for logged-in users) in `src/components/layout/HomeHeader.vue`
-- [ ] T025 [US5] Add circular user avatar that links to profile in `src/components/layout/HomeHeader.vue`
-- [ ] T026 [US3] Add capsule-shaped theme toggle (sun/moon icons) in `src/components/layout/HomeHeader.vue`
-- [ ] T027 [US1] Implement Dawn styling: white glass, roasted brown text, amber sun icon in `src/components/layout/HomeHeader.vue`
-- [ ] T028 [US2] Implement Dusk styling: dark glass, off-white text, pale gold moon icon in `src/components/layout/HomeHeader.vue`
-- [ ] T029 Handle guest state (hide points, show login prompt) in `src/components/layout/HomeHeader.vue`
+- [x] T022 [P] [US1] Create HomeHeader component structure with glassmorphism styling in `src/components/layout/HomeHeader.vue`
+- [x] T023 [US1] Add brand logo/text "朝暮 Dawn & Dusk" on left side in `src/components/layout/HomeHeader.vue`
+- [x] T024 [US5] Add "光阴值 [number]" display with hourglass icon (for logged-in users) in `src/components/layout/HomeHeader.vue`
+- [x] T025 [US5] Add circular user avatar that links to profile in `src/components/layout/HomeHeader.vue`
+- [x] T026 [US3] Add capsule-shaped theme toggle (sun/moon icons) in `src/components/layout/HomeHeader.vue`
+- [x] T027 [US1] Implement Dawn styling: white glass, roasted brown text, amber sun icon in `src/components/layout/HomeHeader.vue`
+- [x] T028 [US2] Implement Dusk styling: dark glass, off-white text, pale gold moon icon in `src/components/layout/HomeHeader.vue`
+- [x] T029 Handle guest state (hide points, show login prompt) in `src/components/layout/HomeHeader.vue`
 
 ### 3.2 Hero Banner Section - US1, US2, US7
 
-- [ ] T030 [P] [US1] Create HeroBanner component as large horizontal glassmorphism card in `src/components/home/HeroBanner.vue`
-- [ ] T031 [US1] Add left section: time-based title ("朝·醒神推荐" or "暮·微醺推荐") in `src/components/home/HeroBanner.vue`
-- [ ] T032 [US1] Add left section: brand slogan "把时间，浪费在美好的朝暮里" in `src/components/home/HeroBanner.vue`
-- [ ] T033 [P] [US7] Create RecommendedCard sub-component for featured products in `src/components/home/RecommendedCard.vue`
-- [ ] T034 [US1] Add right section: 3 vertical product cards with images in `src/components/home/HeroBanner.vue`
-- [ ] T035 [US7] Add "加入购物车" buttons with add-to-cart functionality in `src/components/home/RecommendedCard.vue`
-- [ ] T036 [US1] Implement Dawn styling: white glass, amber buttons in `src/components/home/HeroBanner.vue`
-- [ ] T037 [US2] Implement Dusk styling: dark glass, pale gold buttons in `src/components/home/HeroBanner.vue`
-- [ ] T038 Handle empty recommendations state (fallback message or popular products) in `src/components/home/HeroBanner.vue`
+- [x] T030 [P] [US1] Create HeroBanner component as large horizontal glassmorphism card in `src/components/home/HeroBanner.vue`
+- [x] T031 [US1] Add left section: time-based title ("朝·醒神推荐" or "暮·微醺推荐") in `src/components/home/HeroBanner.vue`
+- [x] T032 [US1] Add left section: brand slogan "把时间，浪费在美好的朝暮里" in `src/components/home/HeroBanner.vue`
+- [x] T033 [P] [US7] Create RecommendedCard sub-component for featured products in `src/components/home/RecommendedCard.vue`
+- [x] T034 [US1] Add right section: 3 vertical product cards with images in `src/components/home/HeroBanner.vue`
+- [x] T035 [US7] Add "加入购物车" buttons with add-to-cart functionality in `src/components/home/RecommendedCard.vue`
+- [x] T036 [US1] Implement Dawn styling: white glass, amber buttons in `src/components/home/HeroBanner.vue`
+- [x] T037 [US2] Implement Dusk styling: dark glass, pale gold buttons in `src/components/home/HeroBanner.vue`
+- [x] T038 Handle empty recommendations state (fallback message or popular products) in `src/components/home/HeroBanner.vue`
 
 ### 3.3 Category Tabs - US4
 
-- [ ] T039 [P] [US4] Create CategoryTabs component with horizontal scroll in `src/components/home/CategoryTabs.vue`
-- [ ] T040 [US4] Render pill-style buttons for each category from API in `src/components/home/CategoryTabs.vue`
-- [ ] T041 [US4] Implement selected state: amber (Dawn) / gold (Dusk) background highlight in `src/components/home/CategoryTabs.vue`
-- [ ] T042 [US4] Implement unselected state: neutral gray (Dawn) / dark glass (Dusk) in `src/components/home/CategoryTabs.vue`
-- [ ] T043 [US4] Emit category selection events to parent for filtering product grid in `src/components/home/CategoryTabs.vue`
-- [ ] T044 [US4] Add hover/tap states with smooth transitions in `src/components/home/CategoryTabs.vue`
+- [x] T039 [P] [US4] Create CategoryTabs component with horizontal scroll in `src/components/home/CategoryTabs.vue`
+- [x] T040 [US4] Render pill-style buttons for each category from API in `src/components/home/CategoryTabs.vue`
+- [x] T041 [US4] Implement selected state: amber (Dawn) / gold (Dusk) background highlight in `src/components/home/CategoryTabs.vue`
+- [x] T042 [US4] Implement unselected state: neutral gray (Dawn) / dark glass (Dusk) in `src/components/home/CategoryTabs.vue`
+- [x] T043 [US4] Emit category selection events to parent for filtering product grid in `src/components/home/CategoryTabs.vue`
+- [x] T044 [US4] Add hover/tap states with smooth transitions in `src/components/home/CategoryTabs.vue`
 
 ### 3.4 Product Grid - US4, US7
 
-- [ ] T045 [P] [US4] Create ProductCard component with glassmorphism styling in `src/components/product/ProductCard.vue`
-- [ ] T046 [US4] Add product image (square, rounded corners) in `src/components/product/ProductCard.vue`
-- [ ] T047 [US4] Add product name (Chinese primary, English secondary) in `src/components/product/ProductCard.vue`
-- [ ] T048 [US4] Add price with accent color (amber Dawn / pale gold Dusk) in `src/components/product/ProductCard.vue`
-- [ ] T049 [US4] Add optional special tags (e.g., "晚霞" membership tag) in `src/components/product/ProductCard.vue`
-- [ ] T050 [US4] Implement hover/tap state: scale up (1.02-1.05x), shadow deepens in `src/components/product/ProductCard.vue`
-- [ ] T051 [US7] Add add-to-cart button with loading/success feedback in `src/components/product/ProductCard.vue`
-- [ ] T052 [US1] Implement Dawn styling: white glass, warm glow border, roasted brown text in `src/components/product/ProductCard.vue`
-- [ ] T053 [US2] Implement Dusk styling: dark glass, subtle shadow, off-white text in `src/components/product/ProductCard.vue`
+- [x] T045 [P] [US4] Create ProductCard component with glassmorphism styling in `src/components/product/ProductCard.vue`
+- [x] T046 [US4] Add product image (square, rounded corners) in `src/components/product/ProductCard.vue`
+- [x] T047 [US4] Add product name (Chinese primary, English secondary) in `src/components/product/ProductCard.vue`
+- [x] T048 [US4] Add price with accent color (amber Dawn / pale gold Dusk) in `src/components/product/ProductCard.vue`
+- [x] T049 [US4] Add optional special tags (e.g., "晚霞" membership tag) in `src/components/product/ProductCard.vue`
+- [x] T050 [US4] Implement hover/tap state: scale up (1.02-1.05x), shadow deepens in `src/components/product/ProductCard.vue`
+- [x] T051 [US7] Add add-to-cart button with loading/success feedback in `src/components/product/ProductCard.vue`
+- [x] T052 [US1] Implement Dawn styling: white glass, warm glow border, roasted brown text in `src/components/product/ProductCard.vue`
+- [x] T053 [US2] Implement Dusk styling: dark glass, subtle shadow, off-white text in `src/components/product/ProductCard.vue`
 
 ### 3.5 Bottom Navigation Bar - US6
 
-- [ ] T054 [P] [US6] Create BottomNav component as full-width glassmorphism bar in `src/components/layout/BottomNav.vue`
-- [ ] T055 [US6] Add four nav items: 首页, 点餐, 订单, 我的 in `src/components/layout/BottomNav.vue`
-- [ ] T056 [US6] Each item has icon above, label below in `src/components/layout/BottomNav.vue`
-- [ ] T057 [US6] Add current page indicator (horizontal line above active icon) in `src/components/layout/BottomNav.vue`
-- [ ] T058 [US1] Implement Dawn styling: white glass, amber active, gray inactive in `src/components/layout/BottomNav.vue`
-- [ ] T059 [US2] Implement Dusk styling: dark glass, pale gold active, light gray inactive in `src/components/layout/BottomNav.vue`
-- [ ] T060 [US6] Wire navigation to Vue Router in `src/components/layout/BottomNav.vue`
-- [ ] T061 [US6] Ensure bottom nav is only visible on mobile (hide on desktop where header nav exists) in `src/components/layout/BottomNav.vue`
+- [x] T054 [P] [US6] Create BottomNav component as full-width glassmorphism bar in `src/components/layout/BottomNav.vue`
+- [x] T055 [US6] Add four nav items: 首页, 点餐, 订单, 我的 in `src/components/layout/BottomNav.vue`
+- [x] T056 [US6] Each item has icon above, label below in `src/components/layout/BottomNav.vue`
+- [x] T057 [US6] Add current page indicator (horizontal line above active icon) in `src/components/layout/BottomNav.vue`
+- [x] T058 [US1] Implement Dawn styling: white glass, amber active, gray inactive in `src/components/layout/BottomNav.vue`
+- [x] T059 [US2] Implement Dusk styling: dark glass, pale gold active, light gray inactive in `src/components/layout/BottomNav.vue`
+- [x] T060 [US6] Wire navigation to Vue Router in `src/components/layout/BottomNav.vue`
+- [x] T061 [US6] Ensure bottom nav is only visible on mobile (hide on desktop where header nav exists) in `src/components/layout/BottomNav.vue`
 
 **Checkpoint**: All homepage components built - ready for view integration
 
@@ -140,23 +140,23 @@
 
 ### 4.1 HomeView Complete Redesign
 
-- [ ] T062 Replace current HomeView content with new component structure in `src/views/HomeView.vue`
-- [ ] T063 [US1] Add full-screen background layer with theme-aware cafe image in `src/views/HomeView.vue`
-- [ ] T064 Integrate HomeHeader at top in `src/views/HomeView.vue`
-- [ ] T065 Integrate HeroBanner below header in `src/views/HomeView.vue`
-- [ ] T066 Integrate CategoryTabs below hero in `src/views/HomeView.vue`
-- [ ] T067 Integrate ProductCard grid below tabs in `src/views/HomeView.vue`
-- [ ] T068 Integrate BottomNav at bottom (mobile only) in `src/views/HomeView.vue`
-- [ ] T069 Add loading states (skeletons) while data fetches in `src/views/HomeView.vue`
-- [ ] T070 Add error states with retry functionality in `src/views/HomeView.vue`
-- [ ] T071 [US4] Wire category selection to filter product grid in `src/views/HomeView.vue`
-- [ ] T072 [US7] Wire add-to-cart buttons to cart store in `src/views/HomeView.vue`
+- [x] T062 Replace current HomeView content with new component structure in `src/views/HomeView.vue`
+- [x] T063 [US1] Add full-screen background layer with theme-aware cafe image in `src/views/HomeView.vue`
+- [x] T064 Integrate HomeHeader at top in `src/views/HomeView.vue`
+- [x] T065 Integrate HeroBanner below header in `src/views/HomeView.vue`
+- [x] T066 Integrate CategoryTabs below hero in `src/views/HomeView.vue`
+- [x] T067 Integrate ProductCard grid below tabs in `src/views/HomeView.vue`
+- [x] T068 Integrate BottomNav at bottom (mobile only) in `src/views/HomeView.vue`
+- [x] T069 Add loading states (skeletons) while data fetches in `src/views/HomeView.vue`
+- [x] T070 Add error states with retry functionality in `src/views/HomeView.vue`
+- [x] T071 [US4] Wire category selection to filter product grid in `src/views/HomeView.vue`
+- [x] T072 [US7] Wire add-to-cart buttons to cart store in `src/views/HomeView.vue`
 
 ### 4.2 Layout Adjustments
 
-- [ ] T073 Conditionally hide AppHeader on homepage (HomeHeader is used instead) in `src/components/layout/MainLayout.vue`
-- [ ] T074 Conditionally hide AppFooter on homepage (BottomNav is used instead on mobile) in `src/components/layout/MainLayout.vue`
-- [ ] T075 Ensure other pages still use AppHeader and AppFooter normally in `src/components/layout/MainLayout.vue`
+- [x] T073 Conditionally hide AppHeader on homepage (HomeHeader is used instead) in `src/components/layout/MainLayout.vue`
+- [x] T074 Conditionally hide AppFooter on homepage (BottomNav is used instead on mobile) in `src/components/layout/MainLayout.vue`
+- [x] T075 Ensure other pages still use AppHeader and AppFooter normally in `src/components/layout/MainLayout.vue`
 
 **Checkpoint**: HomeView fully integrated - all components assembled and data flows correctly
 
@@ -168,22 +168,22 @@
 
 ### 5.1 Time-Based Theme Logic - US1, US2
 
-- [ ] T076 [US1] Verify theme store calculateTheme uses 06:00-17:59 Dawn, 18:00-05:59 Dusk in `src/stores/theme.ts`
-- [ ] T077 [US1] Ensure auto-mode interval (60s) is active when mode is 'auto' in `src/stores/theme.ts`
-- [ ] T078 Handle edge cases: prevent flickering at 05:59/06:00 boundary in `src/stores/theme.ts`
+- [x] T076 [US1] Verify theme store calculateTheme uses 06:00-17:59 Dawn, 18:00-05:59 Dusk in `src/stores/theme.ts`
+- [x] T077 [US1] Ensure auto-mode interval (60s) is active when mode is 'auto' in `src/stores/theme.ts`
+- [x] T078 Handle edge cases: prevent flickering at 05:59/06:00 boundary in `src/stores/theme.ts`
 
 ### 5.2 Manual Theme Toggle - US3
 
-- [ ] T079 [US3] Verify HomeHeader theme toggle updates store mode to 'dawn' or 'dusk' in `src/components/layout/HomeHeader.vue`
-- [ ] T080 [US3] Ensure manual selection persists to localStorage in `src/stores/theme.ts`
-- [ ] T081 [US3] On app load, check for stored preference before applying auto in `src/stores/theme.ts`
-- [ ] T082 [US3] Add smooth CSS transition for theme switch (300-500ms) in `src/style.css`
+- [x] T079 [US3] Verify HomeHeader theme toggle updates store mode to 'dawn' or 'dusk' in `src/components/layout/HomeHeader.vue`
+- [x] T080 [US3] Ensure manual selection persists to localStorage in `src/stores/theme.ts`
+- [x] T081 [US3] On app load, check for stored preference before applying auto in `src/stores/theme.ts`
+- [x] T082 [US3] Add smooth CSS transition for theme switch (300-500ms) in `src/style.css`
 
 ### 5.3 Theme-Aware Content - US1, US2
 
-- [ ] T083 [US1] HeroBanner displays "朝·醒神推荐" in Dawn mode in `src/components/home/HeroBanner.vue`
-- [ ] T084 [US2] HeroBanner displays "暮·微醺推荐" in Dusk mode in `src/components/home/HeroBanner.vue`
-- [ ] T085 [US4] Category tabs adjust visible categories based on theme context if backend supports in `src/components/home/CategoryTabs.vue`
+- [x] T083 [US1] HeroBanner displays "朝·醒神推荐" in Dawn mode in `src/components/home/HeroBanner.vue`
+- [x] T084 [US2] HeroBanner displays "暮·微醺推荐" in Dusk mode in `src/components/home/HeroBanner.vue`
+- [x] T085 [US4] Category tabs adjust visible categories based on theme context if backend supports in `src/components/home/CategoryTabs.vue`
 
 **Checkpoint**: Theme behavior complete - auto/manual switching works with persistence
 
@@ -195,27 +195,27 @@
 
 ### 6.1 Core Flow Verification - US7
 
-- [ ] T086 [US7] Test add-to-cart from hero section product cards (manual verification)
-- [ ] T087 [US7] Test add-to-cart from product grid cards (manual verification)
-- [ ] T088 [US6] Verify navigation to cart via BottomNav "点餐" or cart icon (manual verification)
-- [ ] T089 [US6] Verify navigation to orders via BottomNav "订单" (manual verification)
-- [ ] T090 [US5] Verify navigation to profile via BottomNav "我的" or avatar (manual verification)
-- [ ] T091 Test checkout flow from cart is unaffected by homepage changes (manual verification)
+- [x] T086 [US7] Test add-to-cart from hero section product cards (manual verification)
+- [x] T087 [US7] Test add-to-cart from product grid cards (manual verification)
+- [x] T088 [US6] Verify navigation to cart via BottomNav "点餐" or cart icon (manual verification)
+- [x] T089 [US6] Verify navigation to orders via BottomNav "订单" (manual verification)
+- [x] T090 [US5] Verify navigation to profile via BottomNav "我的" or avatar (manual verification)
+- [x] T091 Test checkout flow from cart is unaffected by homepage changes (manual verification)
 
 ### 6.2 Shared Component Compatibility
 
-- [ ] T092 Verify /menu page still uses AppHeader (not HomeHeader) in `src/views/MenuView.vue`
-- [ ] T093 Verify /cart, /checkout, /orders pages use normal layout (manual verification)
-- [ ] T094 Verify /profile page uses normal layout in `src/views/ProfileView.vue`
-- [ ] T095 Verify theme changes apply consistently across all screens (manual verification)
+- [x] T092 Verify /menu page still uses AppHeader (not HomeHeader) in `src/views/MenuView.vue`
+- [x] T093 Verify /cart, /checkout, /orders pages use normal layout (manual verification)
+- [x] T094 Verify /profile page uses normal layout in `src/views/ProfileView.vue`
+- [x] T095 Verify theme changes apply consistently across all screens (manual verification)
 
 ### 6.3 Edge Case Handling
 
-- [ ] T096 Test behavior when recommendations API returns empty in `src/components/home/HeroBanner.vue`
-- [ ] T097 Test behavior when background images fail to load (fallback color) in `src/views/HomeView.vue`
-- [ ] T098 Test rapid theme toggle (queue transitions, no glitching) in `src/stores/theme.ts` and `src/style.css`
-- [ ] T099 Test behavior for not-logged-in users (hide points, show login prompt) in `src/components/layout/HomeHeader.vue`
-- [ ] T100 Verify glassmorphism fallback on browsers without backdrop-filter support in `src/style.css`
+- [x] T096 Test behavior when recommendations API returns empty in `src/components/home/HeroBanner.vue`
+- [x] T097 Test behavior when background images fail to load (fallback color) in `src/views/HomeView.vue`
+- [x] T098 Test rapid theme toggle (queue transitions, no glitching) in `src/stores/theme.ts` and `src/style.css`
+- [x] T099 Test behavior for not-logged-in users (hide points, show login prompt) in `src/components/layout/HomeHeader.vue`
+- [x] T100 Verify glassmorphism fallback on browsers without backdrop-filter support in `src/style.css`
 
 **Checkpoint**: Integration verified - existing flows work, no regressions
 

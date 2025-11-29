@@ -1,97 +1,212 @@
 <template>
-  <div class="min-h-[calc(100vh-64px)] flex flex-col">
-    <!-- Hero Section -->
-    <section class="flex-1 flex flex-col justify-center items-center text-center px-4 py-20 bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
-      <div class="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
-        <!-- Brand Title -->
-        <h1 class="text-5xl md:text-7xl font-serif font-bold text-gray-900 dark:text-white tracking-wide">
-          <span class="block mb-2 text-primary-600 dark:text-primary-400">Dawn & Dusk</span>
-          <span class="text-3xl md:text-4xl font-normal opacity-80">朝 · 暮</span>
-        </h1>
-        
-        <!-- Slogan -->
-        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
-          <span v-if="themeStore.activeTheme === 'dawn'">
-            清晨的第一缕阳光，唤醒城市的味蕾。<br>
-            Dawn brings the light, and coffee brings the life.
-          </span>
-          <span v-else>
-            夜幕降临时的微醺，安抚疲惫的灵魂。<br>
-            Dusk brings the peace, and tea brings the comfort.
-          </span>
-        </p>
+  <div class="relative min-h-screen w-full overflow-x-hidden transition-colors duration-500">
+    <!-- Background Layer -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+      <div
+        class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
+        :class="{ 'opacity-100': themeStore.isDawn, 'opacity-0': !themeStore.isDawn }"
+        style="background-image: url('/images/backgrounds/dawn-bg.webp')"
+      ></div>
+      <div
+        class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
+        :class="{ 'opacity-100': themeStore.isDusk, 'opacity-0': !themeStore.isDusk }"
+        style="background-image: url('/images/backgrounds/dusk-bg.webp')"
+      ></div>
+      <!-- Fallback background color -->
+      <div class="absolute inset-0 bg-[#FCF9F2] dark:bg-[#1A2530] -z-10"></div>
+    </div>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-          <n-button type="primary" size="large" class="px-8 py-6 text-lg" @click="$router.push('/menu')">
-            浏览菜单
-          </n-button>
-          <n-button
-            size="large"
-            ghost
-            class="px-8 py-6 text-lg"
-            @click="$router.push('/member/cart')"
-          >
-            {{ authStore.isLoggedIn ? '查看购物车' : '去购物车（登录后返回）' }}
-          </n-button>
-          <n-button
-            v-if="authStore.isLoggedIn"
-            size="large"
-            tertiary
-            class="px-8 py-6 text-lg"
-            @click="$router.push('/member/orders')"
-          >
-            我的订单
-          </n-button>
-        </div>
-      </div>
-    </section>
+    <!-- Content Layer -->
+    <div class="relative z-10 flex flex-col min-h-screen pb-[80px] md:pb-0">
+      <HomeHeader 
+        :brand-title="'朝暮'"
+        :brand-subtitle="'Dawn & Dusk'"
+        :points="points"
+        :avatar-url="authStore.user?.avatar"
+        :theme="themeStore.activeTheme"
+        :is-guest="!authStore.isLoggedIn"
+        @toggle-theme="themeStore.toggleTheme()"
+        @click-profile="router.push('/profile')"
+        @login="router.push('/login')"
+      />
 
-    <!-- Info Section (Placeholder) -->
-    <section class="py-16 bg-white dark:bg-gray-800 transition-colors duration-300">
-      <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8 text-center">
-        <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
-          <div class="text-4xl mb-4">☕</div>
-          <h3 class="text-xl font-bold mb-2 dark:text-white">精品咖啡</h3>
-          <p class="text-gray-500 dark:text-gray-300">严选阿拉比卡豆，大师级烘焙。</p>
+      <main class="flex-1 container mx-auto px-4 py-6 space-y-8 max-w-7xl pt-20">
+        <!-- Hero Section -->
+        <HeroBanner 
+          :recommended-products="productStore.recommendedProducts"
+          :loading="productStore.isLoadingRecommended"
+          :slot-title="productStore.timeSlotName"
+          :theme="themeStore.activeTheme"
+          @add-to-cart="handleAddToCart"
+        />
+
+        <!-- Main Content Area -->
+        <div class="space-y-6">
+          <!-- Category Tabs -->
+          <CategoryTabs 
+            :categories="productStore.categories"
+            :selected-category-id="productStore.selectedCategoryId"
+            :theme="themeStore.activeTheme"
+            @select="handleCategorySelect"
+          />
+
+          <!-- Error State -->
+          <div v-if="productStore.hasError" class="text-center py-12">
+             <div class="glass-card inline-block px-8 py-6 rounded-xl">
+               <p class="text-red-500 mb-4">加载失败</p>
+               <button 
+                 @click="productStore.initializeHomeData()" 
+                 class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-full text-sm"
+               >
+                 重试
+               </button>
+             </div>
+          </div>
+
+          <!-- Product Grid -->
+          <div v-else-if="productStore.isLoadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div v-for="i in 4" :key="i" class="h-64 rounded-2xl bg-white/10 animate-pulse backdrop-blur-md"></div>
+          </div>
+
+          <div v-else-if="productStore.products.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <ProductCard
+              v-for="product in productStore.products"
+              :key="product.id"
+              :product="product"
+              :theme="themeStore.activeTheme"
+              @add-to-cart="handleAddToCart"
+              @view-detail="(id) => router.push(`/product/${id}`)"
+            />
+          </div>
+
+          <div v-else class="text-center py-12">
+             <div class="glass-card inline-block px-8 py-4 rounded-xl">
+               <p class="text-gray-500 dark:text-gray-400">暂无商品</p>
+             </div>
+          </div>
         </div>
-        <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
-          <div class="text-4xl mb-4">🍵</div>
-          <h3 class="text-xl font-bold mb-2 dark:text-white">原叶茗茶</h3>
-          <p class="text-gray-500 dark:text-gray-300">来自高山的纯净，一口回甘。</p>
-        </div>
-        <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
-          <div class="text-4xl mb-4">🍰</div>
-          <h3 class="text-xl font-bold mb-2 dark:text-white">精致甜点</h3>
-          <p class="text-gray-500 dark:text-gray-300">每日现做，甜蜜你的时光。</p>
-        </div>
-      </div>
-    </section>
+      </main>
+      
+      <!-- Mobile Bottom Nav -->
+      <BottomNav 
+        class="md:hidden" 
+        active-key="home"
+        :theme="themeStore.activeTheme"
+        @navigate="handleBottomNav"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
+import { useProductStore } from '@/stores/product'
+import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-import { NButton } from 'naive-ui'
+import { useMessage } from 'naive-ui'
+import { getMyPoints } from '@/api/user'
+import type { TimeSlotCode } from '@/types/product'
+import HomeHeader from '@/components/layout/HomeHeader.vue'
+import HeroBanner from '@/components/home/HeroBanner.vue'
+import CategoryTabs from '@/components/home/CategoryTabs.vue'
+import ProductCard from '@/components/product/ProductCard.vue'
+import BottomNav from '@/components/layout/BottomNav.vue'
 
+const router = useRouter()
 const themeStore = useThemeStore()
+const productStore = useProductStore()
+const cartStore = useCartStore()
 const authStore = useAuthStore()
+const message = useMessage()
+
+const points = ref(0)
+
+// Helper to determine if we need to force a specific time slot based on theme/time mismatch
+const getSlotCodeForTheme = (): TimeSlotCode | undefined => {
+  const hour = new Date().getHours()
+  const isDayTime = hour >= 6 && hour < 18
+  
+  // If Visual Theme is Dawn but it's Night time -> Force 'dawn' content
+  if (themeStore.activeTheme === 'dawn' && !isDayTime) {
+    return 'dawn'
+  } 
+  // If Visual Theme is Dusk but it's Day time -> Force 'dusk' content
+  else if (themeStore.activeTheme === 'dusk' && isDayTime) {
+    return 'dusk'
+  }
+  
+  // Otherwise (Auto mode, or Manual matching real time) -> Let backend decide
+  return undefined
+}
+
+const handleCategorySelect = async (id: number | null) => {
+  if (id === null) {
+     // If 'All' is selected, default to the first category for now as store expects a categoryId
+     if (productStore.categories.length > 0) {
+         const firstCategory = productStore.categories[0]
+         if (firstCategory) {
+             await productStore.fetchProductsByCategory(firstCategory.id)
+         }
+     }
+  } else {
+    await productStore.fetchProductsByCategory(id)
+  }
+}
+
+const handleAddToCart = async (productId: number) => {
+  try {
+    await cartStore.addItem({
+      productId: productId,
+      quantity: 1
+    })
+    message.success('已加入购物车')
+  } catch (error) {
+    message.error('添加失败，请重试')
+  }
+}
+
+const handleBottomNav = (key: string) => {
+  switch (key) {
+    case 'home':
+      // already here
+      break
+    case 'menu':
+      router.push('/menu')
+      break
+    case 'orders':
+      router.push('/member/orders')
+      break
+    case 'profile':
+      router.push('/profile')
+      break
+  }
+}
+
+// Watch for theme changes to seamlessly update recommendations
+watch(() => themeStore.activeTheme, async () => {
+  const slotCode = getSlotCodeForTheme()
+  await productStore.fetchRecommendedProducts(slotCode)
+})
+
+onMounted(async () => {
+  const slotCode = getSlotCodeForTheme()
+  // Pass the calculated slot code to initialization
+  productStore.initializeHomeData(slotCode)
+  
+  if (authStore.isLoggedIn) {
+    try {
+      const data = await getMyPoints()
+      points.value = data.balance
+    } catch (e) {
+      console.error('Failed to fetch points', e)
+    }
+  }
+})
 </script>
 
 <style scoped>
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Ensure the background layers cover the entire scrollable area or viewport */
+/* The fixed positioning in template handles the background image */
 </style>

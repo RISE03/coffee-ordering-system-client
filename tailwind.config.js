@@ -76,6 +76,39 @@ export default {
       boxShadow: {
         'dawn': '0 4px 12px rgba(93, 64, 55, 0.1)',
         'dusk': '0 4px 12px rgba(0, 0, 0, 0.3)',
+        // Glassmorphism 阴影
+        'glass': 'var(--glass-shadow)',
+        'glass-hover': 'var(--glass-shadow-hover)',
+        'glass-strong': 'var(--glass-shadow-strong)',
+      },
+      // Glassmorphism 模糊效果
+      backdropBlur: {
+        'glass-sm': '8px',
+        'glass-md': '12px',
+        'glass-lg': '20px',
+      },
+      // 背景透明度
+      backgroundColor: {
+        'glass': 'var(--glass-bg)',
+        'glass-hover': 'var(--glass-bg-hover)',
+        'glass-strong': 'var(--glass-bg-strong)',
+        'glass-nav': 'var(--glass-nav-bg)',
+      },
+      // 边框颜色
+      borderColor: {
+        'glass': 'var(--glass-border)',
+        'glass-subtle': 'var(--glass-border-subtle)',
+      },
+      // 动画时长
+      transitionDuration: {
+        'theme': '400ms',
+      },
+      // 背景图片
+      backgroundImage: {
+        'dawn-bg': "url('/images/backgrounds/dawn-bg.webp')",
+        'dusk-bg': "url('/images/backgrounds/dusk-bg.webp')",
+        'dawn-fallback': 'linear-gradient(135deg, #FCF9F2 0%, #F7F3E8 50%, #F5E6D3 100%)',
+        'dusk-fallback': 'linear-gradient(135deg, #1A2530 0%, #243342 50%, #2D3E4F 100%)',
       },
     },
   },

@@ -160,3 +160,301 @@ select:focus {
 .theme-transition {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* ============================================
+   Phase 1: Glassmorphism 基础系统
+   V2.0 首页 UI 刷新 - 玻璃态设计支持
+   ============================================ */
+
+/* --- Dawn 模式 Glassmorphism 变量 --- */
+:root,
+:root[data-theme="dawn"] {
+  /* 玻璃卡片背景 */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-bg-strong: rgba(255, 255, 255, 0.9);
+
+  /* 玻璃导航栏背景 */
+  --glass-nav-bg: rgba(255, 255, 255, 0.7);
+
+  /* 玻璃边框 */
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-border-subtle: rgba(224, 213, 197, 0.5);
+
+  /* 玻璃阴影（暖色调） */
+  --glass-shadow: 0 4px 24px rgba(93, 64, 55, 0.12);
+  --glass-shadow-hover: 0 8px 32px rgba(93, 64, 55, 0.18);
+  --glass-shadow-strong: 0 12px 48px rgba(93, 64, 55, 0.25);
+
+  /* 模糊强度 */
+  --glass-blur-sm: blur(8px);
+  --glass-blur-md: blur(12px);
+  --glass-blur-lg: blur(20px);
+
+  /* 首页背景图片 */
+  --bg-image-url: url('/images/backgrounds/dawn-bg.webp');
+  --bg-fallback-gradient: linear-gradient(135deg, #FCF9F2 0%, #F7F3E8 50%, #F5E6D3 100%);
+
+  /* 卡片特效 */
+  --glass-glow: 0 0 20px rgba(245, 176, 65, 0.15);
+}
+
+/* --- Dusk 模式 Glassmorphism 变量 --- */
+:root[data-theme="dusk"] {
+  /* 玻璃卡片背景（深色玻璃） */
+  --glass-bg: rgba(26, 37, 48, 0.75);
+  --glass-bg-hover: rgba(36, 51, 66, 0.85);
+  --glass-bg-strong: rgba(26, 37, 48, 0.9);
+
+  /* 玻璃导航栏背景 */
+  --glass-nav-bg: rgba(26, 37, 48, 0.7);
+
+  /* 玻璃边框（冷色调） */
+  --glass-border: rgba(61, 79, 95, 0.4);
+  --glass-border-subtle: rgba(184, 197, 204, 0.2);
+
+  /* 玻璃阴影（冷色调） */
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-shadow-strong: 0 12px 48px rgba(0, 0, 0, 0.45);
+
+  /* 模糊强度 (与 Dawn 保持一致) */
+  --glass-blur-sm: blur(8px);
+  --glass-blur-md: blur(12px);
+  --glass-blur-lg: blur(20px);
+
+  /* 首页背景图片 */
+  --bg-image-url: url('/images/backgrounds/dusk-bg.webp');
+  --bg-fallback-gradient: linear-gradient(135deg, #1A2530 0%, #243342 50%, #2D3E4F 100%);
+
+  /* 卡片特效（微光） */
+  --glass-glow: 0 0 20px rgba(250, 215, 160, 0.1);
+}
+
+/* --- Glassmorphism 工具类 --- */
+
+/* 基础玻璃卡片 */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+/* 强调型玻璃卡片 */
+.glass-card-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow-strong);
+}
+
+/* 导航栏玻璃效果 */
+.glass-nav {
+  background: var(--glass-nav-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border-bottom: 1px solid var(--glass-border-subtle);
+  box-shadow: var(--glass-shadow);
+}
+
+/* 底部导航玻璃效果 */
+.glass-nav-bottom {
+  background: var(--glass-nav-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border-top: 1px solid var(--glass-border-subtle);
+  box-shadow: 0 -4px 24px var(--color-shadow);
+}
+
+/* 轻量级玻璃效果（用于按钮、标签等） */
+.glass-light {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 12px;
+}
+
+/* 玻璃按钮 */
+.glass-button {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  color: var(--color-text);
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease,
+    box-shadow 0.2s ease;
+}
+
+.glass-button:hover {
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-button:active {
+  transform: scale(0.98);
+}
+
+/* --- 首页背景相关 --- */
+
+/* 首页全屏背景容器 */
+.homepage-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+
+  /* 背景图片 */
+  background-image: var(--bg-image-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* 过渡动画 */
+  transition: background-image 0.5s ease-in-out;
+}
+
+/* 背景图片加载失败时的回退渐变 */
+.homepage-bg-fallback,
+.homepage-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-fallback-gradient);
+  z-index: -1;
+}
+
+/* 背景叠加层（用于增强对比度） */
+.homepage-bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Dawn 模式叠加层 */
+:root[data-theme="dawn"] .homepage-bg-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(252, 249, 242, 0.3) 0%,
+    rgba(252, 249, 242, 0.1) 50%,
+    rgba(252, 249, 242, 0.4) 100%
+  );
+}
+
+/* Dusk 模式叠加层 */
+:root[data-theme="dusk"] .homepage-bg-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(26, 37, 48, 0.4) 0%,
+    rgba(26, 37, 48, 0.2) 50%,
+    rgba(26, 37, 48, 0.5) 100%
+  );
+}
+
+/* --- 主题切换过渡增强 --- */
+
+/* 为支持 transition 的属性添加平滑过渡 */
+:root {
+  transition:
+    --color-primary 0.4s ease,
+    --color-bg 0.4s ease,
+    --color-text 0.4s ease;
+}
+
+/* 全局主题切换过渡 */
+html,
+body,
+#app,
+.glass-card,
+.glass-nav,
+.glass-nav-bottom,
+.glass-light,
+.glass-button {
+  transition:
+    background-color 0.4s ease,
+    background 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+/* --- Glassmorphism 浏览器兼容性回退 --- */
+
+/* 不支持 backdrop-filter 的浏览器回退 */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-card,
+  .glass-card-strong {
+    background: var(--color-bg-secondary);
+    opacity: 0.95;
+  }
+
+  .glass-nav,
+  .glass-nav-bottom {
+    background: var(--color-bg-secondary);
+    opacity: 0.98;
+  }
+
+  .glass-light,
+  .glass-button {
+    background: var(--color-bg-secondary);
+    opacity: 0.9;
+  }
+}
+
+/* Safari 10-11 前缀支持 */
+@supports (-webkit-backdrop-filter: blur(10px)) and (not (backdrop-filter: blur(10px))) {
+  .glass-card,
+  .glass-card-strong,
+  .glass-nav,
+  .glass-nav-bottom,
+  .glass-light,
+  .glass-button {
+    -webkit-backdrop-filter: var(--glass-blur-md);
+  }
+}
+
+/* --- 产品卡片交互增强 --- */
+
+/* 产品卡片悬停效果预设 */
+.product-card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-card-hover:hover {
+  transform: scale(1.03);
+  box-shadow: var(--glass-shadow-hover), var(--glass-glow);
+}
+
+.product-card-hover:active {
+  transform: scale(0.99);
+}

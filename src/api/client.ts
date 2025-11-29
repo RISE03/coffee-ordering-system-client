@@ -67,8 +67,12 @@ apiClient.interceptors.response.use(
   },
   (error: AxiosError<ApiResponse>) => {
     const normalized = normalizeError(error)
+    const config = error.config as any
 
     if (error.response?.status === 401 || isUnauthorizedError(Number(normalized.code))) {
+      if (config?.skipAuthRedirect) {
+        return Promise.reject(error)
+      }
       handleUnauthorized(normalized.message)
     } else {
       message.error(normalized.message)
