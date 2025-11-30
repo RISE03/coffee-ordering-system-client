@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import { useProductStore } from '@/stores/product'
@@ -129,12 +129,6 @@ const handleAddToCart = async (productId: number) => {
     message.error('添加失败，请重试')
   }
 }
-
-// Watch for theme changes to seamlessly update recommendations
-watch(() => themeStore.activeTheme, async () => {
-  const slotCode = getSlotCodeForTheme()
-  await productStore.fetchRecommendedProducts(slotCode)
-})
 
 onMounted(async () => {
   const slotCode = getSlotCodeForTheme()

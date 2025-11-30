@@ -39,10 +39,9 @@
         :style="{ '--n-color': 'transparent' }"
       >
         <div class="w-full mx-auto">
-          <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
-              <component :is="Component" />
-            </transition>
+          <router-view v-slot="{ Component, route }">
+            <!-- 简化：去掉过渡，直接渲染，避免视觉干扰 -->
+            <component :is="Component" :key="route.fullPath" />
           </router-view>
         </div>
       </n-layout-content>

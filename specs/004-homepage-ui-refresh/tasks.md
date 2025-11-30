@@ -285,27 +285,27 @@
 
 ### 8.1 Global Navigation & Layout
 
-- [ ] T139 Update `MainLayout.vue` to render `BottomNav` globally on all routes (not just home) on mobile.
-- [ ] T140 Remove old `AppFooter` from `MainLayout.vue` (if it duplicates navigation).
-- [ ] T141 Ensure `MainLayout.vue` applies the global theme background (Dawn/Dusk images or gradients) to all pages.
-- [ ] T142 Adjust `padding-bottom` in `MainLayout.vue` (or individual views) to prevent `BottomNav` from obscuring content.
+- [x] T139 Update `MainLayout.vue` to render `BottomNav` globally on all routes (not just home) on mobile.
+- [x] T140 Remove old `AppFooter` from `MainLayout.vue` (if it duplicates navigation).
+- [x] T141 Ensure `MainLayout.vue` applies the global theme background (Dawn/Dusk images or gradients) to all pages.
+- [x] T142 Adjust `padding-bottom` in `MainLayout.vue` (or individual views) to prevent `BottomNav` from obscuring content.
 
 ### 8.2 Menu View Adaptation
 
-- [ ] T143 Update `MenuView.vue` to use `HomeHeader` (or a variant) instead of old `AppHeader`.
-- [ ] T144 Apply glassmorphism styling to `MenuView` containers (product lists, filters).
-- [ ] T145 Ensure `MenuView` background is transparent to show global theme background.
+- [x] T143 Update `MenuView.vue` to use `HomeHeader` (or a variant) instead of old `AppHeader`.
+- [x] T144 Apply glassmorphism styling to `MenuView` containers (product lists, filters).
+- [x] T145 Ensure `MenuView` background is transparent to show global theme background.
 
 ### 8.3 Order View Adaptation
 
-- [ ] T146 Update `OrderListPage.vue` to use glassmorphism cards for order items.
-- [ ] T147 Update `OrderListPage.vue` header to match the new style.
-- [ ] T148 Ensure `OrderListPage.vue` background is transparent.
+- [x] T146 Update `OrderListPage.vue` to use glassmorphism cards for order items.
+- [x] T147 Update `OrderListPage.vue` header to match the new style.
+- [x] T148 Ensure `OrderListPage.vue` background is transparent.
 
 ### 8.4 Profile View Adaptation
 
-- [ ] T149 Update `ProfileView.vue` to use glassmorphism cards for user info and menu items.
-- [ ] T150 Update `ProfileView.vue` header to match the new style.
-- [ ] T151 Ensure `ProfileView.vue` background is transparent.
+- [x] T149 Update `ProfileView.vue` to use glassmorphism cards for user info and menu items.
+- [x] T150 Update `ProfileView.vue` header to match the new style.
+- [x] T151 Ensure `ProfileView.vue` background is transparent.
 
 **Checkpoint**: Global UI consistency achieved - seamless transitions between pages.

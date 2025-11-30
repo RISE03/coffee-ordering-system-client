@@ -1,6 +1,17 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import MainLayout from '@/components/layout/MainLayout.vue'
+import HomeView from '@/views/HomeView.vue'
+import MenuView from '@/views/MenuView.vue'
+import CartView from '@/views/CartView.vue'
+import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue'
+import ProfileView from '@/views/ProfileView.vue'
+import ProductDetail from '@/views/product/ProductDetail.vue'
+import CheckoutPage from '@/views/member/CheckoutPage.vue'
+import OrderListPage from '@/views/member/OrderListPage.vue'
+import OrderDetailPage from '@/views/member/OrderDetailPage.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 // 路由定义
 const routes: RouteRecordRaw[] = [
@@ -11,64 +22,64 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'home',
-        component: () => import('@/views/HomeView.vue'),
+        component: HomeView,
         meta: { title: '首页' }
       },
       {
         path: 'menu',
         name: 'menu',
-        component: () => import('@/views/MenuView.vue'),
+        component: MenuView,
         meta: { title: '菜单' }
       },
       {
         path: 'member/cart',
         name: 'cart',
-        component: () => import('@/views/CartView.vue'),
+        component: CartView,
         alias: '/cart',
         meta: { title: '购物车', requiresAuth: true }
       },
       {
         path: 'login',
         name: 'login',
-        component: () => import('@/views/LoginView.vue'),
+        component: LoginView,
         meta: { title: '登录', guestOnly: true }
       },
       {
         path: 'register',
         name: 'register',
-        component: () => import('@/views/RegisterView.vue'),
+        component: RegisterView,
         meta: { title: '注册', guestOnly: true }
       },
       {
         path: 'profile',
         name: 'profile',
-        component: () => import('@/views/ProfileView.vue'),
+        component: ProfileView,
         meta: { title: '个人中心', requiresAuth: true }
       },
       // Product routes
       {
         path: 'product/:id',
         name: 'product-detail',
-        component: () => import('@/views/product/ProductDetail.vue'),
+        component: ProductDetail,
         meta: { title: '商品详情' }
       },
       // Member routes (require authentication)
       {
         path: 'member/checkout',
         name: 'checkout',
-        component: () => import('@/views/member/CheckoutPage.vue'),
+        component: CheckoutPage,
         meta: { title: '确认订单', requiresAuth: true }
       },
       {
         path: 'member/orders',
         name: 'order-list',
-        component: () => import('@/views/member/OrderListPage.vue'),
+        component: OrderListPage,
         meta: { title: '我的订单', requiresAuth: true }
       },
       {
         path: 'member/orders/:orderNo',
         name: 'order-detail',
-        component: () => import('@/views/member/OrderDetailPage.vue'),
+        component: OrderDetailPage,
         meta: { title: '订单详情', requiresAuth: true }
       }
     ]
@@ -77,7 +88,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: () => import('@/views/NotFoundView.vue'),
+    component: NotFoundView,
     meta: { title: '404 Not Found' }
   }
 ]

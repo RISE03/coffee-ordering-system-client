@@ -41,6 +41,14 @@ export interface PointsInfo {
  * GET /api/points/me
  */
 export async function getMyPoints(): Promise<PointsInfo> {
-  const response = await apiClient.get<PointsInfo>('/points/me')
-  return response.data
+  // 说明：
+  // 积分接口在部分环境中会返回 401（业务码 4010）但并不影响登录态本身。
+  // 默认拦截器会在 401 时触发全局登出，导致刚登录的用户被立即重定向回登录页。
+  // 这里显式跳过全局 401 重定向，让登录流程先保持成功状态，积分获取失败时交由调用方自行处理。
+  const response = await apiClient.get<PointsInfo>('/points/me', {
+    // 自定义字段，Axios 类型未声明，拦截器中已读取该字段
+    // @ts-expect-error custom flag for auth handling
+    skipAuthRedirect: true
+  })
+  return response.data as PointsInfo
 }

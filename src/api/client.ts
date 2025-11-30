@@ -53,7 +53,12 @@ apiClient.interceptors.response.use(
 
       const displayMsg = mapMessageFromCode(res.code, res.message)
 
+      // 业务 401 处理：允许调用方通过 config.skipAuthRedirect 跳过全局登出
       if (isUnauthorizedError(res.code)) {
+        // @ts-expect-error 自定义标记，类型未声明
+        if (response.config?.skipAuthRedirect) {
+          return Promise.reject(buildError(displayMsg, res.code))
+        }
         handleUnauthorized(displayMsg)
       } else {
         message.error(displayMsg)
@@ -69,7 +74,8 @@ apiClient.interceptors.response.use(
     const normalized = normalizeError(error)
     const config = error.config as any
 
-    if (error.response?.status === 401 || isUnauthorizedError(Number(normalized.code))) {
+    const is401 = error.response?.status === 401 || isUnauthorizedError(Number(normalized.code))
+    if (is401) {
       if (config?.skipAuthRedirect) {
         return Promise.reject(error)
       }
@@ -83,20 +89,28 @@ apiClient.interceptors.response.use(
 )
 
 /**
- * 处理业务错误码
+ * 处理业务 / HTTP 401
+ * - 已登录：提示后清理本地态并跳转登录
+ * - 游客：仅在当前路由需要登录时跳转；公共路由不再强制跳转，避免首屏接口 401 导致空白
  */
 function handleUnauthorized(msg?: string) {
   const authStore = useAuthStore()
+  const currentRoute = router.currentRoute.value
+  const requiresAuth = Boolean(currentRoute.meta.requiresAuth)
 
-  // 如果当前已登录，说明 Token 过期，需要清理状态
-  // 传 false 避免调用后端 logout 接口（token 已失效）
+  // 已登录：认为 token 失效，执行登出并提示
   if (authStore.isLoggedIn) {
     message.warning(msg || '登录已过期，请重新登录')
     authStore.logout(false)
+  } else {
+    // 游客：仅在必须登录的场景跳转，公共接口 401 只提示不跳转
+    if (!requiresAuth) {
+      message.warning(msg || '请先登录后再操作')
+      return
+    }
   }
 
   // 跳转登录页 (带上 redirect 参数以便登录后跳回)
-  const currentRoute = router.currentRoute.value
   if (currentRoute.path !== '/login') {
     router.push({
       path: '/login',

@@ -1,57 +1,66 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <h1 class="text-2xl font-bold mb-6 text-[var(--color-text)]">我的订单</h1>
+  <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <!-- Page Header - Glassmorphism Style -->
+    <div class="glass-card p-4 mb-4">
+      <h1 class="text-xl font-bold text-[var(--color-text)]">我的订单</h1>
+    </div>
 
-    <!-- Status Filter Tabs -->
-    <div class="mb-6 overflow-x-auto">
-      <n-tabs v-model:value="activeStatus" type="line" @update:value="handleStatusChange">
-        <n-tab name="all">全部</n-tab>
-        <n-tab name="PENDING_PAYMENT">待支付</n-tab>
-        <n-tab name="PAID_WAITING">已支付</n-tab>
-        <n-tab name="IN_PREPARATION">制作中</n-tab>
-        <n-tab name="READY_FOR_PICKUP">待取餐</n-tab>
-        <n-tab name="COMPLETED">已完成</n-tab>
-        <n-tab name="CANCELLED">已取消</n-tab>
-        <n-tab name="REFUNDING">退款中</n-tab>
-        <n-tab name="REFUNDED">已退款</n-tab>
-      </n-tabs>
+    <!-- Status Filter Tabs - Glassmorphism Style -->
+    <div class="glass-card mb-4 p-2 overflow-x-auto">
+      <div class="flex gap-2 min-w-max">
+        <button
+          v-for="tab in statusTabs"
+          :key="tab.value"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
+          :class="activeStatus === tab.value
+            ? 'bg-[var(--color-primary)] text-[var(--color-bg)] shadow-sm'
+            : 'text-[var(--color-text-secondary)] hover:bg-[var(--glass-bg-hover)]'"
+          @click="handleStatusChange(tab.value)"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="orderStore.loadingList && orders.length === 0" class="text-center py-12">
+    <div v-if="orderStore.loadingList && orders.length === 0" class="glass-card p-12 text-center">
       <n-spin size="large" />
       <p class="mt-4 text-[var(--color-text-secondary)]">正在为您查找订单...</p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="orderStore.errorList && orders.length === 0" class="text-center py-12">
-      <n-result status="error" title="订单加载遇到了小问题" :description="orderStore.errorList">
-        <template #footer>
-          <n-button @click="() => loadOrders()">重新加载</n-button>
-        </template>
-      </n-result>
+    <div v-else-if="orderStore.errorList && orders.length === 0" class="glass-card p-8 text-center">
+      <div class="text-[var(--color-text-secondary)] mb-4">
+        <span class="text-4xl">😔</span>
+      </div>
+      <h3 class="text-lg font-medium text-[var(--color-text)] mb-2">订单加载遇到了小问题</h3>
+      <p class="text-sm text-[var(--color-text-secondary)] mb-4">{{ orderStore.errorList }}</p>
+      <button class="glass-button text-[var(--color-primary)]" @click="() => loadOrders()">
+        重新加载
+      </button>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="orders.length === 0" class="text-center py-12">
-      <n-empty :description="emptyDescription">
-        <template #extra>
-          <p class="text-[var(--color-text-secondary)] mb-4">
-            {{ emptySubtitle }}
-          </p>
-          <n-button type="primary" @click="router.push('/menu')">
-            去逛逛菜单
-          </n-button>
-        </template>
-      </n-empty>
+    <div v-else-if="orders.length === 0" class="glass-card p-8 text-center">
+      <div class="text-[var(--color-text-secondary)] mb-4">
+        <span class="text-4xl">📋</span>
+      </div>
+      <h3 class="text-lg font-medium text-[var(--color-text)] mb-2">{{ emptyDescription }}</h3>
+      <p class="text-sm text-[var(--color-text-secondary)] mb-4">{{ emptySubtitle }}</p>
+      <button
+        class="glass-button bg-[var(--color-primary)] text-[var(--color-bg)]"
+        @click="router.push('/menu')"
+      >
+        去逛逛菜单
+      </button>
     </div>
 
     <!-- Order List -->
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-3">
       <div
         v-for="order in orders"
         :key="order.orderNo"
-        class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-4 cursor-pointer hover:border-[var(--color-primary)] transition-colors"
+        class="glass-card product-card-hover p-4 cursor-pointer"
         @click="goToDetail(order.orderNo)"
       >
         <!-- Order Header -->
@@ -102,17 +111,16 @@
       </div>
 
       <!-- Load More -->
-      <div v-if="hasMore" class="text-center py-6">
-        <n-button
-          :loading="orderStore.loadingList"
+      <div v-if="hasMore" class="text-center py-4">
+        <button
+          class="glass-button text-[var(--color-text-secondary)]"
           :disabled="orderStore.loadingList"
-          ghost
           @click="loadMore"
         >
-          加载更多
-        </n-button>
+          {{ orderStore.loadingList ? '加载中...' : '加载更多' }}
+        </button>
       </div>
-      <div v-else-if="orders.length > 0" class="text-center py-6 text-[var(--color-text-secondary)] text-sm">
+      <div v-else-if="orders.length > 0" class="text-center py-4 text-[var(--color-text-secondary)] text-sm">
         已经到底啦
       </div>
     </div>
@@ -122,15 +130,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  NSpin,
-  NResult,
-  NButton,
-  NEmpty,
-  NTabs,
-  NTab,
-  NTag,
-} from 'naive-ui'
+import { NSpin, NTag } from 'naive-ui'
 import { useOrderStore } from '@/stores/order'
 import { getOrderStatusLabel, ORDER_STATUS_MAP } from '@/types/order'
 import OrderActions from '@/components/member/OrderActions.vue'
@@ -138,6 +138,19 @@ import type { OrderStatus } from '@/types/order'
 
 const router = useRouter()
 const orderStore = useOrderStore()
+
+// Status tabs data
+const statusTabs = [
+  { value: 'all', label: '全部' },
+  { value: 'PENDING_PAYMENT', label: '待支付' },
+  { value: 'PAID_WAITING', label: '已支付' },
+  { value: 'IN_PREPARATION', label: '制作中' },
+  { value: 'READY_FOR_PICKUP', label: '待取餐' },
+  { value: 'COMPLETED', label: '已完成' },
+  { value: 'CANCELLED', label: '已取消' },
+  { value: 'REFUNDING', label: '退款中' },
+  { value: 'REFUNDED', label: '已退款' },
+]
 
 // State - 使用 store 的 activeStatusTab 保持状态
 const activeStatus = ref<string>(orderStore.activeStatusTab || 'all')
@@ -286,12 +299,3 @@ onMounted(() => {
   }
 })
 </script>
-
-<style scoped>
-:deep(.n-tabs .n-tabs-tab) {
-  color: var(--color-text-secondary);
-}
-:deep(.n-tabs .n-tabs-tab--active) {
-  color: var(--color-primary);
-}
-</style>
