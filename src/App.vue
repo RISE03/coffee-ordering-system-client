@@ -11,16 +11,21 @@ import {
 } from 'naive-ui'
 import { computed } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { useRoute } from 'vue-router'
 
 // Initialize theme store to apply theme on startup
 const themeStore = useThemeStore()
+const route = useRoute()
 
 const theme = computed(() => themeStore.activeTheme === 'dusk' ? darkTheme : null)
+
+// 根据路由元信息决定是否隐藏全局背景
+const hideGlobalBg = computed(() => route.meta.hideGlobalBg === true)
 </script>
 
 <template>
-  <div class="homepage-bg"></div>
-  <div class="homepage-bg-overlay"></div>
+  <div v-if="!hideGlobalBg" class="homepage-bg"></div>
+  <div v-if="!hideGlobalBg" class="homepage-bg-overlay"></div>
   <NConfigProvider :locale="zhCN" :date-locale="dateZhCN" :theme="theme">
     <NLoadingBarProvider>
       <NMessageProvider>

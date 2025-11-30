@@ -21,14 +21,12 @@
       :style="{ '--n-color': 'transparent', '--n-text-color': 'var(--color-text)' }"
     >
       <!-- Global Header -->
-      <HomeHeader 
+      <HomeHeader
         :brand-title="'朝暮'"
         :brand-subtitle="'Dawn & Dusk'"
         :points="points"
         :avatar-url="authStore.user?.avatar"
-        :theme="themeStore.activeTheme"
         :is-guest="!authStore.isLoggedIn"
-        @toggle-theme="themeStore.toggleTheme()"
         @click-profile="router.push('/profile')"
         @login="router.push('/login')"
       />

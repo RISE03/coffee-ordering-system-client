@@ -48,16 +48,7 @@
     <!-- Right Actions -->
     <div class="flex items-center space-x-2 md:space-x-4">
       <!-- Theme Toggle -->
-      <n-button quaternary circle size="small" @click="toggleTheme">
-        <template #icon>
-          <n-icon v-if="themeStore.activeTheme === 'dawn'" size="18">
-            <SunnyOutline />
-          </n-icon>
-          <n-icon v-else size="18">
-            <MoonOutline />
-          </n-icon>
-        </template>
-      </n-button>
+      <ThemeSwitcher />
 
       <!-- Cart -->
       <n-badge :value="cartStore.summary.totalQty" :max="99">
@@ -148,7 +139,6 @@
 <script setup lang="ts">
 import { computed, h, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { 
@@ -161,18 +151,16 @@ import {
   NDrawer,
   NDrawerContent
 } from 'naive-ui'
-import { 
-  SunnyOutline, 
-  MoonOutline, 
+import {
   CartOutline,
   PersonOutline,
   LogOutOutline,
   MenuOutline
 } from '@vicons/ionicons5'
+import ThemeSwitcher from '@/components/common/ThemeSwitcher.vue'
 import type { Component } from 'vue'
 
 const router = useRouter()
-const themeStore = useThemeStore()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 
@@ -207,11 +195,6 @@ const handleUserSelect = (key: string) => {
   }
 }
 
-// 切换主题
-const toggleTheme = () => {
-  const newTheme = themeStore.activeTheme === 'dawn' ? 'dusk' : 'dawn'
-  themeStore.setMode(newTheme)
-}
 
 // 导航辅助
 const navigateTo = (path: string) => {

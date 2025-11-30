@@ -15,6 +15,20 @@ import NotFoundView from '@/views/NotFoundView.vue'
 
 // 路由定义
 const routes: RouteRecordRaw[] = [
+  // 独立页面（不使用 MainLayout，有自己的背景）
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: { title: '登录', guestOnly: true, hideGlobalBg: true }
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: RegisterView,
+    meta: { title: '注册', guestOnly: true, hideGlobalBg: true }
+  },
+  // 主布局页面
   {
     path: '/',
     component: MainLayout,
@@ -37,18 +51,6 @@ const routes: RouteRecordRaw[] = [
         component: CartView,
         alias: '/cart',
         meta: { title: '购物车', requiresAuth: true }
-      },
-      {
-        path: 'login',
-        name: 'login',
-        component: LoginView,
-        meta: { title: '登录', guestOnly: true }
-      },
-      {
-        path: 'register',
-        name: 'register',
-        component: RegisterView,
-        meta: { title: '注册', guestOnly: true }
       },
       {
         path: 'profile',

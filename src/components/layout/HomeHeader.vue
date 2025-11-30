@@ -1,32 +1,27 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { NIcon, NAvatar } from 'naive-ui'
-import { SunnyOutline, MoonOutline, HourglassOutline, PersonCircleOutline } from '@vicons/ionicons5'
+import { HourglassOutline, PersonCircleOutline } from '@vicons/ionicons5'
+import ThemeSwitcher from '@/components/common/ThemeSwitcher.vue'
 
 interface Props {
   brandTitle?: string
   brandSubtitle?: string
   points?: number
   avatarUrl?: string
-  theme?: 'dawn' | 'dusk'
   isGuest?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   brandTitle: '朝暮',
   brandSubtitle: 'Dawn & Dusk',
   points: 0,
-  theme: 'dawn',
   isGuest: false
 })
 
 const emit = defineEmits<{
-  (e: 'toggleTheme'): void
   (e: 'clickProfile'): void
   (e: 'login'): void
 }>()
-
-const isDawn = computed(() => props.theme === 'dawn')
 </script>
 
 <template>
@@ -57,13 +52,7 @@ const isDawn = computed(() => props.theme === 'dawn')
         </div>
 
         <!-- Theme Toggle -->
-        <button 
-          @click="emit('toggleTheme')"
-          class="flex items-center justify-center w-11 h-11 rounded-full glass-button hover:scale-105 active:scale-95 focus:outline-none"
-          aria-label="Toggle Theme"
-        >
-          <NIcon :component="isDawn ? SunnyOutline : MoonOutline" class="text-lg text-[var(--color-primary)]" />
-        </button>
+        <ThemeSwitcher />
 
         <!-- Avatar / Profile -->
         <div 
