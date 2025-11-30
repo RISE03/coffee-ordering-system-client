@@ -30,7 +30,7 @@ const handleSelect = (id: number | null) => {
       <!-- All Categories Option -->
       <button
         @click="handleSelect(null)"
-        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border"
+        class="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border"
         :class="[
           selectedCategoryId === null
             ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-lg transform scale-105'
@@ -45,7 +45,7 @@ const handleSelect = (id: number | null) => {
         v-for="category in categories"
         :key="category.id"
         @click="handleSelect(category.id)"
-        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border"
+        class="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border"
         :class="[
           selectedCategoryId === category.id
             ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-lg transform scale-105'

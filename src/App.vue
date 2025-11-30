@@ -19,6 +19,8 @@ const theme = computed(() => themeStore.activeTheme === 'dusk' ? darkTheme : nul
 </script>
 
 <template>
+  <div class="homepage-bg"></div>
+  <div class="homepage-bg-overlay"></div>
   <NConfigProvider :locale="zhCN" :date-locale="dateZhCN" :theme="theme">
     <NLoadingBarProvider>
       <NMessageProvider>

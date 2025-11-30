@@ -80,7 +80,7 @@ const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
         <!-- Mobile Add Button -->
         <button 
           @click.stop="emit('add-to-cart', product.id)"
-          class="md:hidden p-1.5 -mr-1 rounded-full glass-button active:scale-95 border-none bg-transparent shadow-none hover:bg-[var(--glass-bg-hover)]"
+          class="md:hidden p-2 -mr-1 rounded-full glass-button active:scale-95 border-none bg-transparent shadow-none hover:bg-[var(--glass-bg-hover)]"
         >
           <NIcon :component="AddCircleOutline" class="text-3xl text-[var(--color-primary)]" />
         </button>

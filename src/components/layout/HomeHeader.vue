@@ -33,39 +33,17 @@ const isDawn = computed(() => props.theme === 'dawn')
   <header class="fixed top-0 left-0 right-0 z-50 px-4 py-3 glass-nav transition-all duration-500 ease-in-out">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
       <!-- Brand -->
-      <div class="flex flex-col">
-        <h1 class="text-lg font-serif font-bold tracking-wide text-[var(--color-primary-hover)]">
-          {{ brandTitle }}
-        </h1>
-        <span class="text-[0.6rem] uppercase tracking-widest opacity-80 font-sans text-[var(--color-text-secondary)]">
-          {{ brandSubtitle }}
-        </span>
+      <div class="flex items-center gap-3">
+        <img :src="'/images/logo/logo.png'" alt="Logo" class="h-10 w-auto object-contain" />
+        <div class="flex flex-col">
+          <h1 class="text-lg font-serif font-bold tracking-wide text-[var(--color-primary-hover)] leading-tight">
+            {{ brandTitle }}
+          </h1>
+          <span class="text-[0.6rem] uppercase tracking-widest opacity-80 font-sans text-[var(--color-text-secondary)] leading-none">
+            {{ brandSubtitle }}
+          </span>
+        </div>
       </div>
-
-      <!-- Desktop Navigation -->
-      <nav class="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
-        <router-link 
-          to="/" 
-          class="text-sm font-medium transition-colors text-[var(--color-text)] hover:text-[var(--color-primary)]"
-          active-class="text-[var(--color-primary)] font-bold"
-        >
-          首页
-        </router-link>
-        <router-link 
-          to="/menu" 
-          class="text-sm font-medium transition-colors text-[var(--color-text)] hover:text-[var(--color-primary)]"
-          active-class="text-[var(--color-primary)] font-bold"
-        >
-          点餐
-        </router-link>
-        <router-link 
-          to="/member/orders" 
-          class="text-sm font-medium transition-colors text-[var(--color-text)] hover:text-[var(--color-primary)]"
-          active-class="text-[var(--color-primary)] font-bold"
-        >
-          订单
-        </router-link>
-      </nav>
 
       <!-- Right Actions -->
       <div class="flex items-center gap-3">
@@ -81,7 +59,7 @@ const isDawn = computed(() => props.theme === 'dawn')
         <!-- Theme Toggle -->
         <button 
           @click="emit('toggleTheme')"
-          class="flex items-center justify-center w-8 h-8 rounded-full glass-button hover:scale-105 active:scale-95 focus:outline-none"
+          class="flex items-center justify-center w-11 h-11 rounded-full glass-button hover:scale-105 active:scale-95 focus:outline-none"
           aria-label="Toggle Theme"
         >
           <NIcon :component="isDawn ? SunnyOutline : MoonOutline" class="text-lg text-[var(--color-primary)]" />
@@ -89,7 +67,7 @@ const isDawn = computed(() => props.theme === 'dawn')
 
         <!-- Avatar / Profile -->
         <div 
-          class="cursor-pointer transition-transform active:scale-95"
+          class="cursor-pointer transition-transform active:scale-95 p-1.5"
           @click="isGuest ? emit('login') : emit('clickProfile')"
         >
           <NAvatar 

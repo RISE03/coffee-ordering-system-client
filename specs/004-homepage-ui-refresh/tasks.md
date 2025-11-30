@@ -227,182 +227,85 @@
 
 ### 7.1 Micro-Interactions
 
-- [ ] T101 Add hover scale + shadow on product cards in `src/components/product/ProductCard.vue`
-- [ ] T102 [P] Add button press feedback (color change, haptic-style) across all buttons
-- [ ] T103 Add loading spinner or skeleton for product grid while fetching in `src/views/HomeView.vue`
-- [ ] T104 Add brief toast notification "已加入购物车" on add-to-cart success (cart integration)
-- [ ] T105 Ensure touch targets are minimum 44x44px across all interactive elements
+- [x] T101 Add hover scale + shadow on product cards in `src/components/product/ProductCard.vue`
+- [x] T102 [P] Add button press feedback (color change, haptic-style) across all buttons
+- [x] T103 Add loading spinner or skeleton for product grid while fetching in `src/views/HomeView.vue`
+- [x] T104 Add brief toast notification "已加入购物车" on add-to-cart success (cart integration)
+- [x] T105 Ensure touch targets are minimum 44x44px across all interactive elements
 
 ### 7.2 Responsiveness
 
-- [ ] T106 Test homepage on mobile (320px - 480px): 2-column grid, bottom nav visible
-- [ ] T107 Test homepage on tablet (768px): 3-column grid possible
-- [ ] T108 Test homepage on desktop (1024px+): 4-column grid, AppHeader visible, BottomNav hidden
-- [ ] T109 Verify hero banner adapts to smaller screens (stack layout if needed) in `src/components/home/HeroBanner.vue`
+- [x] T106 Test homepage on mobile (320px - 480px): 2-column grid, bottom nav visible
+- [x] T107 Test homepage on tablet (768px): 3-column grid possible
+- [x] T108 Test homepage on desktop (1024px+): 4-column grid, AppHeader visible, BottomNav hidden
+- [x] T109 Verify hero banner adapts to smaller screens (stack layout if needed) in `src/components/home/HeroBanner.vue`
 
 ### 7.3 Performance Verification
 
-- [ ] T110 Measure initial load time on 4G (target: <3s)
-- [ ] T111 Verify theme transition completes in <500ms
-- [ ] T112 Ensure backdrop-filter blur doesn't cause jank on mid-range devices
-- [ ] T113 Optimize background images if load time is impacted in `public/images/backgrounds/`
+- [x] T110 Measure initial load time on 4G (target: <3s)
+- [x] T111 Verify theme transition completes in <500ms
+- [x] T112 Ensure backdrop-filter blur doesn't cause jank on mid-range devices
+- [x] T113 Optimize background images if load time is impacted in `public/images/backgrounds/`
 
 ### 7.4 Manual QA Checklist (from spec.md)
 
-- [ ] T114 Verify: Opening homepage 06:00-17:59 displays Dawn theme (amber, bright cafe, white glass)
-- [ ] T115 Verify: Opening homepage 18:00-05:59 displays Dusk theme (pale gold, night cafe, dark glass)
-- [ ] T116 Verify: Top bar shows brand logo "朝暮 Dawn & Dusk" on left
-- [ ] T117 Verify: Top bar shows "光阴值 [number]" with hourglass icon (logged-in users)
-- [ ] T118 Verify: Top bar shows circular avatar that navigates to profile
-- [ ] T119 Verify: Theme toggle switches between sun (Dawn) and moon (Dusk) states
-- [ ] T120 Verify: Theme switch has smooth transition (no jarring jumps)
-- [ ] T121 Verify: Hero banner displays correct time-based title
-- [ ] T122 Verify: Hero banner displays slogan "把时间，浪费在美好的朝暮里"
-- [ ] T123 Verify: Hero banner shows 3 recommended products with add-to-cart buttons
-- [ ] T124 Verify: Category tabs are horizontal scrollable pills
-- [ ] T125 Verify: Tapping category tab filters product grid
-- [ ] T126 Verify: Selected tab has theme-appropriate highlight
-- [ ] T127 Verify: Product grid displays two columns on mobile
-- [ ] T128 Verify: Product cards show image, Chinese name, English name, price
-- [ ] T129 Verify: Product cards have glassmorphism styling
-- [ ] T130 Verify: Product cards respond to tap with scale/shadow feedback
-- [ ] T131 Verify: Add-to-cart buttons add items to cart successfully
-- [ ] T132 Verify: Bottom nav displays: 首页, 点餐, 订单, 我的
-- [ ] T133 Verify: Current page highlighted in bottom nav
-- [ ] T134 Verify: Other nav items navigate correctly
-- [ ] T135 Verify: Theme preference persists after app reload
-- [ ] T136 Verify: Glassmorphism blur renders correctly on supported browsers
-- [ ] T137 Verify: All images load without broken icons
-- [ ] T138 Verify: No significant lag or jank on mobile devices
+- [x] T114 Verify: Opening homepage 06:00-17:59 displays Dawn theme (amber, bright cafe, white glass)
+- [x] T115 Verify: Opening homepage 18:00-05:59 displays Dusk theme (pale gold, night cafe, dark glass)
+- [x] T116 Verify: Top bar shows brand logo "朝暮 Dawn & Dusk" on left
+- [x] T117 Verify: Top bar shows "光阴值 [number]" with hourglass icon (logged-in users)
+- [x] T118 Verify: Top bar shows circular avatar that navigates to profile
+- [x] T119 Verify: Theme toggle switches between sun (Dawn) and moon (Dusk) states
+- [x] T120 Verify: Theme switch has smooth transition (no jarring jumps)
+- [x] T121 Verify: Hero banner displays correct time-based title
+- [x] T122 Verify: Hero banner displays slogan "把时间，浪费在美好的朝暮里"
+- [x] T123 Verify: Hero banner shows 3 recommended products with add-to-cart buttons
+- [x] T124 Verify: Category tabs are horizontal scrollable pills
+- [x] T125 Verify: Tapping category tab filters product grid
+- [x] T126 Verify: Selected tab has theme-appropriate highlight
+- [x] T127 Verify: Product grid displays two columns on mobile
+- [x] T128 Verify: Product cards show image, Chinese name, English name, price
+- [x] T129 Verify: Product cards have glassmorphism styling
+- [x] T130 Verify: Product cards respond to tap with scale/shadow feedback
+- [x] T131 Verify: Add-to-cart buttons add items to cart successfully
+- [x] T132 Verify: Bottom nav displays: 首页, 点餐, 订单, 我的
+- [x] T133 Verify: Current page highlighted in bottom nav
+- [x] T134 Verify: Other nav items navigate correctly
+- [x] T135 Verify: Theme preference persists after app reload
+- [x] T136 Verify: Glassmorphism blur renders correctly on supported browsers
+- [x] T137 Verify: All images load without broken icons
+- [x] T138 Verify: No significant lag or jank on mobile devices
 
 **Checkpoint**: Polish complete - all acceptance criteria validated
 
 ---
 
-## Dependencies & Execution Order
+## Phase 8: Global UI Consistency
 
-### Phase Dependencies
+**Purpose**: Extend the new glassmorphism UI (BottomNav, HomeHeader style, Theme backgrounds) to all major views (Menu, Orders, Profile) for a unified experience.
 
-- **Phase 1 (Foundation)**: No dependencies - can start immediately
-- **Phase 2 (API & Data)**: Depends on T014 (types) completing first
-- **Phase 3 (Components)**: Depends on Phase 1 (glassmorphism CSS) and Phase 2 (store/types)
-- **Phase 4 (Integration)**: Depends on Phase 3 (all components built)
-- **Phase 5 (Theme Behavior)**: Can run in parallel with Phase 4 for theme.ts tasks
-- **Phase 6 (Regression)**: Depends on Phase 4 and Phase 5 completing
-- **Phase 7 (Polish & QA)**: Depends on Phase 6 completing
+### 8.1 Global Navigation & Layout
 
-### User Story Dependencies
+- [ ] T139 Update `MainLayout.vue` to render `BottomNav` globally on all routes (not just home) on mobile.
+- [ ] T140 Remove old `AppFooter` from `MainLayout.vue` (if it duplicates navigation).
+- [ ] T141 Ensure `MainLayout.vue` applies the global theme background (Dawn/Dusk images or gradients) to all pages.
+- [ ] T142 Adjust `padding-bottom` in `MainLayout.vue` (or individual views) to prevent `BottomNav` from obscuring content.
 
-| User Story | Description | Priority | Can Start After |
-|------------|-------------|----------|-----------------|
-| US1 | Morning Homepage Experience (Dawn theme) | P1 | Phase 2 complete |
-| US2 | Evening Homepage Experience (Dusk theme) | P1 | Phase 2 complete |
-| US3 | Manual Theme Toggle | P2 | US1 + US2 (both themes needed) |
-| US4 | Browse Products via Category Tabs | P2 | Phase 2 complete |
-| US5 | View Points and Membership Status | P3 | Phase 2 complete |
-| US6 | Navigate via Bottom Navigation Bar | P2 | Phase 2 complete |
-| US7 | Add Product to Cart from Homepage | P3 | Phase 2 complete + cart store |
+### 8.2 Menu View Adaptation
 
-### Within Each Phase
+- [ ] T143 Update `MenuView.vue` to use `HomeHeader` (or a variant) instead of old `AppHeader`.
+- [ ] T144 Apply glassmorphism styling to `MenuView` containers (product lists, filters).
+- [ ] T145 Ensure `MenuView` background is transparent to show global theme background.
 
-- CSS utilities (T005-T009) before component styling
-- Types (T014) before API modules (T015-T016)
-- API modules before store (T017-T021)
-- Store before components
-- Components before view integration (Phase 4)
+### 8.3 Order View Adaptation
 
-### Parallel Opportunities
+- [ ] T146 Update `OrderListPage.vue` to use glassmorphism cards for order items.
+- [ ] T147 Update `OrderListPage.vue` header to match the new style.
+- [ ] T148 Ensure `OrderListPage.vue` background is transparent.
 
-**Phase 1:**
-- T002, T003, T004 can run in parallel (auditing tasks)
-- T006, T007 can run in parallel (Dawn/Dusk CSS)
-- T011, T012 can run in parallel (background images)
+### 8.4 Profile View Adaptation
 
-**Phase 2:**
-- T015, T016 can run in parallel (API modules)
+- [ ] T149 Update `ProfileView.vue` to use glassmorphism cards for user info and menu items.
+- [ ] T150 Update `ProfileView.vue` header to match the new style.
+- [ ] T151 Ensure `ProfileView.vue` background is transparent.
 
-**Phase 3:**
-- T022, T030, T039, T045, T054 can run in parallel (component scaffolding)
-
----
-
-## Parallel Example: Component Scaffolding
-
-```bash
-# Launch all component scaffolds together (after Phase 2 complete):
-Task: "Create HomeHeader component structure in src/components/layout/HomeHeader.vue"
-Task: "Create HeroBanner component in src/components/home/HeroBanner.vue"
-Task: "Create CategoryTabs component in src/components/home/CategoryTabs.vue"
-Task: "Create ProductCard component in src/components/product/ProductCard.vue"
-Task: "Create BottomNav component in src/components/layout/BottomNav.vue"
-```
-
----
-
-## Implementation Strategy
-
-### MVP First (User Story 1 + 2 Only)
-
-1. Complete Phase 1: Foundation & Theme (T001-T013)
-2. Complete Phase 2: API & Data Layer (T014-T021)
-3. Complete Phase 3: Build components for US1 + US2 (Dawn/Dusk themes)
-4. Complete Phase 4: Integrate HomeView (T062-T075)
-5. Complete Phase 5: Theme behavior (T076-T085)
-6. **STOP and VALIDATE**: Both Dawn and Dusk themes display correctly
-7. Demo/thesis presentation ready
-
-### Incremental Delivery
-
-1. Foundation + API → Data layer ready
-2. Add Dawn theme (US1) → Test → First visual milestone
-3. Add Dusk theme (US2) → Test → Dual theme working
-4. Add Theme Toggle (US3) → Test → Manual switching works
-5. Add Category Filtering (US4) → Test → Product browsing works
-6. Add Points/Avatar (US5) → Test → Member info visible
-7. Add Bottom Nav (US6) → Test → Mobile navigation works
-8. Add Cart Integration (US7) → Test → Full functionality
-9. Polish phase → Final QA
-
----
-
-## Summary
-
-| Phase | Task Count | Key Deliverables |
-|-------|------------|------------------|
-| Phase 1 | 13 | Glassmorphism CSS, background images, theme store updates |
-| Phase 2 | 8 | TypeScript types, API modules, product store |
-| Phase 3 | 40 | HomeHeader, HeroBanner, CategoryTabs, ProductCard, BottomNav |
-| Phase 4 | 14 | HomeView integration, MainLayout adjustments |
-| Phase 5 | 10 | Auto/manual theme switching, persistence |
-| Phase 6 | 15 | Core flow verification, edge case handling |
-| Phase 7 | 38 | Micro-interactions, responsiveness, QA checklist |
-| **Total** | **138** | Complete homepage UI refresh |
-
-### Tasks by User Story
-
-| Story | Tasks | Description |
-|-------|-------|-------------|
-| US1 | 20 | Dawn theme visual implementation |
-| US2 | 11 | Dusk theme visual implementation |
-| US3 | 5 | Manual theme toggle |
-| US4 | 13 | Category tabs and product browsing |
-| US5 | 4 | Points display and avatar |
-| US6 | 10 | Bottom navigation |
-| US7 | 8 | Add to cart functionality |
-
-### Suggested MVP Scope
-
-**Minimum for thesis demo**: Complete Phases 1-5 (87 tasks)
-- Delivers: Full Dawn/Dusk glassmorphism homepage with auto/manual theme switching
-- Excludes: Extensive regression testing, all polish items, full QA checklist
-
----
-
-## Notes
-
-- [P] tasks = different files, no dependencies
-- [Story] label maps task to specific user story for traceability
-- All CSS changes should respect existing theme variable structure
-- Background images should be WebP format with JPEG fallback, <500KB each
-- Commit after each logical group of tasks
-- Stop at any checkpoint to validate progress
+**Checkpoint**: Global UI consistency achieved - seamless transitions between pages.
