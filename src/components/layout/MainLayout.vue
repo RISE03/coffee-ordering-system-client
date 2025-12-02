@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen w-full overflow-x-hidden transition-colors duration-500">
+  <div class="relative h-screen w-full overflow-hidden transition-colors duration-500">
     <!-- Global Background Layer -->
     <div class="fixed inset-0 z-0 pointer-events-none">
       <div
@@ -17,8 +17,9 @@
     </div>
 
     <n-layout
-      class="min-h-screen flex flex-col bg-transparent relative z-10"
+      class="h-screen flex flex-col bg-transparent relative z-10"
       :style="{ '--n-color': 'transparent', '--n-text-color': 'var(--color-text)' }"
+      :native-scrollbar="false"
     >
       <!-- Global Header -->
       <HomeHeader
