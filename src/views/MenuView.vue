@@ -132,16 +132,17 @@ const handleAddToCart = async (productId: number) => {
 }
 
 onMounted(async () => {
-  // Initialize categories if not already loaded
+  // 若分类未加载，则先拉取分类
   if (productStore.categories.length === 0) {
     await productStore.fetchCategories()
   }
   
-  // If we have a selected category, refresh its products, otherwise fetch the first category's products
-  if (productStore.selectedCategoryId) {
-    await productStore.fetchProductsByCategory(productStore.selectedCategoryId)
-  } else if (productStore.categories.length > 0) {
-     await productStore.fetchProductsByCategory(productStore.categories[0].id)
+  // 取当前选中分类；若未选中则回退到第一个分类（Store 内也会默认选中第一个）
+  const categoryId =
+    productStore.selectedCategoryId ?? productStore.categories[0]?.id
+
+  if (typeof categoryId === 'number') {
+    await productStore.fetchProductsByCategory(categoryId)
   }
 })
 </script>
