@@ -60,7 +60,7 @@ const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
     <!-- Add to Cart Action -->
     <button 
       @click.stop="emit('add-to-cart', product.id)"
-      class="ml-2 p-1.5 rounded-full transition-transform active:scale-90 focus:outline-none"
+      class="ml-2 p-2.5 rounded-full transition-transform active:scale-90 focus:outline-none"
       :class="isDawn ? 'text-amber-600 hover:bg-amber-100/50' : 'text-amber-300 hover:bg-white/10'"
       aria-label="Add to cart"
     >

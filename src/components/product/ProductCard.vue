@@ -54,7 +54,7 @@ const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
       <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hidden md:flex">
         <button 
           @click.stop="emit('add-to-cart', product.id)"
-          class="bg-white text-[var(--color-primary)] p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-amber-50"
+          class="bg-white text-[var(--color-primary)] p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-amber-50 active:scale-90"
         >
           <NIcon :component="AddCircleOutline" class="text-2xl" />
         </button>

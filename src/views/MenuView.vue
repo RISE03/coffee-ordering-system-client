@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-6">
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
     <!-- Page Header - Glassmorphism Style -->
     <div class="glass-card p-6 mb-6 text-center md:text-left">
       <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">全日菜单</h1>
@@ -31,17 +31,30 @@
       <aside class="w-full md:w-56 flex-shrink-0">
         <div class="glass-card sticky top-24 p-4">
           <h2 class="font-bold text-lg mb-4 text-[var(--color-text)]">分类</h2>
-          <div class="space-y-2">
+          
+          <!-- Category Loading State -->
+          <div v-if="productStore.isLoadingCategories" class="space-y-2">
+            <n-skeleton text v-for="i in 5" :key="i" class="h-8 rounded" />
+          </div>
+
+          <!-- Category List -->
+          <div v-else class="space-y-2">
             <div
-              v-for="category in categories"
-              :key="category"
-              class="px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 text-[var(--color-text-secondary)]"
-              :class="selectedCategory === category
-                ? 'bg-[var(--color-primary)] text-[var(--color-bg)] font-medium shadow-sm'
-                : 'hover:bg-[var(--glass-bg-hover)]'"
-              @click="selectedCategory = category"
+              v-for="category in productStore.categories"
+              :key="category.id"
+              class="px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-2"
+              :class="productStore.selectedCategoryId === category.id
+                ? 'bg-[var(--color-primary)] text-white font-medium shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--glass-bg-hover)]'"
+              @click="handleCategorySelect(category.id)"
             >
-              {{ category }}
+              <img 
+                v-if="category.icon" 
+                :src="category.icon" 
+                class="w-5 h-5 object-contain opacity-80"
+                :class="productStore.selectedCategoryId === category.id ? 'brightness-200' : ''"
+              />
+              <span>{{ category.name }}</span>
             </div>
           </div>
         </div>
@@ -49,33 +62,38 @@
 
       <!-- Product Grid - Glassmorphism Cards -->
       <main class="flex-1">
-        <!-- Info Message - Glassmorphism Style -->
-        <div class="glass-light mb-6 p-4 flex items-center text-sm text-[var(--color-text-secondary)]">
-          <span class="mr-2 text-[var(--color-primary)]">ℹ️</span>
-          <span>当前展示为菜单页面骨架，真实商品数据将在后续里程碑中接入。</span>
-        </div>
-
-        <!-- Product Grid with Glass Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <div
-            v-for="n in 6"
-            :key="n"
-            class="glass-card product-card-hover p-0 overflow-hidden"
-          >
-            <!-- Product Image Placeholder -->
-            <div class="aspect-square bg-[var(--glass-bg-hover)] flex items-center justify-center">
-              <span class="text-[var(--color-text-secondary)] text-sm opacity-50">商品图片</span>
-            </div>
-            <!-- Product Info -->
-            <div class="p-3 space-y-2">
-              <div class="h-4 bg-[var(--glass-bg-hover)] rounded w-3/4 animate-pulse"></div>
-              <div class="h-3 bg-[var(--glass-bg-hover)] rounded w-1/2 animate-pulse"></div>
-              <div class="flex justify-between items-center pt-2">
-                <div class="h-5 bg-[var(--color-primary)] bg-opacity-20 rounded w-1/4 animate-pulse"></div>
-                <div class="w-8 h-8 rounded-full bg-[var(--color-primary)] bg-opacity-20 animate-pulse"></div>
+        <!-- Products Loading State -->
+        <div v-if="productStore.isLoadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div v-for="i in 6" :key="i" class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+            <n-skeleton class="aspect-square w-full" :sharp="false" />
+            <div class="p-3 flex-1 flex flex-col space-y-2">
+              <n-skeleton text width="80%" />
+              <n-skeleton text width="40%" size="small" />
+              <div class="flex justify-between items-center mt-2">
+                <n-skeleton text width="30%" />
+                <n-skeleton circle width="32px" height="32px" />
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="productStore.products.length === 0" class="text-center py-12">
+           <div class="glass-card inline-block px-8 py-4 rounded-xl">
+             <p class="text-[var(--color-text-secondary)]">暂无商品</p>
+           </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <ProductCard
+            v-for="product in productStore.products"
+            :key="product.id"
+            :product="product"
+            :theme="themeStore.activeTheme"
+            @add-to-cart="handleAddToCart"
+            @view-detail="(id) => router.push(`/product/${id}`)"
+          />
         </div>
       </main>
     </div>
@@ -83,8 +101,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useProductStore } from '@/stores/product'
+import { useThemeStore } from '@/stores/theme'
+import { useCartStore } from '@/stores/cart'
+import { useMessage, NSkeleton } from 'naive-ui'
+import ProductCard from '@/components/product/ProductCard.vue'
 
-const categories = ['全部商品', '晨曦咖啡', '午后茗茶', '微醺特调', '精致甜点']
-const selectedCategory = ref('全部商品')
+const router = useRouter()
+const productStore = useProductStore()
+const themeStore = useThemeStore()
+const cartStore = useCartStore()
+const message = useMessage()
+
+const handleCategorySelect = async (categoryId: number) => {
+  await productStore.fetchProductsByCategory(categoryId)
+}
+
+const handleAddToCart = async (productId: number) => {
+  try {
+    await cartStore.addItem({
+      productId: productId,
+      quantity: 1
+    })
+    message.success('已加入购物车')
+  } catch (error) {
+    message.error('添加失败，请重试')
+  }
+}
+
+onMounted(async () => {
+  // Initialize categories if not already loaded
+  if (productStore.categories.length === 0) {
+    await productStore.fetchCategories()
+  }
+  
+  // If we have a selected category, refresh its products, otherwise fetch the first category's products
+  if (productStore.selectedCategoryId) {
+    await productStore.fetchProductsByCategory(productStore.selectedCategoryId)
+  } else if (productStore.categories.length > 0) {
+     await productStore.fetchProductsByCategory(productStore.categories[0].id)
+  }
+})
 </script>

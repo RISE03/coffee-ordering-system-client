@@ -26,7 +26,7 @@
            <p class="text-red-500 mb-4">加载失败</p>
            <button 
              @click="productStore.initializeHomeData()" 
-             class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-full text-sm"
+             class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-full text-sm active:scale-95 transition-transform"
            >
              重试
            </button>
