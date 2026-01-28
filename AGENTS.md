@@ -11,15 +11,16 @@
 - 所有文件的读取、写入、提交等操作必须统一使用 UTF-8 编码
 
 ## 项目结构与模块组织
-- `src/` 为应用根目录：`views/` 存放路由页面（首页、菜单、购物车、登录/注册、会员结算与订单）；`components/` 拆分通用 UI（`common/`、`layout/`、`member/`）；`stores/` 放置 Pinia 状态（`auth`、`cart`、`theme`）；`api/` 封装 axios 拦截器与 `/api` 前缀；`router/index.ts` 定义路由与登录/访客守卫；`types/` 集中 DTO 与存储键；`utils/` 放工具函数；`style.css` 启动 Tailwind 与主题变量；`assets/` 存静态资源。
+- `src/` 为应用根目录：`views/` 存放路由页面（首页、菜单、购物车、登录/注册、会员结算与订单）；`components/` 拆分通用 UI（`common/`、`layout/`、`member/`）；`stores/` 放置 Pinia 状态（`auth`、`cart`、`theme`）；`api/` 封装 axios 拦截器与 `/api` 前缀；`router/index.ts` 定义路由与登录/访客守卫；`types/` 集中 DTO 与存储键；`utils/` 放工具函数；`composables/` 放可复用组合式函数；`tests/` 放 Vitest 相关测试与初始化；`style.css` 启动 Tailwind 与主题变量；`assets/` 存静态资源。
 - `public/` 为原样输出的静态文件；`index.html` 是 Vite 入口；`dist/` 为构建产物。
-- `specs/001-client-spa-specs/` 存需求、清单与数据模型，功能变更时同步更新以保持文档一致。
+- `specs/` 存需求、清单与数据模型（如 `001-client-spa-specs/`、`003-cart-checkout-orders/`、`004-homepage-ui-refresh/`），功能变更时同步更新以保持文档一致。
 
 ## 构建、测试与开发命令
 - `npm install` — 安装依赖（建议 Node 18+）。
 - `npm run dev` — 启动 Vite（端口 5174）并开启 API 代理，自动打开浏览器。
 - `npm run build` — 先用 `vue-tsc -b` 做类型检查，再产出生产包到 `dist/`。
 - `npm run preview` — 本地预览已构建资源，做烟囱测试。
+- `npm run test` / `npm run test:run` / `npm run test:ui` — 运行 Vitest（UI 模式需本地交互环境）。
 
 ## 代码风格与命名约定
 - 使用 Vue 3 + TypeScript + Composition API + `<script setup>`；统一 2 空格缩进，避免 `any`。
@@ -29,8 +30,9 @@
 - Pinia 逻辑放在各 `defineStore` 文件；副作用（认证检查、主题初始化）集中在 `main.ts`。
 
 ## 测试指南
-- 目前未接入自动化测试；请在 `npm run dev` 或 `preview` 下手动验证登录重定向、购物车操作、结算摘要等关键路径。
-- 如需新增测试，推荐 Vitest + Vue Test Utils；用 `*.spec.ts` 命名，放在组件同级或 `tests/`，axios 调用在模块层 mock。
+- 已接入 Vitest（`vitest.config.ts`，`happy-dom` 环境，初始化文件为 `src/tests/setup.ts`）。
+- 新增测试建议用 `*.spec.ts` 命名，优先放在 `src/tests/`（或组件同级）；axios 调用在模块层 mock。
+- 仍需在 `npm run dev` 或 `preview` 下手动验证登录重定向、购物车操作、结算摘要等关键路径。
 
 ## 提交与 Pull Request 指南
 - 历史简单，建议遵循 Conventional Commits（如 `feat: add checkout summary`、`fix: handle expired token`）保持可读性。

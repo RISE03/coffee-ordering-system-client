@@ -20,11 +20,12 @@
 *   **核心框架**：Vue 3 (Composition API, `<script setup>`)
 *   **构建工具**：Vite 7.x
 *   **语言**：TypeScript 5.x
-*   **UI 组件库**：Naive UI (计划集成)
-*   **状态管理**：Pinia (计划集成)
-*   **路由**：Vue Router 4 (计划集成)
-*   **样式**：Tailwind CSS (计划集成) + CSS 变量主题切换
-*   **HTTP 客户端**：Axios (计划集成)
+*   **UI 组件库**：Naive UI
+*   **状态管理**：Pinia
+*   **路由**：Vue Router 4
+*   **样式**：Tailwind CSS + CSS 变量主题切换
+*   **HTTP 客户端**：Axios
+*   **单元测试**：Vitest
 
 ## 2. 开发环境与命令
 
@@ -41,6 +42,9 @@
 | `npm run dev` | 启动开发服务器 (默认端口 5174，支持局域网访问) |
 | `npm run build` | 执行类型检查 (`vue-tsc`) 并构建生产版本 |
 | `npm run preview` | 预览构建后的生产版本 |
+| `npm run test` | 运行单元测试 (Vitest) |
+| `npm run test:run` | 单元测试单次运行 (CI 模式) |
+| `npm run test:ui` | 启动测试 UI 界面 |
 
 ### 后端对接
 *   **API 地址**：默认后端运行在 `http://localhost:8080` (Spring Boot)。
@@ -54,9 +58,18 @@ C:\D\task\DawnDusk\frontend-client\
 ├── .specify/              # 项目详细规格说明书与设计文档 (重要参考)
 │   ├── markdown/          # 需求、UI设计、接口定义、数据库设计等
 │   └── ...
-├── src/                   # 源代码目录
-│   ├── components/        # Vue 组件
+├── specs/                 # 具体的实施规格与任务清单 (如 001-client-spa-specs)
+├── src/                   # 源代码目录 (@)
+│   ├── api/               # API 接口封装 (Axios)
 │   ├── assets/            # 静态资源
+│   ├── components/        # 公共组件
+│   ├── composables/       # 组合式函数 (Hooks)
+│   ├── router/            # 路由配置
+│   ├── stores/            # 状态管理 (Pinia)
+│   ├── tests/             # 单元测试
+│   ├── types/             # TypeScript 类型定义
+│   ├── utils/             # 工具函数
+│   ├── views/             # 页面视图
 │   ├── App.vue            # 根组件
 │   ├── main.ts            # 入口文件
 │   └── style.css          # 全局样式
