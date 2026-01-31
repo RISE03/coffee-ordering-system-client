@@ -1,0 +1,368 @@
+# Time Flow Homepage API Contract
+# 时间流动主题首页 API 合约
+# Version: 1.0.0
+# Date: 2026-01-29
+
+openapi: 3.0.3
+info:
+  title: 朝暮咖啡厅 - 时间流动首页 API
+  description: |
+    时间流动主题首页所需的 API 端点。
+
+    本合约主要复用现有的推荐商品接口，扩展时段参数支持。
+  version: 1.0.0
+  contact:
+    name: DawnDusk Team
+
+servers:
+  - url: http://localhost:8080/api
+    description: 开发服务器
+  - url: https://api.dawndusk.cafe/api
+    description: 生产服务器
+
+tags:
+  - name: TimeFlow
+    description: 时间流动首页相关接口
+  - name: Products
+    description: 商品相关接口（复用现有）
+
+paths:
+  /products/recommend:
+    get:
+      tags:
+        - TimeFlow
+        - Products
+      summary: 获取时段推荐商品
+      description: |
+        根据时段编码获取推荐商品列表。
+
+        - 如果不传 `timeSlotCode`，后端根据服务器时间自动判断
+        - 前端可传入 5 时段编码中的任意一个
+        - 后端如不支持 5 时段，可映射到 3 时段（dawn/midday/dusk）
+      operationId: getRecommendedProducts
+      parameters:
+        - name: timeSlotCode
+          in: query
+          description: |
+            时段编码（可选）。
+
+            5 时段体系:
+            - `morning`: 晨曦时光 (06:00-10:59)
+            - `noon`: 午间活力 (11:00-13:59)
+            - `afternoon`: 午后漫时 (14:00-16:59)
+            - `evening`: 暮色降临 (17:00-20:59)
+            - `night`: 夜幕低垂 (21:00-05:59)
+
+            向后兼容 3 时段:
+            - `dawn`: 映射自 morning
+            - `midday`: 映射自 noon/afternoon
+            - `dusk`: 映射自 evening/night
+          required: false
+          schema:
+            type: string
+            enum:
+              - morning
+              - noon
+              - afternoon
+              - evening
+              - night
+              - dawn    # 向后兼容
+              - midday  # 向后兼容
+              - dusk    # 向后兼容
+          example: afternoon
+        - name: scene
+          in: query
+          description: 场景标识（可选，用于区分不同场景的推荐策略）
+          required: false
+          schema:
+            type: string
+            default: home
+          example: home
+        - name: limit
+          in: query
+          description: 返回商品数量限制（默认 6）
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 6
+          example: 6
+      responses:
+        '200':
+          description: 成功返回推荐商品
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_RecommendationResponse'
+              examples:
+                afternoon_recommendations:
+                  summary: 午后漫时推荐示例
+                  value:
+                    code: 0
+                    message: success
+                    data:
+                      timeSlotCode: afternoon
+                      timeSlotName: 午后漫时
+                      products:
+                        - id: 101
+                          name: 焦糖玛奇朵
+                          englishName: Caramel Macchiato
+                          price: 32.00
+                          imageUrl: /images/products/caramel-macchiato.jpg
+                          categoryId: 1
+                          tag: 午后推荐
+                        - id: 102
+                          name: 抹茶拿铁
+                          englishName: Matcha Latte
+                          price: 28.00
+                          imageUrl: /images/products/matcha-latte.jpg
+                          categoryId: 1
+                          tag: 人气饮品
+        '400':
+          description: 参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                code: 4001
+                message: Invalid timeSlotCode parameter
+                data: null
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+
+  /products/recommend/batch:
+    get:
+      tags:
+        - TimeFlow
+      summary: 批量获取多时段推荐商品（可选实现）
+      description: |
+        一次性获取多个时段的推荐商品，减少前端请求次数。
+
+        **注意**: 此接口为可选实现，如后端未支持，前端可并行调用单时段接口。
+      operationId: getBatchRecommendedProducts
+      parameters:
+        - name: timeSlotCodes
+          in: query
+          description: 时段编码列表（逗号分隔）
+          required: true
+          schema:
+            type: string
+          example: morning,noon,afternoon
+        - name: limit
+          in: query
+          description: 每个时段返回的商品数量
+          required: false
+          schema:
+            type: integer
+            default: 6
+      responses:
+        '200':
+          description: 成功返回多时段推荐商品
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_BatchRecommendationResponse'
+        '400':
+          description: 参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+
+components:
+  schemas:
+    # ==================== 通用响应结构 ====================
+    ApiResponse_RecommendationResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: integer
+          description: 响应码，0 表示成功
+          example: 0
+        message:
+          type: string
+          description: 响应消息
+          example: success
+        data:
+          $ref: '#/components/schemas/RecommendationResponse'
+
+    ApiResponse_BatchRecommendationResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/RecommendationResponse'
+          example:
+            morning:
+              timeSlotCode: morning
+              timeSlotName: 晨曦时光
+              products: []
+            noon:
+              timeSlotCode: noon
+              timeSlotName: 午间活力
+              products: []
+
+    ApiResponse_Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: 错误码
+          example: 4001
+        message:
+          type: string
+          description: 错误信息
+          example: Invalid parameter
+        data:
+          type: 'null'
+          nullable: true
+
+    # ==================== 业务数据结构 ====================
+    RecommendationResponse:
+      type: object
+      required:
+        - timeSlotCode
+        - timeSlotName
+        - products
+      properties:
+        timeSlotCode:
+          type: string
+          description: 时段编码
+          enum:
+            - morning
+            - noon
+            - afternoon
+            - evening
+            - night
+            - dawn
+            - midday
+            - dusk
+          example: afternoon
+        timeSlotName:
+          type: string
+          description: 时段名称（中文）
+          example: 午后漫时
+        products:
+          type: array
+          description: 推荐商品列表
+          items:
+            $ref: '#/components/schemas/Product'
+          minItems: 0
+          maxItems: 20
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - categoryId
+      properties:
+        id:
+          type: integer
+          description: 商品 ID
+          example: 101
+        name:
+          type: string
+          description: 商品名称（中文）
+          example: 焦糖玛奇朵
+        englishName:
+          type: string
+          description: 商品英文名称
+          nullable: true
+          example: Caramel Macchiato
+        price:
+          type: number
+          format: float
+          description: 商品价格
+          minimum: 0
+          example: 32.00
+        imageUrl:
+          type: string
+          description: 商品图片 URL
+          nullable: true
+          example: /images/products/caramel-macchiato.jpg
+        categoryId:
+          type: integer
+          description: 所属分类 ID
+          example: 1
+        status:
+          type: integer
+          description: 商品状态（1=上架，0=下架）
+          enum: [0, 1]
+          example: 1
+        description:
+          type: string
+          description: 商品描述
+          nullable: true
+          example: 浓郁咖啡与香甜焦糖的完美融合
+        tag:
+          type: string
+          description: 商品标签
+          nullable: true
+          example: 午后推荐
+        tags:
+          type: array
+          description: 标签列表
+          items:
+            type: string
+          nullable: true
+          example: ["人气", "推荐"]
+
+    # ==================== 时段配置（前端静态数据参考） ====================
+    TimeFlowSlot:
+      type: string
+      description: 时间流时段编码
+      enum:
+        - morning
+        - noon
+        - afternoon
+        - evening
+        - night
+
+    TimeFlowConfig:
+      type: object
+      description: 时段配置（前端静态数据，非 API 返回）
+      properties:
+        code:
+          $ref: '#/components/schemas/TimeFlowSlot'
+        name:
+          type: string
+          example: 晨曦时光
+        hours:
+          type: array
+          items:
+            type: integer
+          minItems: 2
+          maxItems: 2
+          example: [6, 11]
+        description:
+          type: string
+          example: 阳光穿透玻璃窗，一杯咖啡开启美好的一天
+        slogan:
+          type: string
+          example: 用醇香唤醒沉睡的灵魂

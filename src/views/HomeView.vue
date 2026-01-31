@@ -1,142 +1,166 @@
 <template>
-  <!-- Content for HomeView -->
-  <main class="container mx-auto px-4 py-6 space-y-8 max-w-7xl">
-    <!-- Hero Section -->
-    <HeroBanner 
-      :recommended-products="productStore.recommendedProducts"
-      :loading="productStore.isLoadingRecommended"
-      :slot-title="productStore.timeSlotName"
-      :theme="themeStore.activeTheme"
-      @add-to-cart="handleAddToCart"
+  <!-- 时间流动主题首页 - 单屏切换式 -->
+  <div class="timeflow-home">
+    <!-- 动态时间展示区 -->
+    <DynamicTimeHeader />
+
+    <!-- 横向时间轴导航 -->
+    <HorizontalTimeline
+      :slots="timeflowStore.slots"
+      :active-slot="timeflowStore.activeSlot"
+      :current-slot="timeflowStore.currentSlot"
+      @navigate="handleNavigate"
     />
 
-    <!-- Main Content Area -->
-    <div class="space-y-6">
-      <!-- Category Tabs -->
-      <CategoryTabs 
-        :categories="productStore.categories"
-        :selected-category-id="productStore.selectedCategoryId"
-        :theme="themeStore.activeTheme"
-        @select="handleCategorySelect"
-      />
+    <!-- 当前时段内容（带过渡动画） -->
+    <Transition name="slide-fade" mode="out-in">
+      <div :key="timeflowStore.activeSlot" class="timeflow-content">
+        <!-- 时段头部 -->
+        <div class="timeflow-section-header text-center mb-8">
+          <h2
+            class="text-3xl md:text-4xl font-serif font-bold mb-2"
+            :style="{ color: currentDisplaySlotConfig?.colors.text }"
+          >
+            {{ currentDisplaySlotConfig?.name }}
+          </h2>
+          <p
+            class="text-base md:text-lg opacity-70"
+            :style="{ color: currentDisplaySlotConfig?.colors.textSecondary }"
+          >
+            {{ currentDisplaySlotConfig?.description }}
+          </p>
 
-      <!-- Error State -->
-      <div v-if="productStore.hasError" class="text-center py-12">
-         <div class="glass-card inline-block px-8 py-6 rounded-xl">
-           <p class="text-red-500 mb-4">加载失败</p>
-           <button 
-             @click="productStore.initializeHomeData()" 
-             class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-full text-sm active:scale-95 transition-transform"
-           >
-             重试
-           </button>
-         </div>
-      </div>
-
-      <!-- Product Grid -->
-      <div v-else-if="productStore.isLoadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div v-for="i in 4" :key="i" class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
-              <NSkeleton class="aspect-square w-full" :sharp="false" />
-              <div class="p-3 flex-1 flex flex-col space-y-2">
-                <NSkeleton text width="80%" />
-                <NSkeleton text width="40%" size="small" />
-                <div class="flex justify-between items-center mt-2">
-                  <NSkeleton text width="30%" />
-                  <NSkeleton circle width="32px" height="32px" />
-                </div>
-              </div>
-            </div>
+          <!-- 时段专属优惠横幅 -->
+          <div
+            v-if="currentDisplaySlotConfig?.promotion"
+            class="mt-4 inline-flex items-center gap-3 px-5 py-3 rounded-full promotion-banner"
+            :style="{
+              backgroundColor: currentDisplaySlotConfig.colors.glassBg,
+              borderColor: currentDisplaySlotConfig.colors.accent
+            }"
+          >
+            <span
+              v-if="currentDisplaySlotConfig.promotion.tag"
+              class="px-2 py-0.5 rounded text-xs font-bold"
+              :style="{
+                backgroundColor: currentDisplaySlotConfig.colors.primary,
+                color: currentDisplaySlotConfig.colors.text
+              }"
+            >
+              {{ currentDisplaySlotConfig.promotion.tag }}
+            </span>
+            <span
+              class="font-medium"
+              :style="{ color: currentDisplaySlotConfig.colors.text }"
+            >
+              {{ currentDisplaySlotConfig.promotion.title }}
+            </span>
           </div>
+        </div>
 
-      <div v-else-if="productStore.products.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <ProductCard
-          v-for="product in productStore.products"
-          :key="product.id"
-          :product="product"
-          :theme="themeStore.activeTheme"
+        <!-- Bento Grid 商品布局 -->
+        <BentoProductGrid
+          v-if="currentDisplaySlotConfig"
+          :products="timeflowStore.productsBySlot[timeflowStore.activeSlot]"
+          :slot-colors="currentDisplaySlotConfig.colors"
+          :loading="timeflowStore.isSlotLoading(timeflowStore.activeSlot)"
+          :error="timeflowStore.getSlotError(timeflowStore.activeSlot)"
           @add-to-cart="handleAddToCart"
-          @view-detail="(id) => router.push(`/product/${id}`)"
+          @view-detail="handleViewDetail"
+          @retry="handleRetry"
         />
       </div>
+    </Transition>
 
-      <div v-else class="text-center py-12">
-         <div class="glass-card inline-block px-8 py-4 rounded-xl">
-           <p class="text-gray-500 dark:text-gray-400">暂无商品</p>
-         </div>
-      </div>
-    </div>
-  </main>
+    <!-- 日落倒计时 -->
+    <ThemeCountdown />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
-import { useProductStore } from '@/stores/product'
+import { useTimeFlowStore } from '@/stores/timeflow'
 import { useCartStore } from '@/stores/cart'
-import { useMessage, NSkeleton } from 'naive-ui'
-import type { TimeSlotCode } from '@/types/product'
-import HeroBanner from '@/components/home/HeroBanner.vue'
-import CategoryTabs from '@/components/home/CategoryTabs.vue'
-import ProductCard from '@/components/product/ProductCard.vue'
+import { useAuthStore } from '@/stores/auth'
+import { useMessage } from 'naive-ui'
+import { TIME_FLOW_SLOTS } from '@/constants/timeflow'
+import type { TimeFlowSlot } from '@/types/timeflow'
+import DynamicTimeHeader from '@/components/home/DynamicTimeHeader.vue'
+import HorizontalTimeline from '@/components/home/HorizontalTimeline.vue'
+import BentoProductGrid from '@/components/home/BentoProductGrid.vue'
+import ThemeCountdown from '@/components/home/ThemeCountdown.vue'
 
 const router = useRouter()
-const themeStore = useThemeStore()
-const productStore = useProductStore()
+const timeflowStore = useTimeFlowStore()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const message = useMessage()
 
-// Helper to determine if we need to force a specific time slot based on theme/time mismatch
-const getSlotCodeForTheme = (): TimeSlotCode | undefined => {
-  const hour = new Date().getHours()
-  const isDayTime = hour >= 6 && hour < 18
-  
-  // If Visual Theme is Dawn but it's Night time -> Force 'dawn' content
-  if (themeStore.activeTheme === 'dawn' && !isDayTime) {
-    return 'dawn'
-  } 
-  // If Visual Theme is Dusk but it's Day time -> Force 'dusk' content
-  else if (themeStore.activeTheme === 'dusk' && isDayTime) {
-    return 'dusk'
-  }
-  
-  // Otherwise (Auto mode, or Manual matching real time) -> Let backend decide
-  return undefined
+// 获取当前显示时段的配置
+const currentDisplaySlotConfig = computed(() => {
+  return TIME_FLOW_SLOTS.find(s => s.code === timeflowStore.activeSlot)
+})
+
+/**
+ * 处理导航点击
+ */
+function handleNavigate(slotCode: TimeFlowSlot) {
+  // 不再需要滚动，直接切换
+  timeflowStore.setActiveSlot(slotCode)
+  timeflowStore.loadSlotProducts(slotCode)
+  timeflowStore.preloadAdjacentSlots(slotCode)
 }
 
-const handleCategorySelect = async (id: number | null) => {
-  if (id === null) {
-     // If 'All' is selected, default to the first category for now as store expects a categoryId
-     if (productStore.categories.length > 0) {
-         const firstCategory = productStore.categories[0]
-         if (firstCategory) {
-             await productStore.fetchProductsByCategory(firstCategory.id)
-         }
-     }
-  } else {
-    await productStore.fetchProductsByCategory(id)
+/**
+ * 处理加入购物车
+ */
+async function handleAddToCart(productId: number) {
+  // 检查登录状态
+  if (!authStore.isLoggedIn) {
+    message.warning('请先登录后再添加购物车')
+    router.push('/login')
+    return
   }
-}
 
-const handleAddToCart = async (productId: number) => {
   try {
     await cartStore.addItem({
       productId: productId,
       quantity: 1
     })
     message.success('已加入购物车')
-  } catch (error) {
+  } catch {
     message.error('添加失败，请重试')
   }
 }
 
+/**
+ * 处理查看商品详情
+ */
+function handleViewDetail(productId: number) {
+  router.push(`/product/${productId}`)
+}
+
+/**
+ * 处理重试加载
+ */
+function handleRetry() {
+  timeflowStore.retrySlotProducts(timeflowStore.activeSlot)
+}
+
 onMounted(async () => {
-  const slotCode = getSlotCodeForTheme()
-  // Pass the calculated slot code to initialization
-  productStore.initializeHomeData(slotCode)
+  // 初始化时间流数据
+  await timeflowStore.initialize()
+  // 不再需要滚动到当前时段
 })
 </script>
 
 <style scoped>
-/* Scoped styles if needed to override or augment global utilities */
+/* 优惠横幅样式 */
+.promotion-banner {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
 </style>
