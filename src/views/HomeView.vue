@@ -1,79 +1,85 @@
 <template>
   <!-- 时间流动主题首页 - 单屏切换式 -->
   <div class="timeflow-home">
-    <!-- 动态时间展示区 -->
-    <DynamicTimeHeader />
+    <div class="timeflow-container">
+      <!-- 动态时间展示区 -->
+      <DynamicTimeHeader />
 
-    <!-- 横向时间轴导航 -->
-    <HorizontalTimeline
-      :slots="timeflowStore.slots"
-      :active-slot="timeflowStore.activeSlot"
-      :current-slot="timeflowStore.currentSlot"
-      @navigate="handleNavigate"
-    />
+      <!-- 横向时间轴导航 -->
+      <HorizontalTimeline
+        :slots="timeflowStore.slots"
+        :active-slot="timeflowStore.activeSlot"
+        :current-slot="timeflowStore.currentSlot"
+        @navigate="handleNavigate"
+      />
 
-    <!-- 当前时段内容（带过渡动画） -->
-    <Transition name="slide-fade" mode="out-in">
-      <div :key="timeflowStore.activeSlot" class="timeflow-content">
-        <!-- 时段头部 -->
-        <div class="timeflow-section-header text-center mb-8">
-          <h2
-            class="text-3xl md:text-4xl font-serif font-bold mb-2"
-            :style="{ color: currentDisplaySlotConfig?.colors.text }"
-          >
-            {{ currentDisplaySlotConfig?.name }}
-          </h2>
-          <p
-            class="text-base md:text-lg opacity-70"
-            :style="{ color: currentDisplaySlotConfig?.colors.textSecondary }"
-          >
-            {{ currentDisplaySlotConfig?.description }}
-          </p>
-
-          <!-- 时段专属优惠横幅 -->
+      <!-- 当前时段内容（带过渡动画） -->
+      <Transition name="slide-fade" mode="out-in">
+        <div :key="timeflowStore.activeSlot" class="timeflow-content">
+          <!-- 时段头部 -->
           <div
-            v-if="currentDisplaySlotConfig?.promotion"
-            class="mt-4 inline-flex items-center gap-3 px-5 py-3 rounded-full promotion-banner"
+            class="timeflow-section-header text-center mb-8"
             :style="{
-              backgroundColor: currentDisplaySlotConfig.colors.glassBg,
-              borderColor: currentDisplaySlotConfig.colors.accent
+              backgroundColor: currentDisplaySlotConfig?.colors.glassBg,
+              borderColor: currentDisplaySlotConfig?.colors.accent
             }"
           >
-            <span
-              v-if="currentDisplaySlotConfig.promotion.tag"
-              class="px-2 py-0.5 rounded text-xs font-bold"
+            <h2
+              class="text-3xl md:text-4xl font-serif font-bold mb-2"
+              :style="{ color: currentDisplaySlotConfig?.colors.text }"
+            >
+              {{ currentDisplaySlotConfig?.name }}
+            </h2>
+            <p
+              class="text-base md:text-lg"
+              :style="{ color: currentDisplaySlotConfig?.colors.textSecondary }"
+            >
+              {{ currentDisplaySlotConfig?.description }}
+            </p>
+
+            <!-- 时段专属优惠横幅 -->
+            <div
+              v-if="currentDisplaySlotConfig?.promotion"
+              class="mt-4 inline-flex items-center gap-3 px-5 py-3 rounded-full promotion-banner"
               :style="{
-                backgroundColor: currentDisplaySlotConfig.colors.primary,
-                color: currentDisplaySlotConfig.colors.text
+                backgroundColor: currentDisplaySlotConfig.colors.primary + '20',
+                borderColor: currentDisplaySlotConfig.colors.accent
               }"
             >
-              {{ currentDisplaySlotConfig.promotion.tag }}
-            </span>
-            <span
-              class="font-medium"
-              :style="{ color: currentDisplaySlotConfig.colors.text }"
-            >
-              {{ currentDisplaySlotConfig.promotion.title }}
-            </span>
+              <span
+                v-if="currentDisplaySlotConfig.promotion.tag"
+                class="px-2 py-0.5 rounded text-xs font-bold"
+                :style="{
+                  backgroundColor: currentDisplaySlotConfig.colors.tagBg || currentDisplaySlotConfig.colors.primary,
+                  color: currentDisplaySlotConfig.colors.tagText || currentDisplaySlotConfig.colors.text
+                }"
+              >
+                {{ currentDisplaySlotConfig.promotion.tag }}
+              </span>
+              <span
+                class="font-medium"
+                :style="{ color: currentDisplaySlotConfig.colors.text }"
+              >
+                {{ currentDisplaySlotConfig.promotion.title }}
+              </span>
+            </div>
           </div>
+
+          <!-- Bento Grid 商品布局 -->
+          <BentoProductGrid
+            v-if="currentDisplaySlotConfig"
+            :products="timeflowStore.productsBySlot[timeflowStore.activeSlot]"
+            :slot-colors="currentDisplaySlotConfig.colors"
+            :loading="timeflowStore.isSlotLoading(timeflowStore.activeSlot)"
+            :error="timeflowStore.getSlotError(timeflowStore.activeSlot)"
+            :is-open="timeflowStore.isOpen"
+            @add-to-cart="handleAddToCart"
+            @view-detail="handleViewDetail"
+            @retry="handleRetry"
+          />
         </div>
-
-        <!-- Bento Grid 商品布局 -->
-        <BentoProductGrid
-          v-if="currentDisplaySlotConfig"
-          :products="timeflowStore.productsBySlot[timeflowStore.activeSlot]"
-          :slot-colors="currentDisplaySlotConfig.colors"
-          :loading="timeflowStore.isSlotLoading(timeflowStore.activeSlot)"
-          :error="timeflowStore.getSlotError(timeflowStore.activeSlot)"
-          @add-to-cart="handleAddToCart"
-          @view-detail="handleViewDetail"
-          @retry="handleRetry"
-        />
-      </div>
-    </Transition>
-
-    <!-- 日落倒计时 -->
-    <ThemeCountdown />
+      </Transition>
+    </div>
   </div>
 </template>
 
@@ -89,7 +95,6 @@ import type { TimeFlowSlot } from '@/types/timeflow'
 import DynamicTimeHeader from '@/components/home/DynamicTimeHeader.vue'
 import HorizontalTimeline from '@/components/home/HorizontalTimeline.vue'
 import BentoProductGrid from '@/components/home/BentoProductGrid.vue'
-import ThemeCountdown from '@/components/home/ThemeCountdown.vue'
 
 const router = useRouter()
 const timeflowStore = useTimeFlowStore()
@@ -156,11 +161,29 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 优惠横幅样式 */
-.promotion-banner {
+.timeflow-home {
+  padding: 0 1rem;
+}
+
+.timeflow-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 时段头部区域 */
+.timeflow-section-header {
+  padding: 2rem 2.5rem;
+  border-radius: 1.5rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* 优惠横幅样式 */
+.promotion-banner {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid;
 }
 </style>

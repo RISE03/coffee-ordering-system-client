@@ -56,6 +56,10 @@ export interface TimeFlowColors {
   textSecondary: string
   /** 玻璃卡片背景 */
   glassBg: string
+  /** 标签背景色（可选，默认用 primary） */
+  tagBg?: string
+  /** 标签文字色（可选，默认用 text） */
+  tagText?: string
 }
 
 // ============================================================================
@@ -139,11 +143,11 @@ export function isValidTimeFlowSlot(value: string): value is TimeFlowSlot {
  * @returns 对应的时段编码
  */
 export function getSlotByHour(hour: number): TimeFlowSlot {
-  if (hour >= 6 && hour < 11) return 'morning'
+  if (hour >= 7 && hour < 11) return 'morning'
   if (hour >= 11 && hour < 14) return 'noon'
   if (hour >= 14 && hour < 17) return 'afternoon'
   if (hour >= 17 && hour < 21) return 'evening'
-  // 21:00-05:59 (包括午夜跨越)
+  // 21:00-06:59 (包括午夜跨越)
   return 'night'
 }
 

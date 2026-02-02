@@ -14,11 +14,11 @@ const STORAGE_KEY = 'dawn_dusk_theme_mode'
 
 /**
  * V2.0 首页 UI 刷新 - 主题时间范围定义
- * - Dawn (朝): 06:00 - 17:59 (hour >= 6 && hour < 18)
- * - Dusk (暮): 18:00 - 05:59 (hour >= 18 || hour < 6)
+ * - Dawn (朝): 07:00 - 16:59 (hour >= 7 && hour < 17)
+ * - Dusk (暮): 17:00 - 06:59 (hour >= 17 || hour < 7)
  */
-const DAWN_START_HOUR = 6
-const DAWN_END_HOUR = 18 // exclusive, so 17:59 is the last Dawn minute
+const DAWN_START_HOUR = 7
+const DAWN_END_HOUR = 17 // exclusive, so 16:59 is the last Dawn minute
 
 export const useThemeStore = defineStore('theme', () => {
   // 状态：当前选中的模式
@@ -42,8 +42,8 @@ export const useThemeStore = defineStore('theme', () => {
 
   /**
    * 根据当前时间计算应该使用的主题
-   * Dawn: 06:00 - 17:59
-   * Dusk: 18:00 - 05:59
+   * Dawn: 07:00 - 16:59
+   * Dusk: 17:00 - 06:59
    */
   function calculateThemeByTime(): 'dawn' | 'dusk' {
     const hour = new Date().getHours()

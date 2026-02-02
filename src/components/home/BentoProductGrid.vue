@@ -14,11 +14,14 @@ interface Props {
   loading?: boolean
   /** 错误信息 */
   error?: string | null
+  /** 是否营业中 */
+  isOpen?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-  error: null
+  error: null,
+  isOpen: true
 })
 
 const emit = defineEmits<{
@@ -113,6 +116,7 @@ const secondaryProducts = computed(() => {
         <TimeSlotCard
           :product="featuredProduct"
           :slot-colors="slotColors"
+          :is-open="isOpen"
           size="large"
           @click="emit('view-detail', featuredProduct.id)"
           @add-to-cart="emit('add-to-cart', featuredProduct.id)"
@@ -128,6 +132,7 @@ const secondaryProducts = computed(() => {
         <TimeSlotCard
           :product="product"
           :slot-colors="slotColors"
+          :is-open="isOpen"
           size="small"
           @click="emit('view-detail', product.id)"
           @add-to-cart="emit('add-to-cart', product.id)"

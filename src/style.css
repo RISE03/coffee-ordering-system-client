@@ -473,7 +473,7 @@ body,
   --timeflow-accent: #FF8C00;
   --timeflow-text: #5D4037;
   --timeflow-text-secondary: #8D6E63;
-  --timeflow-glass-bg: rgba(255, 248, 231, 0.75);
+  --timeflow-glass-bg: rgba(255, 248, 231, 0.88);
   --timeflow-glass-border: rgba(255, 179, 71, 0.3);
 }
 
@@ -484,7 +484,7 @@ body,
   --timeflow-accent: #FF9800;
   --timeflow-text: #4E342E;
   --timeflow-text-secondary: #795548;
-  --timeflow-glass-bg: rgba(255, 253, 231, 0.75);
+  --timeflow-glass-bg: rgba(255, 253, 231, 0.88);
   --timeflow-glass-border: rgba(255, 193, 7, 0.3);
 }
 
@@ -495,7 +495,7 @@ body,
   --timeflow-accent: #E59400;
   --timeflow-text: #5D4037;
   --timeflow-text-secondary: #8D6E63;
-  --timeflow-glass-bg: rgba(255, 243, 224, 0.75);
+  --timeflow-glass-bg: rgba(255, 243, 224, 0.88);
   --timeflow-glass-border: rgba(245, 176, 65, 0.3);
 }
 
@@ -506,7 +506,7 @@ body,
   --timeflow-accent: #E8C78B;
   --timeflow-text: #ECF0F1;
   --timeflow-text-secondary: #B8C5CC;
-  --timeflow-glass-bg: rgba(45, 52, 54, 0.75);
+  --timeflow-glass-bg: rgba(45, 52, 54, 0.88);
   --timeflow-glass-border: rgba(250, 215, 160, 0.3);
 }
 
@@ -517,7 +517,7 @@ body,
   --timeflow-accent: #6A9BB5;
   --timeflow-text: #E0E7EE;
   --timeflow-text-secondary: #A8B5BF;
-  --timeflow-glass-bg: rgba(15, 32, 39, 0.75);
+  --timeflow-glass-bg: rgba(15, 32, 39, 0.88);
   --timeflow-glass-border: rgba(184, 212, 227, 0.3);
 }
 

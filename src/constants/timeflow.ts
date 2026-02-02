@@ -15,7 +15,7 @@ export const TIME_FLOW_SLOTS: TimeFlowConfig[] = [
     code: 'morning',
     name: '晨曦时光',
     nameEn: 'Morning Glow',
-    hours: [6, 11],
+    hours: [7, 11],
     description: '阳光穿透玻璃窗，一杯咖啡开启美好的一天',
     slogan: '用醇香唤醒沉睡的灵魂',
     colors: {
@@ -86,7 +86,9 @@ export const TIME_FLOW_SLOTS: TimeFlowConfig[] = [
       gradient: 'linear-gradient(135deg, #2D3436 0%, #636E72 40%, #B83B5E 100%)',
       text: '#ECF0F1',
       textSecondary: '#B8C5CC',
-      glassBg: 'rgba(45, 52, 54, 0.75)'
+      glassBg: 'rgba(45, 52, 54, 0.75)',
+      tagBg: '#FAD7A0',
+      tagText: '#2D3436'
     },
     icon: 'moon-outline'
     // 暮色时段无优惠
@@ -95,7 +97,7 @@ export const TIME_FLOW_SLOTS: TimeFlowConfig[] = [
     code: 'night',
     name: '夜幕低垂',
     nameEn: 'Night Serenity',
-    hours: [21, 6],
+    hours: [21, 7],
     description: '夜深人静，给自己一份宁静与放松',
     slogan: '在星光下卸下一天的重量',
     colors: {
@@ -104,7 +106,9 @@ export const TIME_FLOW_SLOTS: TimeFlowConfig[] = [
       gradient: 'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
       text: '#E0E7EE',
       textSecondary: '#A8B5BF',
-      glassBg: 'rgba(15, 32, 39, 0.75)'
+      glassBg: 'rgba(15, 32, 39, 0.75)',
+      tagBg: '#6A9BB5',
+      tagText: '#E0E7EE'
     },
     icon: 'star-outline',
     promotion: {

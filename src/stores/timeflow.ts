@@ -16,11 +16,15 @@ import {
 } from '@/types/timeflow'
 import type { Product } from '@/types/product'
 import { getDisplayErrorMessage } from '@/utils/error'
+import { getBusinessHours, isBusinessOpen, type BusinessHours } from '@/api/config'
 
 export const useTimeFlowStore = defineStore('timeflow', () => {
   // ============================================================================
   // 状态
   // ============================================================================
+
+  /** 当前时间（统一管理，每分钟更新） */
+  const currentTime = ref<Date>(new Date())
 
   /** 当前真实时段（根据本地时间计算） */
   const currentSlot = ref<TimeFlowSlot>(getCurrentSlot())
@@ -40,6 +44,12 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
   /** 是否已初始化 */
   const initialized = ref(false)
 
+  /** 营业时间配置 */
+  const businessHours = ref<BusinessHours>({ start: '08:00', end: '22:00' })
+
+  /** 时段检测定时器 ID */
+  let slotCheckIntervalId: number | null = null
+
   // ============================================================================
   // 计算属性
   // ============================================================================
@@ -57,6 +67,11 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
   const hasError = computed(() =>
     Object.values(errorSlots.value).some(err => err !== null)
   )
+
+  /** 是否营业中 */
+  const isOpen = computed(() => {
+    return isBusinessOpen(businessHours.value, currentTime.value)
+  })
 
   // ============================================================================
   // Actions
@@ -127,6 +142,9 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
   async function initialize() {
     if (initialized.value) return
 
+    // 加载营业时间配置
+    businessHours.value = await getBusinessHours()
+
     // 更新当前时段
     currentSlot.value = getCurrentSlot()
     activeSlot.value = currentSlot.value
@@ -141,6 +159,49 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
     setTimeout(() => {
       preloadAdjacentSlots(currentSlot.value)
     }, 500)
+
+    // 启动时段检测定时器（每分钟检查一次）
+    startSlotCheck()
+  }
+
+  /**
+   * 启动时段检测定时器
+   */
+  function startSlotCheck() {
+    // 清除已有定时器
+    if (slotCheckIntervalId !== null) {
+      clearInterval(slotCheckIntervalId)
+    }
+
+    // 每分钟更新时间和检查时段变化
+    slotCheckIntervalId = window.setInterval(() => {
+      // 更新当前时间
+      currentTime.value = new Date()
+
+      const newSlot = getCurrentSlot()
+      if (newSlot !== currentSlot.value) {
+        // 保存旧时段用于比较
+        const oldSlot = currentSlot.value
+        // 时段发生变化
+        currentSlot.value = newSlot
+        // 如果用户当前查看的是旧的真实时段，自动跟随到新时段
+        if (activeSlot.value === oldSlot) {
+          activeSlot.value = newSlot
+          loadSlotProducts(newSlot)
+          preloadAdjacentSlots(newSlot)
+        }
+      }
+    }, 60000)
+  }
+
+  /**
+   * 停止时段检测定时器
+   */
+  function stopSlotCheck() {
+    if (slotCheckIntervalId !== null) {
+      clearInterval(slotCheckIntervalId)
+      slotCheckIntervalId = null
+    }
   }
 
   /**
@@ -169,6 +230,7 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
    * 重置所有状态
    */
   function $reset() {
+    stopSlotCheck()
     currentSlot.value = getCurrentSlot()
     activeSlot.value = currentSlot.value
     productsBySlot.value = createEmptyProductsBySlot()
@@ -179,6 +241,7 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
 
   return {
     // 状态
+    currentTime,
     currentSlot,
     activeSlot,
     productsBySlot,
@@ -191,6 +254,7 @@ export const useTimeFlowStore = defineStore('timeflow', () => {
     activeProducts,
     isLoading,
     hasError,
+    isOpen,
 
     // Actions
     loadSlotProducts,

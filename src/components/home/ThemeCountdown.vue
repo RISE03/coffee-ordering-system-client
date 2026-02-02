@@ -111,12 +111,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -128,7 +128,7 @@ onUnmounted(() => {
 .countdown-text {
   font-size: 0.875rem;
   font-weight: 500;
-  opacity: 0.9;
+  color: var(--color-text);
 }
 
 @keyframes fadeIn {
