@@ -50,7 +50,9 @@ export async function getProducts(
  * GET /api/products/:id
  */
 export async function getProductById(id: number): Promise<Product> {
-  const response = await apiClient.get<Product>(`/products/${id}`)
+  const response = await apiClient.get<Product>(`/products/${id}`, {
+    skipAuthRedirect: true
+  } as any)
   return response.data
 }
 

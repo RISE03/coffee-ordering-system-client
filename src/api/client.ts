@@ -9,6 +9,13 @@ import { normalizeError, mapMessageFromCode } from '@/utils/error'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
+type RequestConfigWithAuthFlag = InternalAxiosRequestConfig & {
+  skipAuthRedirect?: boolean
+}
+
+// 仅这些接口返回 401 时，才认为登录态失效并触发强制登出
+const FORCE_LOGOUT_ON_401_PREFIXES = ['/auth', '/member', '/user']
+
 // 创建 Discrete API 用于在非组件环境（如 Axios 拦截器）中显示消息
 const { message } = createDiscreteApi(['message'])
 
@@ -55,11 +62,11 @@ apiClient.interceptors.response.use(
 
       // 业务 401 处理：允许调用方通过 config.skipAuthRedirect 跳过全局登出
       if (isUnauthorizedError(res.code)) {
-        // @ts-expect-error 自定义标记，类型未声明
-        if (response.config?.skipAuthRedirect) {
+        const config = response.config as RequestConfigWithAuthFlag
+        if (config?.skipAuthRedirect) {
           return Promise.reject(buildError(displayMsg, res.code))
         }
-        handleUnauthorized(displayMsg)
+        handleUnauthorized(displayMsg, config)
       } else {
         message.error(displayMsg)
       }
@@ -72,14 +79,14 @@ apiClient.interceptors.response.use(
   },
   (error: AxiosError<ApiResponse>) => {
     const normalized = normalizeError(error)
-    const config = error.config as any
+    const config = error.config as RequestConfigWithAuthFlag | undefined
 
     const is401 = error.response?.status === 401 || isUnauthorizedError(Number(normalized.code))
     if (is401) {
       if (config?.skipAuthRedirect) {
         return Promise.reject(error)
       }
-      handleUnauthorized(normalized.message)
+      handleUnauthorized(normalized.message, config)
     } else {
       message.error(normalized.message)
     }
@@ -90,16 +97,21 @@ apiClient.interceptors.response.use(
 
 /**
  * 处理业务 / HTTP 401
- * - 已登录：提示后清理本地态并跳转登录
+ * - 已登录：仅认证关键接口触发强制登出，其它接口仅提示
  * - 游客：仅在当前路由需要登录时跳转；公共路由不再强制跳转，避免首屏接口 401 导致空白
  */
-function handleUnauthorized(msg?: string) {
+function handleUnauthorized(msg?: string, requestConfig?: RequestConfigWithAuthFlag) {
   const authStore = useAuthStore()
   const currentRoute = router.currentRoute.value
   const requiresAuth = Boolean(currentRoute.meta.requiresAuth)
+  const shouldForceLogout = shouldForceLogoutOnUnauthorized(requestConfig)
 
-  // 已登录：认为 token 失效，执行登出并提示
+  // 已登录：仅在认证关键接口返回 401 时，认为 token 失效
   if (authStore.isLoggedIn) {
+    if (!shouldForceLogout) {
+      message.warning(msg || '请求未通过权限校验')
+      return
+    }
     message.warning(msg || '登录已过期，请重新登录')
     authStore.logout(false)
   } else {
@@ -117,6 +129,30 @@ function handleUnauthorized(msg?: string) {
       query: { redirect: currentRoute.fullPath }
     })
   }
+}
+
+function shouldForceLogoutOnUnauthorized(config?: RequestConfigWithAuthFlag): boolean {
+  const requestPath = parseRequestPath(config?.url)
+  if (!requestPath) {
+    return false
+  }
+  return FORCE_LOGOUT_ON_401_PREFIXES.some((prefix) => requestPath.startsWith(prefix))
+}
+
+function parseRequestPath(rawUrl?: string): string {
+  if (!rawUrl) {
+    return ''
+  }
+
+  if (/^https?:\/\//i.test(rawUrl)) {
+    try {
+      return new URL(rawUrl).pathname
+    } catch {
+      return ''
+    }
+  }
+
+  return rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`
 }
 
 function buildError(messageText: string, code?: number | string) {

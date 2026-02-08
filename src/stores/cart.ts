@@ -4,26 +4,38 @@ import { addToCart, clearCart as clearCartApi, getCart, removeCartItem, updateCa
 import type { AddToCartRequest, CartItem, CartResponse, CartSummary } from '@/types/cart'
 import { getDisplayErrorMessage } from '@/utils/error'
 
-const CART_STORAGE_KEY = 'dawn_dusk_cart_items'
+const LEGACY_CART_STORAGE_KEY = 'dawn_dusk_cart_items'
+const CART_STORAGE_KEY_PREFIX = 'dawn_dusk_cart_items_v2'
 export const CART_QUANTITY_MIN = 1
 export const CART_QUANTITY_MAX = 99
+
+function getCartStorageKey(userId: number): string {
+  return `${CART_STORAGE_KEY_PREFIX}:${userId}`
+}
 
 export const useCartStore = defineStore('cart', () => {
   // State
   const items = ref<CartItem[]>([])
+  const activeUserId = ref<number | null>(null)
   const initialized = ref(false)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const lastSyncedAt = ref<string | null>(null)
 
-  // 从本地恢复
-  const storedItems = localStorage.getItem(CART_STORAGE_KEY)
-  if (storedItems) {
+  // 清理遗留旧键，避免历史脏数据在未登录态显示
+  localStorage.removeItem(LEGACY_CART_STORAGE_KEY)
+
+  function readUserCart(userId: number): CartItem[] {
+    const key = getCartStorageKey(userId)
+    const storedItems = localStorage.getItem(key)
+    if (!storedItems) return []
+
     try {
-      items.value = JSON.parse(storedItems) as CartItem[]
+      return JSON.parse(storedItems) as CartItem[]
     } catch (e) {
       console.error('解析本地购物车失败:', e)
-      localStorage.removeItem(CART_STORAGE_KEY)
+      localStorage.removeItem(key)
+      return []
     }
   }
 
@@ -40,16 +52,36 @@ export const useCartStore = defineStore('cart', () => {
   watch(
     items,
     (newItems) => {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newItems))
+      if (!activeUserId.value) return
+      localStorage.setItem(getCartStorageKey(activeUserId.value), JSON.stringify(newItems))
     },
     { deep: true }
   )
 
-  // 内部方法：应用服务端返回
-  function applyCart(data: CartResponse) {
-    items.value = data.items || []
-    error.value = null
-    lastSyncedAt.value = new Date().toISOString()
+  // 内部方法：应用服务端返回，成功返回 true
+  function applyCart(data: unknown): data is CartResponse {
+    // 确保 data 有效且包含 items 数组
+    if (data && typeof data === 'object' && Array.isArray((data as CartResponse).items)) {
+      items.value = (data as CartResponse).items
+      error.value = null
+      lastSyncedAt.value = new Date().toISOString()
+      return true
+    }
+
+    console.warn('applyCart: 无效的购物车数据', data)
+    return false
+  }
+
+  /**
+   * 强制从服务端同步购物车
+   * 用于接口返回结构不完整时兜底，避免 UI 停留在旧状态。
+   */
+  async function refreshCartStrict() {
+    const latest = await getCart()
+    const ok = applyCart(latest)
+    if (!ok) {
+      throw new Error('购物车数据格式异常，请稍后重试')
+    }
   }
 
   function setItems(newItems: CartItem[]) {
@@ -60,13 +92,39 @@ export const useCartStore = defineStore('cart', () => {
     return Number.isInteger(quantity) && quantity >= CART_QUANTITY_MIN && quantity <= CART_QUANTITY_MAX
   }
 
+  function bindUser(userId: number | null) {
+    if (!userId) {
+      activeUserId.value = null
+      items.value = []
+      initialized.value = false
+      loading.value = false
+      error.value = null
+      lastSyncedAt.value = null
+      return
+    }
+
+    if (activeUserId.value === userId) return
+
+    activeUserId.value = userId
+    items.value = readUserCart(userId)
+    initialized.value = false
+    loading.value = false
+    error.value = null
+    lastSyncedAt.value = null
+  }
+
+  function clearUserCache(userId?: number) {
+    const targetUserId = userId ?? activeUserId.value
+    if (!targetUserId) return
+    localStorage.removeItem(getCartStorageKey(targetUserId))
+  }
+
   // Actions
   async function fetchCart() {
     loading.value = true
     error.value = null
     try {
-      const res = await getCart()
-      applyCart(res)
+      await refreshCartStrict()
     } catch (err) {
       error.value = getDisplayErrorMessage(err)
     } finally {
@@ -82,7 +140,9 @@ export const useCartStore = defineStore('cart', () => {
     }
     try {
       const res = await addToCart(payload)
-      applyCart(res)
+      if (!applyCart(res)) {
+        await refreshCartStrict()
+      }
       return true
     } catch (err) {
       error.value = getDisplayErrorMessage(err)
@@ -99,7 +159,9 @@ export const useCartStore = defineStore('cart', () => {
 
     try {
       const res = await updateCartItem(productId, { quantity })
-      applyCart(res)
+      if (!applyCart(res)) {
+        await refreshCartStrict()
+      }
     } catch (err) {
       error.value = getDisplayErrorMessage(err)
       throw err
@@ -109,7 +171,9 @@ export const useCartStore = defineStore('cart', () => {
   async function removeItem(productId: number) {
     try {
       const res = await removeCartItem(productId)
-      applyCart(res)
+      if (!applyCart(res)) {
+        await refreshCartStrict()
+      }
     } catch (err) {
       error.value = getDisplayErrorMessage(err)
       throw err
@@ -124,7 +188,7 @@ export const useCartStore = defineStore('cart', () => {
       console.warn('清空购物车接口失败，改为本地清理', err)
     } finally {
       items.value = []
-      localStorage.removeItem(CART_STORAGE_KEY)
+      clearUserCache()
       lastSyncedAt.value = new Date().toISOString()
     }
   }
@@ -132,6 +196,7 @@ export const useCartStore = defineStore('cart', () => {
   return {
     // state
     items,
+    activeUserId,
     loading,
     error,
     initialized,
@@ -142,6 +207,8 @@ export const useCartStore = defineStore('cart', () => {
     // actions
     setItems,
     validateQuantity,
+    bindUser,
+    clearUserCache,
     fetchCart,
     addItem,
     updateQuantity,

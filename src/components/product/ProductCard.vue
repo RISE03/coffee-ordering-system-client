@@ -1,63 +1,123 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
-import { AddCircleOutline } from '@vicons/ionicons5'
+import { AddCircleOutline, RemoveCircleOutline } from '@vicons/ionicons5'
 import type { Product } from '@/types/product'
 
 interface Props {
   product: Product
   theme?: 'dawn' | 'dusk'
+  cartQuantity?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  theme: 'dawn'
+  theme: 'dawn',
+  cartQuantity: 0
 })
 
 const emit = defineEmits<{
   (e: 'add-to-cart', productId: number): void
+  (e: 'remove-from-cart', productId: number): void
   (e: 'view-detail', productId: number): void
 }>()
 
 const isDawn = computed(() => props.theme === 'dawn')
 
 const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
+
+const isInCart = computed(() => props.cartQuantity > 0)
+
+// 标签颜色映射
+const tagColorMap: Record<string, string> = {
+  '新品': 'bg-emerald-500/90',
+  '热卖': 'bg-orange-500/90',
+  '限定': 'bg-purple-500/90',
+  '季节限定': 'bg-pink-500/90',
+  '人气': 'bg-rose-500/90',
+  '推荐': 'bg-amber-500/90',
+  '招牌': 'bg-sky-500/90'
+}
+
+const getTagColor = (tag: string): string => {
+  for (const [keyword, color] of Object.entries(tagColorMap)) {
+    if (tag.includes(keyword)) return color
+  }
+  return isDawn.value ? 'bg-amber-500/90' : 'bg-indigo-400/90'
+}
+
+const displayTags = computed(() => {
+  const tags: string[] = []
+  if (props.product.tag) tags.push(props.product.tag)
+  if (props.product.tags) tags.push(...props.product.tags.filter(t => t !== props.product.tag))
+  return tags.slice(0, 2)
+})
 </script>
 
 <template>
-  <div 
+  <div
     class="glass-card rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer product-card-hover group relative"
     @click="emit('view-detail', product.id)"
   >
-    <!-- Badge (Optional) -->
-    <div 
-      v-if="product.tag" 
-      class="absolute top-2 right-2 z-10 px-2 py-0.5 text-[10px] font-bold rounded-md backdrop-blur-md shadow-sm tracking-wider"
-      :class="isDawn ? 'bg-amber-500/90 text-white' : 'bg-indigo-400/90 text-white'"
-    >
-      {{ product.tag }}
+    <!-- 标签列表 -->
+    <div v-if="displayTags.length > 0" class="absolute top-2 right-2 z-10 flex flex-col gap-1 items-end">
+      <span
+        v-for="tag in displayTags"
+        :key="tag"
+        class="px-2 py-0.5 text-[10px] font-bold rounded-md backdrop-blur-md shadow-sm tracking-wider text-white"
+        :class="getTagColor(tag)"
+      >
+        {{ tag }}
+      </span>
     </div>
 
     <!-- Image -->
     <div class="aspect-square w-full bg-gray-200 overflow-hidden relative">
-      <img 
-        v-if="product.imageUrl" 
-        :src="product.imageUrl" 
-        :alt="product.name" 
+      <img
+        v-if="product.imageUrl"
+        :src="product.imageUrl"
+        :alt="product.name"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         loading="lazy"
       />
       <div v-else class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
         <span class="text-sm">暂无图片</span>
       </div>
-      
+
       <!-- Quick Action Overlay (Desktop) -->
-      <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hidden md:flex">
-        <button 
+      <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hidden md:flex">
+        <button
+          v-if="!isInCart"
           @click.stop="emit('add-to-cart', product.id)"
-          class="bg-white text-[var(--color-primary)] p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-amber-50 active:scale-90"
+          class="bg-white/95 backdrop-blur-sm p-3 rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-white active:scale-90"
         >
-          <NIcon :component="AddCircleOutline" class="text-2xl" />
+          <NIcon :component="AddCircleOutline" class="text-2xl text-[#5D4037]" />
         </button>
+        <div
+          v-else
+          class="bg-white/95 backdrop-blur-sm rounded-full shadow-xl flex items-center gap-1 px-3 py-1.5 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
+        >
+          <button
+            @click.stop="emit('remove-from-cart', product.id)"
+            class="p-1.5 rounded-full hover:bg-black/5 active:scale-90 transition-all"
+          >
+            <NIcon :component="RemoveCircleOutline" class="text-xl text-[#5D4037]" />
+          </button>
+          <span class="w-6 text-center font-bold text-[#5D4037]">{{ cartQuantity }}</span>
+          <button
+            @click.stop="emit('add-to-cart', product.id)"
+            class="p-1.5 rounded-full hover:bg-black/5 active:scale-90 transition-all"
+          >
+            <NIcon :component="AddCircleOutline" class="text-xl text-[#5D4037]" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 已加购数量角标 (Desktop) -->
+      <div
+        v-if="isInCart"
+        class="absolute bottom-2 right-2 z-10 hidden md:flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold shadow-md"
+      >
+        {{ cartQuantity }}
       </div>
     </div>
 
@@ -67,23 +127,47 @@ const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
         <h3 class="font-bold text-base text-[var(--color-text)] line-clamp-1">
           {{ product.name }}
         </h3>
-        <p v-if="product.englishName" class="text-xs text-[var(--color-text-secondary)] truncate mt-0.5 mb-2 opacity-80 font-sans">
+        <p v-if="product.englishName" class="text-xs text-[var(--color-text-secondary)] truncate mt-0.5 opacity-80 font-sans">
           {{ product.englishName }}
         </p>
+        <!-- 商品简介 -->
+        <p v-if="product.description" class="text-xs text-[var(--color-text-secondary)] line-clamp-2 mt-1 opacity-70 leading-relaxed">
+          {{ product.description }}
+        </p>
       </div>
-      
+
       <div class="mt-2 flex items-center justify-between">
         <span class="text-lg font-bold text-[var(--color-primary)] font-sans">
           {{ displayPrice }}
         </span>
-        
+
         <!-- Mobile Add Button -->
-        <button 
+        <button
+          v-if="!isInCart"
           @click.stop="emit('add-to-cart', product.id)"
           class="md:hidden p-2 -mr-1 rounded-full glass-button active:scale-95 border-none bg-transparent shadow-none hover:bg-[var(--glass-bg-hover)]"
         >
           <NIcon :component="AddCircleOutline" class="text-3xl text-[var(--color-primary)]" />
         </button>
+        <!-- Mobile: 已加购显示数量调整器 -->
+        <div
+          v-else
+          class="md:hidden flex items-center gap-0.5 -mr-1"
+        >
+          <button
+            @click.stop="emit('remove-from-cart', product.id)"
+            class="p-1 rounded-full active:scale-90 transition-all"
+          >
+            <NIcon :component="RemoveCircleOutline" class="text-2xl text-[var(--color-primary)]" />
+          </button>
+          <span class="w-5 text-center font-bold text-sm text-[var(--color-text)]">{{ cartQuantity }}</span>
+          <button
+            @click.stop="emit('add-to-cart', product.id)"
+            class="p-1 rounded-full active:scale-90 transition-all"
+          >
+            <NIcon :component="AddCircleOutline" class="text-2xl text-[var(--color-primary)]" />
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -48,6 +48,23 @@ describe('CartStore', () => {
 
       expect(cartApi.updateCartItem).toHaveBeenCalledWith(1, { quantity: 5 })
     })
+
+    it('当 addToCart 返回结构异常时，应自动回退拉取 getCart', async () => {
+      const store = useCartStore()
+      store.bindUser(101)
+
+      vi.mocked(cartApi.addToCart).mockResolvedValue({} as any)
+      vi.mocked(cartApi.getCart).mockResolvedValue({
+        items: [{ productId: 1, name: '拿铁', image: '', unitPrice: 18, quantity: 2, subtotal: 36 }],
+        summary: { totalQty: 2, totalAmount: 36 }
+      })
+
+      await store.addItem({ productId: 1, quantity: 1 })
+
+      expect(cartApi.getCart).toHaveBeenCalledTimes(1)
+      expect(store.summary.totalQty).toBe(2)
+      expect(store.items[0]?.name).toBe('拿铁')
+    })
   })
 
   describe('总计刷新', () => {
@@ -73,15 +90,30 @@ describe('CartStore', () => {
   })
 
   describe('本地持久化', () => {
-    it('应该在初始化时从 localStorage 恢复', () => {
+    it('应该在绑定用户后从对应 localStorage 恢复', () => {
       const mockItems = [
         { productId: 1, name: '商品1', image: '', unitPrice: 10, quantity: 1, subtotal: 10 }
       ]
-      localStorage.setItem('dawn_dusk_cart_items', JSON.stringify(mockItems))
+      localStorage.setItem('dawn_dusk_cart_items_v2:101', JSON.stringify(mockItems))
 
       const store = useCartStore()
+      store.bindUser(101)
 
       expect(store.items).toEqual(mockItems)
+    })
+
+    it('切换为未登录状态后应该清空购物车', () => {
+      const store = useCartStore()
+      store.bindUser(101)
+      store.items = [
+        { productId: 1, name: '商品1', image: '', unitPrice: 10, quantity: 1, subtotal: 10 }
+      ]
+
+      store.bindUser(null)
+
+      expect(store.items).toEqual([])
+      expect(store.activeUserId).toBeNull()
+      expect(store.initialized).toBe(false)
     })
   })
 })

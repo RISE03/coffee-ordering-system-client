@@ -235,6 +235,12 @@ const progressOffset = computed(() => {
   border-radius: 1rem;
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.horizontal-timeline:hover {
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 /* 连接线 */

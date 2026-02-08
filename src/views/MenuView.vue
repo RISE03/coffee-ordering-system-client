@@ -1,28 +1,21 @@
 <template>
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     <!-- Page Header - Glassmorphism Style -->
-    <div class="glass-card p-6 mb-6 text-center md:text-left">
-      <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">全日菜单</h1>
-      <p class="text-[var(--color-text-secondary)] text-sm mb-4">探索我们为您精心准备的美味。</p>
-      <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-        <button
-          class="glass-button text-sm font-medium text-[var(--color-primary)]"
-          @click="$router.push('/member/cart')"
-        >
-          前往购物车
-        </button>
-        <button
-          class="glass-button text-sm font-medium text-[var(--color-text-secondary)]"
-          @click="$router.push('/member/checkout')"
-        >
-          去结算
-        </button>
-        <button
-          class="glass-button text-sm font-medium text-[var(--color-text-secondary)]"
-          @click="$router.push('/member/orders')"
-        >
-          我的订单
-        </button>
+    <div class="glass-card p-6 mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="text-center md:text-left">
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">全日菜单</h1>
+          <p class="text-[var(--color-text-secondary)] text-sm">探索我们为您精心准备的美味。</p>
+        </div>
+        <!-- 搜索栏 -->
+        <div class="w-full md:w-80">
+          <SearchBar
+            v-model="searchKeyword"
+            placeholder="搜索商品名称..."
+            @search="handleSearch"
+            @clear="handleClearSearch"
+          />
+        </div>
       </div>
     </div>
 
@@ -31,7 +24,7 @@
       <aside class="w-full md:w-56 flex-shrink-0">
         <div class="glass-card sticky top-24 p-4">
           <h2 class="font-bold text-lg mb-4 text-[var(--color-text)]">分类</h2>
-          
+
           <!-- Category Loading State -->
           <div v-if="productStore.isLoadingCategories" class="space-y-2">
             <n-skeleton text v-for="i in 5" :key="i" class="h-8 rounded" />
@@ -44,13 +37,13 @@
               :key="category.id"
               class="px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-2"
               :class="productStore.selectedCategoryId === category.id
-                ? 'bg-[var(--color-primary)] text-white font-medium shadow-sm'
+                ? 'bg-[var(--color-primary)] text-[var(--color-bg)] font-medium shadow-sm'
                 : 'text-[var(--color-text-secondary)] hover:bg-[var(--glass-bg-hover)]'"
               @click="handleCategorySelect(category.id)"
             >
-              <img 
-                v-if="category.icon" 
-                :src="category.icon" 
+              <img
+                v-if="category.icon"
+                :src="category.icon"
                 class="w-5 h-5 object-contain opacity-80"
                 :class="productStore.selectedCategoryId === category.id ? 'brightness-200' : ''"
               />
@@ -62,72 +55,162 @@
 
       <!-- Product Grid - Glassmorphism Cards -->
       <main class="flex-1">
-        <!-- Products Loading State -->
-        <div v-if="productStore.isLoadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div v-for="i in 6" :key="i" class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
-            <n-skeleton class="aspect-square w-full" :sharp="false" />
-            <div class="p-3 flex-1 flex flex-col space-y-2">
-              <n-skeleton text width="80%" />
-              <n-skeleton text width="40%" size="small" />
-              <div class="flex justify-between items-center mt-2">
-                <n-skeleton text width="30%" />
-                <n-skeleton circle width="32px" height="32px" />
-              </div>
+        <div
+          class="product-content"
+          :class="{ 'product-content--hidden': !contentVisible }"
+        >
+          <!-- Products Loading State -->
+          <ProductSkeleton v-if="productStore.isLoadingProducts" :count="8" />
+
+          <!-- Empty State -->
+          <div v-else-if="filteredProducts.length === 0" class="text-center py-12">
+            <div class="glass-card inline-block px-8 py-6 rounded-xl">
+              <div class="text-4xl mb-3">{{ searchKeyword ? '🔍' : '☕' }}</div>
+              <p class="text-[var(--color-text)] font-medium mb-1">
+                {{ searchKeyword ? '未找到相关商品' : '暂无商品' }}
+              </p>
+              <p class="text-[var(--color-text-secondary)] text-sm">
+                {{ searchKeyword ? '试试其他关键词吧' : '敬请期待更多美味' }}
+              </p>
+              <button
+                v-if="searchKeyword"
+                @click="handleClearSearch"
+                class="mt-4 px-4 py-2 rounded-full glass-button text-sm text-[var(--color-primary)]"
+              >
+                清除搜索
+              </button>
             </div>
           </div>
-        </div>
 
-        <!-- Empty State -->
-        <div v-else-if="productStore.products.length === 0" class="text-center py-12">
-           <div class="glass-card inline-block px-8 py-4 rounded-xl">
-             <p class="text-[var(--color-text-secondary)]">暂无商品</p>
-           </div>
-        </div>
-
-        <!-- Product Grid -->
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <ProductCard
-            v-for="product in productStore.products"
-            :key="product.id"
-            :product="product"
-            :theme="themeStore.activeTheme"
-            @add-to-cart="handleAddToCart"
-            @view-detail="(id) => router.push(`/product/${id}`)"
-          />
+          <!-- Product Grid -->
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <ProductCard
+              v-for="product in filteredProducts"
+              :key="product.id"
+              :product="product"
+              :theme="themeStore.activeTheme"
+              :cart-quantity="getCartQuantity(product.id)"
+              @add-to-cart="handleAddToCart"
+              @remove-from-cart="handleRemoveFromCart"
+              @view-detail="(id) => router.push(`/product/${id}`)"
+            />
+          </div>
         </div>
       </main>
     </div>
+
+    <!-- 购物车悬浮球 -->
+    <CartFloatingBall v-if="authStore.isLoggedIn" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useThemeStore } from '@/stores/theme'
-import { useCartStore } from '@/stores/cart'
+import { useCartStore, CART_QUANTITY_MIN } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import { useMessage, NSkeleton } from 'naive-ui'
 import ProductCard from '@/components/product/ProductCard.vue'
+import SearchBar from '@/components/common/SearchBar.vue'
+import ProductSkeleton from '@/components/common/ProductSkeleton.vue'
+import CartFloatingBall from '@/components/common/CartFloatingBall.vue'
 
 const router = useRouter()
 const productStore = useProductStore()
 const themeStore = useThemeStore()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const message = useMessage()
 
+// 搜索关键词
+const searchKeyword = ref('')
+
+// 切换分类过渡动画控制
+const contentVisible = ref(true)
+
+// 过滤后的商品列表
+const filteredProducts = computed(() => {
+  if (!searchKeyword.value.trim()) {
+    return productStore.products
+  }
+  const keyword = searchKeyword.value.toLowerCase().trim()
+  return productStore.products.filter(product => {
+    return (
+      product.name.toLowerCase().includes(keyword) ||
+      product.englishName?.toLowerCase().includes(keyword) ||
+      product.description?.toLowerCase().includes(keyword)
+    )
+  })
+})
+
+// 获取商品在购物车中的数量
+const getCartQuantity = (productId: number): number => {
+  const item = cartStore.items.find(item => item.productId === productId)
+  return item?.quantity ?? 0
+}
+
 const handleCategorySelect = async (categoryId: number) => {
+  if (productStore.selectedCategoryId === categoryId) return
+  searchKeyword.value = '' // 切换分类时清空搜索
+  // 淡出当前内容
+  contentVisible.value = false
+  await new Promise(resolve => setTimeout(resolve, 300))
+  // 加载新数据
   await productStore.fetchProductsByCategory(categoryId)
+  // 淡入新内容
+  contentVisible.value = true
+}
+
+const handleSearch = (keyword: string) => {
+  // 搜索时可以选择是否切换到全部分类
+  // 当前实现：在当前分类内搜索
+}
+
+const handleClearSearch = () => {
+  searchKeyword.value = ''
 }
 
 const handleAddToCart = async (productId: number) => {
+  // 检查登录状态
+  if (!authStore.isLoggedIn) {
+    message.warning('请先登录后再添加购物车')
+    router.push('/login')
+    return
+  }
+
   try {
     await cartStore.addItem({
       productId: productId,
       quantity: 1
     })
     message.success('已加入购物车')
-  } catch (error) {
+  } catch {
     message.error('添加失败，请重试')
+  }
+}
+
+const handleRemoveFromCart = async (productId: number) => {
+  // 检查登录状态
+  if (!authStore.isLoggedIn) {
+    message.warning('请先登录后再操作')
+    router.push('/login')
+    return
+  }
+
+  try {
+    const currentQty = getCartQuantity(productId)
+    if (currentQty <= CART_QUANTITY_MIN) {
+      // 数量为 1 时，移除商品
+      await cartStore.removeItem(productId)
+      message.success('已从购物车移除')
+    } else {
+      // 数量大于 1 时，减少数量
+      await cartStore.updateQuantity(productId, currentQty - 1)
+    }
+  } catch {
+    message.error('操作失败，请重试')
   }
 }
 
@@ -136,7 +219,7 @@ onMounted(async () => {
   if (productStore.categories.length === 0) {
     await productStore.fetchCategories()
   }
-  
+
   // 取当前选中分类；若未选中则回退到第一个分类（Store 内也会默认选中第一个）
   const categoryId =
     productStore.selectedCategoryId ?? productStore.categories[0]?.id
@@ -144,5 +227,23 @@ onMounted(async () => {
   if (typeof categoryId === 'number') {
     await productStore.fetchProductsByCategory(categoryId)
   }
+
+  // 已登录用户拉取购物车数据
+  if (authStore.isLoggedIn && !cartStore.initialized) {
+    await cartStore.fetchCart()
+  }
 })
 </script>
+
+<style scoped>
+.product-content {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-content--hidden {
+  opacity: 0;
+  transform: translateY(30px);
+}
+</style>

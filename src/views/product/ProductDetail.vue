@@ -30,7 +30,7 @@
       <!-- Product Image -->
       <div class="aspect-square rounded-2xl overflow-hidden bg-[var(--color-bg-secondary)]">
         <img
-          :src="product.image || '/placeholder-product.png'"
+          :src="getProductImage(product)"
           :alt="product.name"
           class="w-full h-full object-cover"
         />
@@ -108,7 +108,7 @@
             size="large"
             class="flex-1"
             :loading="addingToCart"
-            :disabled="!product.available"
+            :disabled="!isProductAvailable(product)"
             @click="handleAddToCart"
           >
             加入购物车
@@ -117,7 +117,7 @@
             type="primary"
             size="large"
             class="flex-1"
-            :disabled="!product.available"
+            :disabled="!isProductAvailable(product)"
             @click="handleBuyNow"
           >
             立即购买
@@ -125,7 +125,7 @@
         </div>
 
         <!-- Unavailable Notice -->
-        <div v-if="!product.available" class="text-center text-red-500">
+        <div v-if="!isProductAvailable(product)" class="text-center text-red-500">
           该商品暂时不可购买
         </div>
       </div>
@@ -155,9 +155,11 @@ interface Product {
   id: number
   name: string
   price: number
-  image: string
+  imageUrl?: string
+  image?: string
+  status?: number
+  available?: boolean
   description?: string
-  available: boolean
   timePeriods?: string[]
 }
 
@@ -174,6 +176,23 @@ const product = ref<Product | null>(null)
 const quantity = ref(1)
 const addingToCart = ref(false)
 
+function getProductImage(item: Product): string {
+  return item.imageUrl || item.image || '/placeholder-product.png'
+}
+
+function isProductAvailable(item: Product | null): boolean {
+  if (!item) {
+    return false
+  }
+  if (typeof item.available === 'boolean') {
+    return item.available
+  }
+  if (typeof item.status === 'number') {
+    return item.status === 1
+  }
+  return true
+}
+
 // Methods
 async function loadProduct() {
   const productId = route.params.id as string
@@ -187,7 +206,10 @@ async function loadProduct() {
 
   try {
     // 从后端获取商品详情
-    const { data } = await apiClient.get<Product>(`/products/${productId}`)
+    const { data } = await apiClient.get<Product>(`/products/${productId}`, {
+      // 详情接口异常不应触发全局登出，交由页面自身兜底展示
+      skipAuthRedirect: true
+    } as any)
     product.value = data
   } catch (err: any) {
     error.value = getDisplayErrorMessage(err)
@@ -204,7 +226,7 @@ async function handleAddToCart() {
     const item: CartItem = {
       productId: product.value.id,
       name: product.value.name,
-      image: product.value.image,
+      image: getProductImage(product.value),
       unitPrice: product.value.price,
       quantity: quantity.value,
       subtotal: product.value.price * quantity.value
@@ -227,7 +249,7 @@ function handleBuyNow() {
   const item: CartItem = {
     productId: product.value.id,
     name: product.value.name,
-    image: product.value.image,
+    image: getProductImage(product.value),
     unitPrice: product.value.price,
     quantity: quantity.value,
     subtotal: product.value.price * quantity.value

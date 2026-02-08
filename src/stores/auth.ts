@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, LoginResponse } from '@/types/user'
 import { AUTH_STORAGE_KEYS } from '@/types/user'
+import { useCartStore } from '@/stores/cart'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -34,6 +35,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, data.token)
     localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(data.user))
+
+    const cartStore = useCartStore()
+    cartStore.bindUser(data.user.id)
   }
 
   /**
@@ -49,6 +53,9 @@ export const useAuthStore = defineStore('auth', () => {
    * @param callApi 是否调用后端注销接口，默认 true。当 token 已失效时应传 false
    */
   async function logout(callApi = true) {
+    const cartStore = useCartStore()
+    const currentUserId = user.value?.id ?? null
+
     // 只有在 token 有效且需要调用 API 时才请求后端
     if (callApi && token.value) {
       try {
@@ -65,6 +72,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN)
     localStorage.removeItem(AUTH_STORAGE_KEYS.USER)
+
+    cartStore.clearUserCache(currentUserId ?? undefined)
+    cartStore.bindUser(null)
   }
 
   /**
@@ -81,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (e) {
       console.error('Auth check failed:', e)
       // Token 无效或过期，仅清理本地状态，不调用后端（token 已失效）
-      logout(false)
+      await logout(false)
     }
   }
 
