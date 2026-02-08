@@ -1,20 +1,24 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- Back Button -->
+  <div class="detail-page container mx-auto px-4 py-8 max-w-4xl">
+    <!-- 返回按钮 -->
     <div class="mb-4">
-      <n-button text @click="router.back()">
+      <n-button
+        text
+        class="back-btn"
+        @click="router.back()"
+      >
         ← 返回菜单
       </n-button>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="glass-card-strong text-center py-12 px-6">
       <n-spin size="large" />
       <p class="mt-4 text-[var(--color-text-secondary)]">正在加载商品信息...</p>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="error" class="text-center py-12">
+    <!-- 错误状态 -->
+    <div v-else-if="error" class="glass-card-strong text-center py-12 px-6">
       <n-result status="error" title="加载失败" :description="error">
         <template #footer>
           <n-button @click="loadProduct">重试</n-button>
@@ -25,10 +29,10 @@
       </n-result>
     </div>
 
-    <!-- Product Detail -->
+    <!-- 商品详情 -->
     <div v-else-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Product Image -->
-      <div class="aspect-square rounded-2xl overflow-hidden bg-[var(--color-bg-secondary)]">
+      <!-- 商品图片 -->
+      <div class="product-image-wrapper">
         <img
           :src="getProductImage(product)"
           :alt="product.name"
@@ -36,9 +40,9 @@
         />
       </div>
 
-      <!-- Product Info -->
-      <div class="space-y-6">
-        <!-- Name & Price -->
+      <!-- 商品信息 -->
+      <div class="glass-card-strong product-info-card">
+        <!-- 名称 & 价格 -->
         <div>
           <h1 class="text-2xl font-bold text-[var(--color-text)]">
             {{ product.name }}
@@ -48,12 +52,12 @@
           </p>
         </div>
 
-        <!-- Description -->
-        <div v-if="product.description" class="text-[var(--color-text-secondary)]">
+        <!-- 描述 -->
+        <div v-if="product.description" class="product-description">
           {{ product.description }}
         </div>
 
-        <!-- Time Period Tags -->
+        <!-- 时间段标签 -->
         <div v-if="product.timePeriods?.length" class="flex gap-2 flex-wrap">
           <n-tag
             v-for="period in product.timePeriods"
@@ -65,9 +69,12 @@
           </n-tag>
         </div>
 
-        <!-- Quantity Selector -->
+        <!-- 分隔线 -->
+        <div class="divider"></div>
+
+        <!-- 数量选择器 -->
         <div class="flex items-center gap-4">
-          <span class="text-[var(--color-text)]">数量</span>
+          <span class="text-[var(--color-text)] font-medium">数量</span>
           <div class="flex items-center gap-2">
             <n-button
               size="small"
@@ -102,8 +109,8 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-4 pt-4">
+        <!-- 操作按钮 -->
+        <div class="flex gap-4 pt-2">
           <n-button
             size="large"
             class="flex-1"
@@ -124,7 +131,7 @@
           </n-button>
         </div>
 
-        <!-- Unavailable Notice -->
+        <!-- 不可购买提示 -->
         <div v-if="!isProductAvailable(product)" class="text-center text-red-500">
           该商品暂时不可购买
         </div>
@@ -292,6 +299,58 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 页面整体：垂直居中（减去顶部导航和底部导航的空间） */
+.detail-page {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* 返回按钮：加玻璃背景胶囊 */
+.back-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border-subtle);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow);
+}
+
+/* 商品图片：圆角 + 阴影增强视觉重量 */
+.product-image-wrapper {
+  aspect-ratio: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow-hover);
+}
+
+/* 信息卡片：撑满高度，内容垂直居中 */
+.product-info-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 1.75rem;
+}
+
+/* 商品描述文字 */
+.product-description {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* 分隔线 */
+.divider {
+  height: 1px;
+  background: var(--glass-border-subtle);
+}
+
 :deep(.n-input-number) {
   --n-text-color: var(--color-text);
 }
