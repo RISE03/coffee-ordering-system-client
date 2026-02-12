@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { TimeFlowConfig, TimeFlowSlot } from '@/types/timeflow'
+import { TIME_FLOW_SLOT_CODES } from '@/types/timeflow'
 import { useThemeStore } from '@/stores/theme'
 import { useTimeFlowStore } from '@/stores/timeflow'
 
@@ -19,48 +20,40 @@ const emit = defineEmits<{
   (e: 'navigate', slotCode: TimeFlowSlot): void
 }>()
 
-// 主题状态
 const themeStore = useThemeStore()
-
-// 时间流 Store（使用统一的时间）
 const timeflowStore = useTimeFlowStore()
 
 function handleClick(slotCode: TimeFlowSlot) {
   emit('navigate', slotCode)
 }
 
-/**
- * 判断时段是否为活跃状态（用户选中的）
- */
 function isActive(code: TimeFlowSlot): boolean {
   return code === props.activeSlot
 }
 
-/**
- * 判断时段是否为当前真实时段
- */
 function isCurrent(code: TimeFlowSlot): boolean {
   return code === props.currentSlot
 }
 
-/**
- * 获取当前活跃时段的配置（用于动态配色）
- */
-const activeSlotConfig = computed(() => {
-  return props.slots.find(s => s.code === props.activeSlot)
-})
-
-/**
- * 获取选中态文字颜色
- * 浅色模式用 accent（更深），深色模式用 primary
- */
-function getActiveTextColor(slot: TimeFlowConfig): string {
-  return themeStore.isDawn ? slot.colors.accent : slot.colors.primary
+/** 获取时段在列表中的索引 */
+function getSlotIndex(code: TimeFlowSlot): number {
+  return TIME_FLOW_SLOT_CODES.indexOf(code)
 }
 
-/**
- * 计算当前时段的进度百分比和剩余时间
- */
+/** 判断时段是否已经过去（在当前时段之前） */
+function isPast(code: TimeFlowSlot): boolean {
+  return getSlotIndex(code) < getSlotIndex(props.currentSlot)
+}
+
+function getActiveTextColor(slot: TimeFlowConfig): string {
+  if (themeStore.isDawn) {
+    // evening 的 accent (#E8C78B) 在浅色背景上对比度不足，用更深的棕色
+    return slot.code === 'evening' ? '#B8860B' : slot.colors.accent
+  }
+  return slot.colors.primary
+}
+
+/** 当前时段的进度和剩余时间 */
 const currentSlotProgress = computed(() => {
   const slot = props.slots.find(s => s.code === props.currentSlot)
   if (!slot) return { progress: 0, remainingMinutes: 0 }
@@ -74,13 +67,10 @@ const currentSlotProgress = computed(() => {
   let startMinutes = startHour * 60
   let endMinutes = endHour * 60
 
-  // 处理跨午夜的时段（如 night: 21-7）
   if (endHour <= startHour) {
     if (currentMinutes >= startMinutes) {
-      // 当前在午夜前（如 21:00-23:59），结束时间是明天
       endMinutes += 24 * 60
     } else {
-      // 当前在午夜后（如 00:00-06:59），开始时间是昨天
       startMinutes -= 24 * 60
     }
   }
@@ -97,9 +87,6 @@ const currentSlotProgress = computed(() => {
   }
 })
 
-/**
- * 格式化剩余时间
- */
 const remainingTimeText = computed(() => {
   const mins = currentSlotProgress.value.remainingMinutes
   if (mins >= 60) {
@@ -111,20 +98,42 @@ const remainingTimeText = computed(() => {
 })
 
 /**
- * 计算 SVG 进度环的 stroke-dashoffset
- * 圆周长 = 2 * π * r，r = 14
+ * 高亮进度线的宽度百分比
+ * 5 个节点均匀分布在 0%, 25%, 50%, 75%, 100%
+ * 填充到：当前时段节点位置 + 时段内进度 * 到下一节点的距离
  */
-const progressCircumference = 2 * Math.PI * 14
-const progressOffset = computed(() => {
-  const progress = currentSlotProgress.value.progress / 100
-  return progressCircumference * (1 - progress)
+const trackFillPercent = computed(() => {
+  const currentIndex = getSlotIndex(props.currentSlot)
+  const totalSegments = TIME_FLOW_SLOT_CODES.length - 1 // 4 段
+  const segmentPercent = 100 / totalSegments // 每段 25%
+
+  // 已完成的整段 + 当前段内的进度
+  const basePercent = currentIndex * segmentPercent
+  const withinSegment = (currentSlotProgress.value.progress / 100) * segmentPercent
+
+  return Math.min(100, basePercent + withinSegment)
+})
+
+/** 当前时段的主题色（用于高亮线） */
+const currentSlotColor = computed(() => {
+  const slot = props.slots.find(s => s.code === props.currentSlot)
+  return slot?.colors.primary ?? 'var(--color-text-secondary)'
 })
 </script>
 
 <template>
   <nav class="horizontal-timeline" aria-label="时间线导航">
-    <!-- 连接线背景 -->
-    <div class="timeline-track" />
+    <!-- 连接线：底层轨道 -->
+    <div class="timeline-track">
+      <!-- 上层高亮填充线 -->
+      <div
+        class="timeline-track-fill"
+        :style="{
+          width: trackFillPercent + '%',
+          background: currentSlotColor
+        }"
+      />
+    </div>
 
     <!-- 时段节点 -->
     <div class="timeline-nodes">
@@ -134,86 +143,54 @@ const progressOffset = computed(() => {
         class="timeline-node"
         :class="{
           'is-active': isActive(slot.code),
-          'is-current': isCurrent(slot.code)
+          'is-current': isCurrent(slot.code),
+          'is-past': isPast(slot.code)
         }"
         @click="handleClick(slot.code)"
       >
-        <!-- 时段名称（移到上方） -->
+        <!-- 时段名称 -->
         <span
           class="node-label"
           :class="{ 'is-active': isActive(slot.code) }"
           :style="{
             fontWeight: isActive(slot.code) ? '600' : '400',
-            color: isActive(slot.code) ? getActiveTextColor(slot) : 'var(--color-text-secondary)'
+            color: isActive(slot.code) || isPast(slot.code) || isCurrent(slot.code)
+              ? getActiveTextColor(slot)
+              : 'var(--color-text-secondary)'
           }"
         >
           {{ slot.name }}
         </span>
 
-        <!-- 圆点指示器 / 进度环 -->
+        <!-- 圆点指示器 -->
         <div class="node-indicator">
-          <!-- 非当前时段：普通圆点 -->
           <div
-            v-if="!isCurrent(slot.code)"
             class="node-dot"
             :style="{
-              backgroundColor: isActive(slot.code)
+              backgroundColor: isCurrent(slot.code) || isPast(slot.code)
                 ? slot.colors.primary
-                : 'var(--color-text-secondary)',
-              boxShadow: isActive(slot.code)
-                ? `0 0 12px ${slot.colors.primary}`
-                : 'none'
+                : isActive(slot.code)
+                  ? slot.colors.primary
+                  : 'var(--color-text-secondary)',
+              boxShadow: isCurrent(slot.code)
+                ? `0 0 14px ${slot.colors.primary}, 0 0 6px ${slot.colors.primary}`
+                : isActive(slot.code)
+                  ? `0 0 10px ${slot.colors.primary}`
+                  : 'none'
+            }"
+            :class="{
+              'dot-current': isCurrent(slot.code),
+              'dot-active': isActive(slot.code) && !isCurrent(slot.code),
+              'dot-past': isPast(slot.code) && !isActive(slot.code)
             }"
           />
-
-          <!-- 当前时段：进度环 -->
-          <div v-else class="progress-ring-wrapper">
-            <svg
-              class="progress-ring"
-              width="36"
-              height="36"
-              viewBox="0 0 36 36"
-            >
-              <!-- 背景圆环 -->
-              <circle
-                class="progress-ring-bg"
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke-width="3"
-                :stroke="slot.colors.textSecondary + '40'"
-              />
-              <!-- 进度圆环 -->
-              <circle
-                class="progress-ring-fill"
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke-width="3"
-                :stroke="slot.colors.primary"
-                stroke-linecap="round"
-                :stroke-dasharray="progressCircumference"
-                :stroke-dashoffset="progressOffset"
-              />
-              <!-- 中心圆点（带呼吸动画） -->
-              <circle
-                class="center-dot"
-                cx="18"
-                cy="18"
-                r="5"
-                :fill="slot.colors.primary"
-              />
-            </svg>
-          </div>
         </div>
 
         <!-- 当前时段：剩余时间 -->
         <span
           v-if="isCurrent(slot.code)"
           class="remaining-time"
-          :style="{ color: slot.colors.primary }"
+          :style="{ color: getActiveTextColor(slot) }"
         >
           还有 {{ remainingTimeText }}
         </span>
@@ -243,7 +220,7 @@ const progressOffset = computed(() => {
   box-shadow: var(--glass-shadow-hover);
 }
 
-/* 连接线 */
+/* 连接线轨道（底层暗淡线） */
 .timeline-track {
   position: absolute;
   top: 50%;
@@ -251,9 +228,19 @@ const progressOffset = computed(() => {
   transform: translate(-50%, -50%);
   width: 80%;
   max-width: 600px;
-  height: 2px;
-  background: var(--glass-border);
-  border-radius: 1px;
+  height: 3px;
+  background: var(--glass-border-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* 高亮填充线（上层） */
+.timeline-track-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+  box-shadow: 0 0 8px currentColor;
+  opacity: 0.85;
 }
 
 /* 节点容器 */
@@ -280,7 +267,6 @@ const progressOffset = computed(() => {
 .timeline-node:hover {
   transform: translateY(-2px);
 }
-
 /* 指示器容器 */
 .node-indicator {
   display: flex;
@@ -290,72 +276,42 @@ const progressOffset = computed(() => {
   height: 36px;
 }
 
-/* 圆点（非当前时段） */
+/* 圆点基础样式 */
 .node-dot {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
-.timeline-node.is-active .node-dot {
+/* 已过时段圆点 */
+.dot-past {
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+}
+
+/* 选中态（非当前时段） */
+.dot-active {
+  width: 16px;
+  height: 16px;
+}
+
+/* 当前时段圆点：放大 + 呼吸光晕 */
+.dot-current {
   width: 18px;
   height: 18px;
-  animation: dot-glow 2s ease-in-out infinite;
+  animation: current-glow 2.5s ease-in-out infinite;
 }
 
-@keyframes dot-glow {
+@keyframes current-glow {
   0%, 100% {
     transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* 进度环容器 */
-.progress-ring-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 进度环 */
-.progress-ring {
-  transform: rotate(-90deg);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-.progress-ring-fill {
-  transition: stroke-dashoffset 0.5s ease;
-  animation: ring-glow 2s ease-in-out infinite;
-}
-
-@keyframes ring-glow {
-  0%, 100% {
-    opacity: 1;
-    filter: drop-shadow(0 0 2px currentColor);
-  }
-  50% {
-    opacity: 0.7;
-    filter: drop-shadow(0 0 6px currentColor);
-  }
-}
-
-/* 中心圆点呼吸动画 */
-.center-dot {
-  animation: breathe 2s ease-in-out infinite;
-}
-
-@keyframes breathe {
-  0%, 100% {
-    r: 5;
     opacity: 1;
   }
   50% {
-    r: 6;
-    opacity: 0.8;
+    transform: scale(1.15);
+    opacity: 0.85;
   }
 }
 
@@ -413,14 +369,14 @@ const progressOffset = computed(() => {
     height: 10px;
   }
 
-  .timeline-node.is-active .node-dot {
+  .dot-current {
     width: 14px;
     height: 14px;
   }
 
-  .progress-ring {
-    width: 28px;
-    height: 28px;
+  .dot-active {
+    width: 12px;
+    height: 12px;
   }
 
   .remaining-time {
