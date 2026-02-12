@@ -8,13 +8,21 @@ import {
   NForm,
   NFormItem,
   NInput,
-  NRadioButton,
-  NRadioGroup,
   NSpin,
   NTag,
+  NIcon,
   type FormInst,
   type FormRules
 } from 'naive-ui'
+import {
+  StorefrontOutline,
+  BicycleOutline,
+  PersonOutline,
+  PhonePortraitOutline,
+  LocationOutline,
+  CreateOutline,
+  ChevronBack
+} from '@vicons/ionicons5'
 import CouponSelector from '@/components/member/CouponSelector.vue'
 import CheckoutSummary from '@/components/member/CheckoutSummary.vue'
 import { useCartStore } from '@/stores/cart'
@@ -50,7 +58,7 @@ const formRules: FormRules = {
   ],
   contactPhone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\\d{9}$/, message: '请输入有效的手机号', trigger: 'blur' }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号', trigger: 'blur' }
   ],
   address: [
     {
@@ -98,7 +106,7 @@ const lastUpdatedLabel = computed(() => {
 
 const isFormValid = computed(() => {
   const nameOk = form.contactName.trim().length >= 2 && form.contactName.trim().length <= 20
-  const phoneOk = /^1[3-9]\\d{9}$/.test(form.contactPhone)
+  const phoneOk = /^1[3-9]\d{9}$/.test(form.contactPhone)
   const addressOk = form.pickupType === 'SELF_PICKUP' || form.address.trim().length > 0
   const remarkOk = form.remark.length <= 120
   return nameOk && phoneOk && addressOk && remarkOk
@@ -128,7 +136,7 @@ const backTarget = computed(() => {
 })
 
 const sourceLabel = computed(() =>
-  checkoutStore.source === 'buyNow' ? '立即购买（不影响购物车）' : '购物车结算'
+  checkoutStore.source === 'buyNow' ? '立即购买' : '购物车结算'
 )
 
 watch(
@@ -280,226 +288,301 @@ async function handleSubmit() {
   }
 }
 
+function selectPickup(type: PickupType) {
+  form.pickupType = type
+}
+
 onMounted(async () => {
   initializing.value = true
   const ok = await ensureSnapshot()
   initializing.value = false
   if (ok) {
-    await refreshPreview('初始化')
+    await refreshPreview()
   }
 })
 </script>
 
 <template>
-  <div class="container mx-auto px-4 py-6 lg:py-8 max-w-5xl">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-serif font-bold text-gray-900 dark:text-gray-100">确认订单</h1>
-          <NTag size="small" type="warning" round>{{ sourceLabel }}</NTag>
+  <div class="min-h-screen pb-20">
+    <div class="container mx-auto px-4 py-8 lg:py-10 max-w-5xl">
+      <!-- 顶部 Header -->
+      <div class="glass-card px-6 py-5 mb-8">
+        <!-- 三栏式导航：左按钮 / 中标题+副标题 / 右占位 -->
+        <div class="flex items-center">
+          <NButton circle secondary @click="handleBack">
+            <template #icon>
+              <NIcon><ChevronBack /></NIcon>
+            </template>
+          </NButton>
+          <div class="flex-1 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <h1 class="text-2xl font-serif font-bold text-[var(--color-text)]">确认订单</h1>
+              <NTag size="small" type="primary" bordered round class="font-medium opacity-90">
+                {{ sourceLabel }}
+              </NTag>
+            </div>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-1">
+              确认商品与联系方式，开启这一刻的美好。
+            </p>
+          </div>
+          <!-- 右侧占位，与左侧按钮等宽，保持标题视觉居中 -->
+          <div class="w-[34px]"></div>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          确认商品与联系方式，开启这一刻的美好。
-        </p>
       </div>
-      <NButton quaternary size="small" @click="handleBack">
-        {{ checkoutStore.source === 'buyNow' ? '返回商品' : '返回购物车' }}
-      </NButton>
-    </div>
 
-    <div v-if="initializing" class="text-center py-16">
-      <NSpin size="large" />
-      <p class="mt-3 text-[var(--color-text-secondary)]">正在为您准备订单...</p>
-    </div>
+      <div v-if="initializing" class="flex flex-col items-center justify-center py-20">
+        <NSpin size="large" />
+        <p class="mt-4 text-[var(--color-text-secondary)] animate-pulse">正在为您准备订单...</p>
+      </div>
 
-    <div
-      v-else
-      class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
-    >
-      <div class="lg:col-span-2 space-y-5">
-        <div class="card">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="section-title">商品清单</h3>
-            <span class="text-xs text-[var(--color-text-secondary)]">
-              预览更新时间：{{ lastUpdatedLabel }}
-            </span>
-          </div>
+      <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- 左侧主要内容区 -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <!-- 商品清单卡片 -->
+          <div class="bg-[var(--color-bg-secondary)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="card-title">商品清单</h3>
+              <span class="text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg)] border border-[var(--color-border)] px-2 py-1 rounded">
+                {{ lastUpdatedLabel }}
+              </span>
+            </div>
 
-          <NAlert
-            v-if="checkoutStore.source === 'buyNow'"
-            type="info"
-            size="small"
-            class="mb-3"
-            show-icon
-          >
-            立即购买为一次性结算，不会影响购物车内容；如需修改数量请返回商品页。
-          </NAlert>
-
-          <div v-if="previewLoading && !previewReady" class="text-center py-10">
-            <NSpin size="large" />
-            <p class="mt-2 text-[var(--color-text-secondary)]">正在确认最新价格...</p>
-          </div>
-
-          <div v-else class="space-y-4">
-            <div
-              v-for="item in previewItems"
-              :key="item.productId"
-              class="item-row"
-              :class="{ 'opacity-60': item.available === false }"
+            <NAlert
+              v-if="checkoutStore.source === 'buyNow'"
+              type="info"
+              class="mb-5 rounded-lg border-none bg-blue-50 dark:bg-blue-900/20"
+              :show-icon="true"
             >
-              <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                <img :src="item.image || '/placeholder-product.png'" :alt="item.name" class="w-full h-full object-cover" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="font-medium text-[var(--color-text)] truncate">{{ item.name }}</p>
-                    <p class="text-xs text-[var(--color-text-secondary)] mt-1">
-                      ￥{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}
+              立即购买为一次性结算，不会影响购物车内容。
+            </NAlert>
+
+            <div v-if="previewLoading && !previewReady" class="text-center py-12">
+              <NSpin size="medium" />
+              <p class="mt-2 text-sm text-[var(--color-text-secondary)]">正在确认最新价格...</p>
+            </div>
+
+            <div v-else class="space-y-6">
+              <div
+                v-for="item in previewItems"
+                :key="item.productId"
+                class="group relative flex gap-4 transition-opacity duration-200"
+                :class="{ 'opacity-50 grayscale': item.available === false }"
+              >
+                <!-- 商品图片 -->
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-[var(--color-bg)] flex-shrink-0 shadow-sm border border-[var(--color-border)]">
+                  <img 
+                    :src="item.image || '/placeholder-product.png'" 
+                    :alt="item.name" 
+                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
+                  />
+                </div>
+                
+                <!-- 商品信息 -->
+                <div class="flex-1 min-w-0 flex flex-col justify-between py-1">
+                  <div>
+                    <div class="flex justify-between items-start gap-2">
+                      <p class="font-medium text-lg text-[var(--color-text)] truncate">{{ item.name }}</p>
+                      <p class="font-bold text-[var(--color-text)] whitespace-nowrap">
+                        ￥{{ item.subtotal.toFixed(2) }}
+                      </p>
+                    </div>
+                    <!-- 规格/描述预留位置 -->
+                    <p class="text-sm text-[var(--color-text-secondary)] mt-0.5 line-clamp-1">
+                      {{ item.name.includes('拿铁') ? '标准糖 · 热' : '默认规格' }}
                     </p>
                   </div>
-                  <div class="text-right">
-                    <p class="text-sm text-[var(--color-primary)] font-semibold">
-                      ￥{{ item.subtotal.toFixed(2) }}
+                  
+                  <div class="flex justify-between items-end">
+                    <p class="text-sm text-[var(--color-text-secondary)] bg-[var(--color-bg)] px-2 py-0.5 rounded inline-block border border-[var(--color-border)]">
+                      ￥{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}
+                    </p>
+                    <p v-if="item.available === false" class="text-xs text-red-500 font-medium">
+                      {{ item.reason || '无法结算' }}
                     </p>
                   </div>
                 </div>
-                <p v-if="item.available === false" class="text-xs text-red-500 mt-1">
-                  {{ item.reason || '该商品暂时无法结算，请返回调整' }}
-                </p>
+              </div>
+
+              <NAlert v-if="hasUnavailableItems" type="warning" class="rounded-lg" show-icon>
+                部分商品暂时无法结算，请返回调整后再试。
+              </NAlert>
+            </div>
+          </div>
+
+          <!-- 取餐方式卡片 -->
+          <div class="bg-[var(--color-bg-secondary)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+            <h3 class="card-title mb-4">取餐方式</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div 
+                class="cursor-pointer relative p-4 rounded-xl border transition-all duration-200 flex flex-col items-center gap-3 text-center hover:shadow-md"
+                :class="form.pickupType === 'SELF_PICKUP' ? 'border-[var(--color-primary)] bg-[var(--color-bg)] shadow-sm' : 'border-[var(--color-border)] bg-[var(--color-bg)]'"
+                @click="selectPickup('SELF_PICKUP')"
+              >
+                <div 
+                  class="p-3 rounded-full shadow-sm text-[var(--color-primary)]"
+                  :class="form.pickupType === 'SELF_PICKUP' ? 'bg-[var(--color-bg-secondary)]' : 'bg-[var(--color-bg-secondary)]'"
+                >
+                  <NIcon size="24"><StorefrontOutline /></NIcon>
+                </div>
+                <div>
+                  <div class="font-medium text-[var(--color-text)]">到店自取</div>
+                  <div class="text-xs text-[var(--color-text-secondary)] mt-1">无需排队，到店即拿</div>
+                </div>
+                <div v-if="form.pickupType === 'SELF_PICKUP'" class="absolute top-2 right-2 text-[var(--color-primary)]">
+                  <div class="w-2 h-2 rounded-full bg-current"></div>
+                </div>
+              </div>
+
+              <div 
+                class="cursor-pointer relative p-4 rounded-xl border transition-all duration-200 flex flex-col items-center gap-3 text-center hover:shadow-md"
+                :class="form.pickupType === 'DELIVERY' ? 'border-[var(--color-primary)] bg-[var(--color-bg)] shadow-sm' : 'border-[var(--color-border)] bg-[var(--color-bg)]'"
+                @click="selectPickup('DELIVERY')"
+              >
+                <div 
+                  class="p-3 rounded-full shadow-sm text-[var(--color-primary)]"
+                  :class="form.pickupType === 'DELIVERY' ? 'bg-[var(--color-bg-secondary)]' : 'bg-[var(--color-bg-secondary)]'"
+                >
+                  <NIcon size="24"><BicycleOutline /></NIcon>
+                </div>
+                <div>
+                  <div class="font-medium text-[var(--color-text)]">外卖配送</div>
+                  <div class="text-xs text-[var(--color-text-secondary)] mt-1">专业配送，美味直达</div>
+                </div>
+                <div v-if="form.pickupType === 'DELIVERY'" class="absolute top-2 right-2 text-[var(--color-primary)]">
+                  <div class="w-2 h-2 rounded-full bg-current"></div>
+                </div>
               </div>
             </div>
-
-            <NAlert v-if="hasUnavailableItems" type="warning" show-icon>
-              部分商品暂时无法结算，请返回调整后再试。
-            </NAlert>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="section-title">取餐方式</h3>
-          </div>
-          <NRadioGroup v-model:value="form.pickupType" class="w-full">
-            <div class="grid grid-cols-2 gap-3">
-              <NRadioButton value="SELF_PICKUP" class="text-center">到店自取</NRadioButton>
-              <NRadioButton value="DELIVERY" class="text-center">外卖配送</NRadioButton>
-            </div>
-          </NRadioGroup>
-        </div>
-
-        <div class="card">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="section-title">
+          <!-- 信息填写卡片 -->
+          <div class="bg-[var(--color-bg-secondary)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+            <h3 class="card-title mb-5">
               {{ form.pickupType === 'SELF_PICKUP' ? '取餐人信息' : '配送信息' }}
             </h3>
+
+            <NForm ref="formRef" :model="form" :rules="formRules" label-placement="top" size="medium">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <NFormItem label="联系人" path="contactName">
+                  <NInput v-model:value="form.contactName" placeholder="怎么称呼您" class="custom-input">
+                    <template #prefix><NIcon :component="PersonOutline" /></template>
+                  </NInput>
+                </NFormItem>
+                <NFormItem label="手机号" path="contactPhone">
+                  <NInput v-model:value="form.contactPhone" placeholder="便于接收取餐通知" class="custom-input">
+                    <template #prefix><NIcon :component="PhonePortraitOutline" /></template>
+                  </NInput>
+                </NFormItem>
+              </div>
+
+              <NFormItem v-if="form.pickupType === 'DELIVERY'" label="配送地址" path="address" class="mt-2">
+                <NInput
+                  v-model:value="form.address"
+                  type="textarea"
+                  placeholder="请输入详细的楼号、门牌号"
+                  :rows="2"
+                  class="custom-input"
+                >
+                  <template #prefix>
+                    <div class="mt-1"><NIcon :component="LocationOutline" /></div>
+                  </template>
+                </NInput>
+              </NFormItem>
+
+              <NFormItem label="备注（选填）" path="remark" class="mt-2">
+                <NInput
+                  v-model:value="form.remark"
+                  type="textarea"
+                  placeholder="如有口味偏好或特殊需求，请告诉我们"
+                  :rows="2"
+                  maxlength="120"
+                  show-count
+                  class="custom-input"
+                >
+                  <template #prefix>
+                    <div class="mt-1"><NIcon :component="CreateOutline" /></div>
+                  </template>
+                </NInput>
+              </NFormItem>
+            </NForm>
           </div>
 
-          <NForm ref="formRef" :model="form" :rules="formRules" label-placement="top">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <NFormItem label="联系人" path="contactName">
-                <NInput v-model:value="form.contactName" placeholder="请输入联系人姓名" />
-              </NFormItem>
-              <NFormItem label="手机号" path="contactPhone">
-                <NInput v-model:value="form.contactPhone" placeholder="请输入手机号" />
-              </NFormItem>
+          <!-- 优惠券卡片 -->
+          <div class="bg-[var(--color-bg-secondary)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="card-title">优惠券</h3>
             </div>
 
-            <NFormItem v-if="form.pickupType === 'DELIVERY'" label="配送地址" path="address">
-              <NInput
-                v-model:value="form.address"
-                type="textarea"
-                placeholder="请输入详细配送地址"
-                :rows="2"
-              />
-            </NFormItem>
-
-            <NFormItem label="备注（选填）" path="remark">
-              <NInput
-                v-model:value="form.remark"
-                type="textarea"
-                placeholder="口味偏好、到店时间等，120 字以内"
-                :rows="2"
-                maxlength="120"
-                show-count
-              />
-            </NFormItem>
-          </NForm>
+            <div v-if="!previewReady" class="text-sm text-[var(--color-text-secondary)] py-4 text-center bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg">
+              确认价格后将显示可用的优惠券
+            </div>
+            
+            <NAlert v-if="couponWarning" type="warning" show-icon class="mb-3 rounded-lg">
+              {{ couponWarning }}
+            </NAlert>
+            
+            <CouponSelector
+              v-else
+              :usable="checkoutStore.usableCoupons"
+              :unusable="checkoutStore.unusableCoupons"
+              v-model:selected-coupon-id="checkoutStore.selectedCouponId"
+              :loading="checkoutStore.couponLoading"
+            />
+          </div>
         </div>
 
-        <div class="card">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="section-title">优惠券</h3>
-            <NButton text size="small" @click="refreshPreview('手动刷新')">刷新预览</NButton>
-          </div>
-
-          <div v-if="!previewReady" class="text-sm text-[var(--color-text-secondary)]">
-            确认价格后将显示可用的优惠券。
-          </div>
-          <NAlert v-if="couponWarning" type="warning" show-icon class="mb-3">
-            {{ couponWarning }}
-          </NAlert>
-          <CouponSelector
-            v-else
-            :usable="checkoutStore.usableCoupons"
-            :unusable="checkoutStore.unusableCoupons"
-            v-model:selected-coupon-id="checkoutStore.selectedCouponId"
-            :loading="checkoutStore.couponLoading"
+        <!-- 右侧结算栏 (Sticky) -->
+        <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-8">
+          <CheckoutSummary
+            :items-amount="price.itemsAmount"
+            :discount-amount="price.discountAmount"
+            :pay-amount="price.payAmount"
+            :points-estimate="checkoutStore.preview?.pointsEstimate || 0"
+            :paying="submitting"
+            :previewing="busyState"
+            :disabled="!canSubmit"
+            :last-updated="checkoutStore.lastPreviewAt || undefined"
+            :preview-error="hasPreviewError ? checkoutStore.previewError : null"
+            @pay="handleSubmit"
+            @refresh="refreshPreview('手动刷新')"
           />
+
+          <NAlert v-if="hasPreviewError" type="error" show-icon class="rounded-xl shadow-sm border-red-100">
+            {{ checkoutStore.previewError }}
+          </NAlert>
         </div>
-      </div>
-
-      <div class="lg:col-span-1 space-y-3">
-        <CheckoutSummary
-          :items-amount="price.itemsAmount"
-          :discount-amount="price.discountAmount"
-          :pay-amount="price.payAmount"
-          :points-estimate="checkoutStore.preview?.pointsEstimate || 0"
-          :paying="submitting"
-          :previewing="busyState"
-          :disabled="!canSubmit"
-          :last-updated="checkoutStore.lastPreviewAt || undefined"
-          :preview-error="hasPreviewError ? checkoutStore.previewError : null"
-          @pay="handleSubmit"
-          @refresh="refreshPreview('手动刷新')"
-        />
-
-        <NAlert v-if="hasPreviewError" type="error" show-icon>
-          {{ checkoutStore.previewError }}，请点击"刷新预览"确认最新价格后再支付。
-        </NAlert>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.card {
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-
-.section-title {
+.card-title {
   color: var(--color-text);
+  font-weight: 600;
+  font-size: 1.125rem; /* text-lg */
+  font-family: var(--font-serif);
+}
+
+:deep(.n-input.custom-input) {
+  border-radius: 0.5rem;
+  background-color: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+:deep(.n-input.custom-input:hover) {
+  border-color: var(--color-primary);
+}
+
+:deep(.n-input.custom-input .n-input__prefix) {
+  margin-right: 8px;
+  color: var(--color-text-secondary);
+}
+
+/* 覆盖 Naive UI 默认样式以匹配设计 */
+:deep(.n-form-item-label) {
   font-weight: 500;
-}
-
-.item-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-}
-
-:deep(.n-radio-button) {
-  flex: 1;
-}
-
-:deep(.n-radio-group) {
-  width: 100%;
+  color: var(--color-text-secondary);
 }
 </style>
