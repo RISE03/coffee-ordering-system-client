@@ -1,14 +1,14 @@
 <template>
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     <!-- Page Header - Glassmorphism Style -->
-    <div class="glass-card p-6 mb-6">
+    <div class="glass-card p-6 mb-6 relative z-30">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="text-center md:text-left">
           <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">全日菜单</h1>
           <p class="text-[var(--color-text-secondary)] text-sm">探索我们为您精心准备的美味。</p>
         </div>
         <!-- 搜索栏 -->
-        <div class="w-full md:w-80">
+        <div class="w-full md:w-80 relative z-40">
           <SearchBar
             v-model="searchKeyword"
             placeholder="搜索商品名称..."
@@ -54,13 +54,13 @@
       </aside>
 
       <!-- Product Grid - Glassmorphism Cards -->
-      <main class="flex-1">
+      <main class="flex-1 relative z-0">
         <div
           class="product-content"
           :class="{ 'product-content--hidden': !contentVisible }"
         >
           <!-- Products Loading State -->
-          <ProductSkeleton v-if="productStore.isLoadingProducts" :count="8" />
+          <ProductSkeleton v-if="productStore.isLoadingProducts || isSearchingProducts" :count="8" />
 
           <!-- Empty State -->
           <div v-else-if="filteredProducts.length === 0" class="text-center py-12">
@@ -105,13 +105,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useThemeStore } from '@/stores/theme'
 import { useCartStore, CART_QUANTITY_MIN } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useMessage, NSkeleton } from 'naive-ui'
+import { getProducts } from '@/api/products'
+import type { Product } from '@/types/product'
 import ProductCard from '@/components/product/ProductCard.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import ProductSkeleton from '@/components/common/ProductSkeleton.vue'
@@ -126,6 +128,13 @@ const message = useMessage()
 
 // 搜索关键词
 const searchKeyword = ref('')
+const searchResults = ref<Product[]>([])
+const isSearchingProducts = ref(false)
+
+const SEARCH_DEBOUNCE_MS = 250
+const SEARCH_RESULT_SIZE = 100
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let searchRequestId = 0
 
 // 切换分类过渡动画控制
 const contentVisible = ref(true)
@@ -135,14 +144,77 @@ const filteredProducts = computed(() => {
   if (!searchKeyword.value.trim()) {
     return productStore.products
   }
-  const keyword = searchKeyword.value.toLowerCase().trim()
-  return productStore.products.filter(product => {
-    return (
-      product.name.toLowerCase().includes(keyword) ||
-      product.englishName?.toLowerCase().includes(keyword) ||
-      product.description?.toLowerCase().includes(keyword)
-    )
-  })
+  return searchResults.value
+})
+
+const resetSearchState = () => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+  searchRequestId += 1
+  isSearchingProducts.value = false
+  searchResults.value = []
+}
+
+const executeGlobalSearch = async (
+  keyword: string,
+  showErrorMessage = false
+) => {
+  const normalizedKeyword = keyword.trim()
+  if (!normalizedKeyword) {
+    resetSearchState()
+    return
+  }
+
+  const requestId = ++searchRequestId
+  isSearchingProducts.value = true
+
+  try {
+    const data = await getProducts({
+      keyword: normalizedKeyword,
+      size: SEARCH_RESULT_SIZE,
+    })
+
+    // 只接收最后一次请求结果，避免旧请求覆盖新输入
+    if (requestId !== searchRequestId) {
+      return
+    }
+
+    searchResults.value = data.list
+  } catch (error) {
+    if (requestId !== searchRequestId) {
+      return
+    }
+
+    console.error('搜索商品失败:', error)
+    searchResults.value = []
+    if (showErrorMessage) {
+      message.error('搜索失败，请稍后重试')
+    }
+  } finally {
+    if (requestId === searchRequestId) {
+      isSearchingProducts.value = false
+    }
+  }
+}
+
+watch(searchKeyword, (value) => {
+  const keyword = value.trim()
+
+  if (!keyword) {
+    resetSearchState()
+    return
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+  }
+
+  isSearchingProducts.value = true
+  searchDebounceTimer = setTimeout(() => {
+    void executeGlobalSearch(keyword)
+  }, SEARCH_DEBOUNCE_MS)
 })
 
 // 获取商品在购物车中的数量
@@ -153,6 +225,7 @@ const getCartQuantity = (productId: number): number => {
 
 const handleCategorySelect = async (categoryId: number) => {
   if (productStore.selectedCategoryId === categoryId) return
+  resetSearchState()
   searchKeyword.value = '' // 切换分类时清空搜索
   // 淡出当前内容
   contentVisible.value = false
@@ -163,9 +236,24 @@ const handleCategorySelect = async (categoryId: number) => {
   contentVisible.value = true
 }
 
-const handleSearch = () => {
-  // 搜索时可以选择是否切换到全部分类
-  // 当前实现：在当前分类内搜索
+const handleSearch = (keywordFromEvent?: string) => {
+  const keyword = (keywordFromEvent ?? searchKeyword.value).trim()
+  if (!keyword) {
+    resetSearchState()
+    return
+  }
+
+  // 历史记录点击时，优先使用事件传入关键词，避免读取到旧值
+  if (searchKeyword.value !== keyword) {
+    searchKeyword.value = keyword
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+
+  void executeGlobalSearch(keyword, true)
 }
 
 const handleViewDetail = (productId: number) => {
@@ -177,6 +265,7 @@ const handleViewDetail = (productId: number) => {
 
 const handleClearSearch = () => {
   searchKeyword.value = ''
+  resetSearchState()
 }
 
 const handleAddToCart = async (productId: number) => {
@@ -240,13 +329,18 @@ onMounted(async () => {
     await cartStore.fetchCart()
   }
 })
+
+onBeforeUnmount(() => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+  }
+})
 </script>
 
 <style scoped>
 .product-content {
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 1;
-  transform: translateY(0);
 }
 
 .product-content--hidden {

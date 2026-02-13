@@ -21,6 +21,7 @@ const emit = defineEmits<{
 const HISTORY_KEY = 'dawn_dusk_search_history'
 const MAX_HISTORY = 6
 
+const containerRef = ref<HTMLElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const isFocused = ref(false)
 const searchHistory = ref<string[]>([])
@@ -94,8 +95,12 @@ const showDropdown = computed(() => {
 
 // 点击外部关闭下拉
 const handleClickOutside = (e: MouseEvent) => {
-  const target = e.target as HTMLElement
-  if (!target.closest('.search-container')) {
+  const target = e.target
+  if (!(target instanceof Node)) {
+    return
+  }
+
+  if (!containerRef.value?.contains(target)) {
     isFocused.value = false
   }
 }
@@ -110,7 +115,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="search-container relative">
+  <div ref="containerRef" class="search-container relative">
     <!-- 搜索输入框 -->
     <div
       class="flex items-center gap-2 px-4 py-2.5 rounded-full glass-card transition-all duration-200"
@@ -124,6 +129,7 @@ onUnmounted(() => {
         :placeholder="placeholder"
         class="flex-1 bg-transparent border-none outline-none text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-secondary)]/60"
         @input="handleInput"
+        @click="isFocused = true"
         @focus="isFocused = true"
         @keydown="handleKeydown"
       />
@@ -145,6 +151,7 @@ onUnmounted(() => {
         <div class="p-3 border-b border-[var(--glass-border)] flex items-center justify-between">
           <span class="text-xs font-medium text-[var(--color-text-secondary)]">搜索历史</span>
           <button
+            @mousedown.prevent
             @click.stop="clearHistory"
             class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
           >
@@ -155,7 +162,8 @@ onUnmounted(() => {
           <button
             v-for="keyword in searchHistory"
             :key="keyword"
-            @click="selectHistory(keyword)"
+            @mousedown.prevent
+            @click.stop="selectHistory(keyword)"
             class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-[var(--glass-bg-hover)] transition-colors"
           >
             <NIcon :component="TimeOutline" class="text-sm text-[var(--color-text-secondary)]" />
