@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import type { Product } from '@/types/product'
 import type { TimeFlowColors } from '@/types/timeflow'
-import { useThemeStore } from '@/stores/theme'
 
 interface Props {
   /** 商品信息 */
@@ -24,9 +23,6 @@ const emit = defineEmits<{
   (e: 'click'): void
   (e: 'add-to-cart', productId: number): void
 }>()
-
-// 主题状态
-const themeStore = useThemeStore()
 
 const formattedPrice = computed(() => {
   return `¥${props.product.price.toFixed(2)}`

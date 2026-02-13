@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { NIcon } from 'naive-ui'
 import { SearchOutline, CloseCircle, TimeOutline } from '@vicons/ionicons5'
 

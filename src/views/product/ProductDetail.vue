@@ -5,9 +5,9 @@
       <n-button
         text
         class="back-btn"
-        @click="router.back()"
+        @click="handleBack"
       >
-        ← 返回菜单
+        {{ topBackLabel }}
       </n-button>
     </div>
 
@@ -22,8 +22,8 @@
       <n-result status="error" title="加载失败" :description="error">
         <template #footer>
           <n-button @click="loadProduct">重试</n-button>
-          <n-button @click="router.push('/menu')" class="ml-2">
-            返回菜单
+          <n-button @click="handleBack" class="ml-2">
+            {{ backLabel }}
           </n-button>
         </template>
       </n-result>
@@ -141,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   useMessage,
@@ -182,6 +182,31 @@ const error = ref<string | null>(null)
 const product = ref<Product | null>(null)
 const quantity = ref(1)
 const addingToCart = ref(false)
+const detailFrom = computed(() => {
+  return typeof route.query.from === 'string' ? route.query.from : null
+})
+
+const backTarget = computed(() => {
+  if (detailFrom.value === 'home') {
+    return '/'
+  }
+  if (detailFrom.value === 'menu') {
+    return '/menu'
+  }
+  return null
+})
+
+const backLabel = computed(() => {
+  if (detailFrom.value === 'home') {
+    return '返回首页'
+  }
+  if (detailFrom.value === 'menu') {
+    return '返回菜单'
+  }
+  return '返回上一页'
+})
+
+const topBackLabel = computed(() => `← ${backLabel.value}`)
 
 function getProductImage(item: Product): string {
   return item.imageUrl || item.image || '/placeholder-product.png'
@@ -198,6 +223,25 @@ function isProductAvailable(item: Product | null): boolean {
     return item.status === 1
   }
   return true
+}
+
+function handleBack() {
+  if (!backTarget.value) {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.replace('/menu')
+    return
+  }
+
+  const historyBack = window.history.state?.back as string | null | undefined
+  if (historyBack && router.resolve(historyBack).fullPath === router.resolve(backTarget.value).fullPath) {
+    router.back()
+    return
+  }
+
+  router.replace(backTarget.value)
 }
 
 // Methods

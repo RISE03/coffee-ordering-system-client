@@ -92,7 +92,7 @@
               :cart-quantity="getCartQuantity(product.id)"
               @add-to-cart="handleAddToCart"
               @remove-from-cart="handleRemoveFromCart"
-              @view-detail="(id) => router.push(`/product/${id}`)"
+              @view-detail="handleViewDetail"
             />
           </div>
         </div>
@@ -163,9 +163,16 @@ const handleCategorySelect = async (categoryId: number) => {
   contentVisible.value = true
 }
 
-const handleSearch = (keyword: string) => {
+const handleSearch = () => {
   // 搜索时可以选择是否切换到全部分类
   // 当前实现：在当前分类内搜索
+}
+
+const handleViewDetail = (productId: number) => {
+  router.push({
+    path: `/product/${productId}`,
+    query: { from: 'menu' }
+  })
 }
 
 const handleClearSearch = () => {

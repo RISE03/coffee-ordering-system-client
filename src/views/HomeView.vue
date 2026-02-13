@@ -143,7 +143,10 @@ async function handleAddToCart(productId: number) {
  * 处理查看商品详情
  */
 function handleViewDetail(productId: number) {
-  router.push(`/product/${productId}`)
+  router.push({
+    path: `/product/${productId}`,
+    query: { from: 'home' }
+  })
 }
 
 /**

@@ -242,7 +242,13 @@ async function refreshPreview(reason?: string) {
 }
 
 function handleBack() {
-  router.push(backTarget.value)
+  const historyBack = window.history.state?.back as string | null | undefined
+  if (historyBack && router.resolve(historyBack).fullPath === router.resolve(backTarget.value).fullPath) {
+    router.back()
+    return
+  }
+
+  router.replace(backTarget.value)
 }
 
 async function handleSubmit() {
