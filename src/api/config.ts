@@ -23,7 +23,7 @@ export interface BusinessHours {
  */
 export async function getBusinessHours(): Promise<BusinessHours> {
   try {
-    const response = await client.get<BusinessHours>('/api/public/config/business-hours')
+    const response = await client.get<BusinessHours>('/public/config/business-hours')
     return response.data
   } catch {
     // 接口不存在或请求失败时，返回默认营业时间

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { NButton } from 'naive-ui'
-
 interface Props {
   /** 主标题 */
   title?: string
@@ -32,16 +30,13 @@ const emit = defineEmits<{
     <div class="icon">{{ props.icon }}</div>
     <h3 class="title">{{ props.title }}</h3>
     <p class="desc">{{ props.description }}</p>
-    <NButton
+    <button
       v-if="!props.hideAction"
-      type="primary"
-      size="medium"
-      ghost
-      class="action"
+      class="action-btn"
       @click="emit('action')"
     >
       {{ props.actionText }}
-    </NButton>
+    </button>
   </div>
 </template>
 
@@ -54,12 +49,11 @@ const emit = defineEmits<{
   text-align: center;
   padding: 2.5rem 1.5rem;
   border-radius: 1.25rem;
-  background: linear-gradient(
-    145deg,
-    rgba(var(--color-primary-rgb, 245, 176, 65), 0.08),
-    rgba(var(--color-primary-rgb, 245, 176, 65), 0.03)
-  );
-  border: 1px dashed var(--color-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px dashed var(--glass-border-subtle);
+  box-shadow: var(--glass-shadow);
   color: var(--color-text);
 }
 
@@ -80,7 +74,26 @@ const emit = defineEmits<{
   margin-bottom: 1rem;
 }
 
-.action {
+.action-btn {
   margin-top: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  background: transparent;
+  border: 1.5px solid var(--color-primary);
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.action-btn:hover {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  box-shadow: var(--glass-shadow);
+}
+
+.action-btn:active {
+  transform: scale(0.97);
 }
 </style>

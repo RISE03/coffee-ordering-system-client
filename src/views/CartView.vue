@@ -189,12 +189,12 @@ function goCheckout() {
 
 <template>
   <div class="container mx-auto px-4 py-6 lg:py-8 max-w-5xl">
-    <div class="flex items-center justify-between mb-6">
+    <div class="page-header glass-card mb-6">
       <div>
-        <h1 class="text-2xl font-serif font-bold text-gray-900 dark:text-gray-100">购物车</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">挑选好物，开启美好时光。</p>
+        <h1 class="text-2xl font-serif font-bold" style="color: var(--color-text)">购物车</h1>
+        <p class="text-sm mt-1" style="color: var(--color-text-secondary)">挑选好物，开启美好时光。</p>
       </div>
-      <div v-if="lastSyncedLabel" class="text-xs text-gray-500 dark:text-gray-400">
+      <div v-if="lastSyncedLabel" class="text-xs" style="color: var(--color-text-secondary)">
         上次同步：{{ lastSyncedLabel }}
       </div>
     </div>
@@ -322,6 +322,13 @@ function goCheckout() {
 </template>
 
 <style scoped>
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
 .cart-item {
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
@@ -389,13 +396,23 @@ function goCheckout() {
 }
 
 .btn.ghost {
+  background: transparent;
   color: var(--color-text-secondary);
+}
+
+.btn.ghost:hover {
+  background: var(--glass-bg);
+  color: var(--color-text);
 }
 
 .btn.primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-bg);
   border-color: transparent;
+}
+
+.btn.primary:hover {
+  background: var(--color-primary-hover);
 }
 
 .btn.primary:disabled,

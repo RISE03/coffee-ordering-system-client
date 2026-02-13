@@ -16,12 +16,15 @@ interface Props {
   error?: string | null
   /** 是否营业中 */
   isOpen?: boolean
+  /** 购物车数量映射 { productId: quantity } */
+  cartQuantities?: Record<number, number>
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   error: null,
-  isOpen: true
+  isOpen: true,
+  cartQuantities: () => ({})
 })
 
 const emit = defineEmits<{
@@ -117,6 +120,7 @@ const secondaryProducts = computed(() => {
           :product="featuredProduct"
           :slot-colors="slotColors"
           :is-open="isOpen"
+          :cart-quantity="cartQuantities[featuredProduct.id] ?? 0"
           size="large"
           @click="emit('view-detail', featuredProduct.id)"
           @add-to-cart="emit('add-to-cart', featuredProduct.id)"
@@ -133,6 +137,7 @@ const secondaryProducts = computed(() => {
           :product="product"
           :slot-colors="slotColors"
           :is-open="isOpen"
+          :cart-quantity="cartQuantities[product.id] ?? 0"
           size="small"
           @click="emit('view-detail', product.id)"
           @add-to-cart="emit('add-to-cart', product.id)"

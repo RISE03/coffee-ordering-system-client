@@ -73,6 +73,7 @@
             :loading="timeflowStore.isSlotLoading(timeflowStore.activeSlot)"
             :error="timeflowStore.getSlotError(timeflowStore.activeSlot)"
             :is-open="timeflowStore.isOpen"
+            :cart-quantities="cartQuantities"
             @add-to-cart="handleAddToCart"
             @view-detail="handleViewDetail"
             @retry="handleRetry"
@@ -105,6 +106,15 @@ const message = useMessage()
 // 获取当前显示时段的配置
 const currentDisplaySlotConfig = computed(() => {
   return TIME_FLOW_SLOTS.find(s => s.code === timeflowStore.activeSlot)
+})
+
+// 购物车数量映射 { productId: quantity }
+const cartQuantities = computed(() => {
+  const map: Record<number, number> = {}
+  for (const item of cartStore.items) {
+    map[item.productId] = item.quantity
+  }
+  return map
 })
 
 /**

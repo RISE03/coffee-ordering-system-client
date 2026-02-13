@@ -12,12 +12,17 @@ interface Props {
   size?: 'large' | 'small'
   /** 是否营业中 */
   isOpen?: boolean
+  /** 购物车中的数量 */
+  cartQuantity?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'small',
-  isOpen: true
+  isOpen: true,
+  cartQuantity: 0
 })
+
+const isInCart = computed(() => props.cartQuantity > 0)
 
 const emit = defineEmits<{
   (e: 'click'): void
@@ -75,6 +80,21 @@ function handleAddToCart(event: Event) {
       >
         {{ product.tag }}
       </div>
+
+      <!-- 已加购数量角标 -->
+      <Transition name="cart-badge">
+        <div
+          v-if="isInCart"
+          class="absolute bottom-2 right-2 z-10 flex items-center justify-center rounded-full font-bold shadow-lg cart-badge"
+          :class="[size === 'large' ? 'w-8 h-8 text-sm' : 'w-6 h-6 text-xs']"
+          :style="{
+            backgroundColor: slotColors.tagBg || slotColors.primary,
+            color: slotColors.tagText || slotColors.text
+          }"
+        >
+          {{ cartQuantity }}
+        </div>
+      </Transition>
     </div>
 
     <!-- 商品信息 -->
@@ -172,5 +192,30 @@ function handleAddToCart(event: Event) {
   background-color: rgba(128, 128, 128, 0.3);
   color: rgba(150, 150, 150, 0.9);
   border: 1px solid rgba(128, 128, 128, 0.4);
+}
+
+/* 购物车角标 */
+.cart-badge {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.cart-badge-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cart-badge-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.cart-badge-enter-from {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.cart-badge-leave-to {
+  opacity: 0;
+  transform: scale(0);
 }
 </style>
