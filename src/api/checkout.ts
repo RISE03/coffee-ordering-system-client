@@ -12,8 +12,22 @@ import type {
   CheckoutSubmitResponse,
   PayOrderRequest,
   PayOrderResponse,
+  PickupType,
   UsableCouponsResponse,
 } from '@/types/cart'
+
+/** 前端内部提交参数（使用语义化字符串） */
+export interface InternalSubmitParams {
+  items: CheckoutSubmitRequest['items']
+  source: CheckoutSubmitRequest['source']
+  pickupType: PickupType
+  pickupName: string
+  pickupPhone: string
+  deliveryAddressId?: number
+  addressInput?: string
+  couponId?: number
+  remark?: string
+}
 
 /**
  * Generate a unique idempotency key
@@ -37,11 +51,29 @@ export async function previewCheckout(
 
 /**
  * Submit checkout (create order)
+ * 接收前端语义化参数，映射为后端期望的格式后发送
  */
 export async function submitCheckout(
-  data: CheckoutSubmitRequest
+  data: InternalSubmitParams
 ): Promise<CheckoutSubmitResponse> {
-  const res = await apiClient.post<CheckoutSubmitResponse>('/member/checkout/submit', data)
+  const pickupTypeMap: Record<PickupType, number> = {
+    SELF_PICKUP: 0,
+    DELIVERY: 1
+  }
+
+  const payload: CheckoutSubmitRequest = {
+    items: data.items,
+    source: data.source,
+    pickupType: pickupTypeMap[data.pickupType],
+    pickupName: data.pickupName,
+    pickupPhone: data.pickupPhone,
+    deliveryAddressId: data.deliveryAddressId,
+    addressInput: data.addressInput,
+    couponId: data.couponId,
+    remark: data.remark
+  }
+
+  const res = await apiClient.post<CheckoutSubmitResponse>('/member/checkout/submit', payload)
   return res.data as CheckoutSubmitResponse
 }
 

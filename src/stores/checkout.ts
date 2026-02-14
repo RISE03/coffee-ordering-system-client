@@ -5,7 +5,8 @@ import {
   getUsableCouponsForAmount,
   payOrder,
   previewCheckout,
-  submitCheckout
+  submitCheckout,
+  type InternalSubmitParams
 } from '@/api/checkout'
 import type {
   BuyNowState,
@@ -13,7 +14,6 @@ import type {
   CheckoutItem,
   CheckoutPreviewResponse,
   CheckoutSource,
-  CheckoutSubmitRequest,
   CouponInfo,
   PayOrderRequest,
   PickupType
@@ -273,7 +273,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     ensureCouponValidity(data.price.itemsAmount)
   }
 
-  async function submit(data: Omit<CheckoutSubmitRequest, 'source'>) {
+  async function submit(data: Omit<InternalSubmitParams, 'source'>) {
     return submitCheckout({
       ...data,
       source: source.value

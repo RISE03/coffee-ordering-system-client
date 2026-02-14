@@ -136,8 +136,8 @@ const SEARCH_RESULT_SIZE = 100
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 let searchRequestId = 0
 
-// 切换分类过渡动画控制
-const contentVisible = ref(true)
+// 切换分类过渡动画控制（初始隐藏，数据加载后淡入）
+const contentVisible = ref(false)
 
 // 过滤后的商品列表
 const filteredProducts = computed(() => {
@@ -323,6 +323,9 @@ onMounted(async () => {
   if (typeof categoryId === 'number') {
     await productStore.fetchProductsByCategory(categoryId)
   }
+
+  // 数据就绪后触发入场动画
+  contentVisible.value = true
 
   // 已登录用户拉取购物车数据
   if (authStore.isLoggedIn && !cartStore.initialized) {

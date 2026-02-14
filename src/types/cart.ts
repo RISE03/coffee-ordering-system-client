@@ -151,20 +151,23 @@ export interface CheckoutPreviewResponse {
 }
 
 /**
- * Checkout submit request
+ * Checkout submit request — 与后端契约对齐
+ * 后端期望 pickupType 为 Integer（0=自取，1=配送），联系人平铺字段
  */
 export interface CheckoutSubmitRequest {
   /** Items to checkout */
   items: CheckoutItem[]
   /** Source: cart or buyNow */
   source: CheckoutSource
-  /** Pickup type */
-  pickupType: PickupType
-  /** Contact information */
-  contact: ContactInfo
-  /** Address ID for delivery (optional) */
-  addressId?: number
-  /** Address input for delivery (optional) */
+  /** 取餐方式：0=自取，1=配送 */
+  pickupType: number
+  /** 取餐人姓名 */
+  pickupName: string
+  /** 取餐人手机号 */
+  pickupPhone: string
+  /** 配送地址 ID（可选） */
+  deliveryAddressId?: number
+  /** 配送地址文本（可选） */
   addressInput?: string
   /** Coupon ID (optional) */
   couponId?: number

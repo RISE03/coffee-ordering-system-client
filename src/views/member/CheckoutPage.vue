@@ -269,10 +269,8 @@ async function handleSubmit() {
     const submitRes = await checkoutStore.submit({
       items: checkoutItems.value,
       pickupType: form.pickupType,
-      contact: {
-        name: form.contactName,
-        phone: form.contactPhone
-      },
+      pickupName: form.contactName,
+      pickupPhone: form.contactPhone,
       addressInput: form.pickupType === 'DELIVERY' ? form.address : undefined,
       couponId: checkoutStore.selectedCouponId ?? undefined,
       remark: form.remark || undefined
