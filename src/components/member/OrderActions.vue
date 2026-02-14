@@ -6,29 +6,24 @@
     </span>
 
     <!-- Cancel button for pending payment orders -->
-    <n-button
+    <button
       v-if="canCancel"
-      type="error"
-      ghost
-      size="small"
-      :loading="cancelling"
+      class="action-btn cancel-btn"
       :disabled="cancelling"
       @click="handleCancel"
     >
-      取消订单
-    </n-button>
+      {{ cancelling ? '取消中...' : '取消订单' }}
+    </button>
 
     <!-- Pay button for pending payment orders -->
-    <n-button
+    <button
       v-if="canPay"
-      type="primary"
-      size="small"
-      :loading="paying"
+      class="action-btn pay-btn"
       :disabled="paying"
       @click="handlePay"
     >
-      去支付
-    </n-button>
+      {{ paying ? '支付中...' : '去支付' }}
+    </button>
 
     <!-- View detail button (only in list context) -->
     <button
@@ -45,8 +40,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDialog, useMessage, NButton } from 'naive-ui'
+import { useDialog, useMessage } from 'naive-ui'
 import { useOrderStore } from '@/stores/order'
+import { useCheckoutStore } from '@/stores/checkout'
 import { getDisplayErrorMessage } from '@/utils/error'
 import type { OrderStatus } from '@/types/order'
 
@@ -78,6 +74,7 @@ const router = useRouter()
 const dialog = useDialog()
 const message = useMessage()
 const orderStore = useOrderStore()
+const checkoutStore = useCheckoutStore()
 
 // State
 const cancelling = ref(false)
@@ -139,21 +136,25 @@ function handleCancel() {
 }
 
 async function handlePay() {
-  paying.value = true
-  try {
-    // 导航到结算页面进行支付
-    // 使用 orderNo 参数让结算页知道这是继续支付已有订单
-    await router.push({
-      path: '/member/checkout',
-      query: { orderNo: props.orderNo }
-    })
-    emit('paid')
-  } finally {
-    // 重置状态，延迟以避免按钮闪烁
-    setTimeout(() => {
-      paying.value = false
-    }, 500)
-  }
+  dialog.warning({
+    title: '确认支付',
+    content: `确定要支付订单 ${props.orderNo} 吗？`,
+    positiveText: '确认支付',
+    negativeText: '再想想',
+    onPositiveClick: async () => {
+      paying.value = true
+      try {
+        checkoutStore.regenerateIdempotencyKey()
+        await checkoutStore.pay({ orderNo: props.orderNo })
+        message.success('支付成功')
+        emit('paid')
+      } catch (error) {
+        message.error(getDisplayErrorMessage(error))
+      } finally {
+        paying.value = false
+      }
+    },
+  })
 }
 
 function handleViewDetail() {
@@ -163,6 +164,41 @@ function handleViewDetail() {
 </script>
 
 <style scoped>
+.action-btn {
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-text-secondary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-text-secondary) 20%, transparent);
+}
+.cancel-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-text-secondary) 16%, transparent);
+  border-color: var(--color-text-secondary);
+}
+
+.pay-btn {
+  color: var(--color-bg);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.pay-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
 .view-detail-btn {
   padding: 4px 12px;
   border-radius: 9999px;

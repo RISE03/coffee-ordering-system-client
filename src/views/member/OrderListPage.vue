@@ -78,10 +78,10 @@
             </div>
 
             <!-- 第二层：商品预览（主体）+ 订单号 -->
-            <p class="font-medium text-base text-[var(--color-text)] line-clamp-2 mb-1">
+            <p class="font-semibold text-lg text-[var(--color-text)] line-clamp-2 mb-1">
               {{ order.itemsPreview }}
             </p>
-            <p class="text-xs text-[var(--color-text-secondary)] opacity-60">
+            <p class="text-xs text-[var(--color-text-secondary)] opacity-75">
               #{{ order.orderNo.slice(-8) }}
             </p>
 
@@ -115,20 +115,25 @@
           </div>
         </div>
 
-        <!-- 加载更多 -->
-        <div v-if="hasMore" class="text-center py-4">
+        <!-- 分页控件 -->
+        <div v-if="totalPages > 1" class="pagination-bar">
           <button
-            class="glass-button text-[var(--color-text-secondary)]"
-            :disabled="orderStore.loadingList"
-            @click="loadMore"
+            class="pagination-btn"
+            :disabled="currentPage <= 1 || orderStore.loadingList"
+            @click="goToPage(currentPage - 1)"
           >
-            {{ orderStore.loadingList ? '加载中...' : '加载更多' }}
+            ‹ 上一页
           </button>
-        </div>
-
-        <!-- 底部终止符 -->
-        <div v-else-if="orders.length > 0" class="end-divider">
-          <span>已经到底啦</span>
+          <span class="pagination-info">
+            {{ currentPage }} / {{ totalPages }}
+          </span>
+          <button
+            class="pagination-btn"
+            :disabled="currentPage >= totalPages || orderStore.loadingList"
+            @click="goToPage(currentPage + 1)"
+          >
+            下一页 ›
+          </button>
         </div>
       </div>
     </div>
@@ -182,10 +187,10 @@ const pageSize = ref(10)
 // 计算属性
 const orders = computed(() => orderStore.listByStatus[activeStatus.value] || [])
 const pageInfo = computed(() => orderStore.pageByStatus[activeStatus.value])
-const hasMore = computed(() => {
+const totalPages = computed(() => {
   const info = pageInfo.value
-  if (!info) return false
-  return orders.value.length < info.total
+  if (!info || info.total === 0) return 0
+  return Math.ceil(info.total / info.size)
 })
 
 // 订单总数
@@ -254,10 +259,7 @@ function getStatusGroup(status: OrderStatus): string {
 }
 
 // 方法
-async function loadOrders(reset = true) {
-  if (reset) {
-    currentPage.value = 1
-  }
+async function loadOrders() {
   const statusFilter = activeStatus.value === 'all'
     ? 'all' as const
     : activeStatus.value as OrderStatus
@@ -265,27 +267,21 @@ async function loadOrders(reset = true) {
     status: statusFilter,
     page: currentPage.value,
     size: pageSize.value,
-    append: !reset,
   })
 }
 
-function loadMore() {
-  currentPage.value++
-  loadOrders(false)
+function goToPage(page: number) {
+  currentPage.value = page
+  loadOrders()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function handleStatusChange(newStatus: string) {
   activeStatus.value = newStatus
   orderStore.setActiveStatusTab(newStatus)
-  if (!orderStore.listByStatus[newStatus]) {
-    currentPage.value = 1
-    loadOrders(true)
-  } else {
-    const page = orderStore.pageByStatus[newStatus]
-    if (page) {
-      currentPage.value = page.page
-    }
-  }
+  currentPage.value = 1
+  loadOrders()
 }
 
 function goToDetail(orderNo: string) {
@@ -295,7 +291,7 @@ function goToDetail(orderNo: string) {
 function handleOrderCancelled() {}
 
 function handleOrderPaid() {
-  loadOrders(true)
+  loadOrders()
 }
 
 function formatTime(dateStr: string): string {
@@ -324,9 +320,8 @@ function getStatusLabel(status: OrderStatus): string {
 // 生命周期
 onMounted(() => {
   activeStatus.value = orderStore.activeStatusTab || 'all'
-  if (!orderStore.listByStatus[activeStatus.value]) {
-    loadOrders()
-  }
+  currentPage.value = 1
+  loadOrders()
 })
 </script>
 
@@ -402,12 +397,12 @@ onMounted(() => {
   box-shadow: 0 0 12px color-mix(in srgb, #10B981 12%, transparent);
 }
 
-/* 已完成/已取消/已退款 — 降低不透明度 */
+/* 已完成/已取消/已退款 — 轻微降低不透明度 */
 .order-card--done {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 .order-card--done:hover {
-  opacity: 0.85;
+  opacity: 0.95;
 }
 
 /* 状态胶囊 */
@@ -422,35 +417,40 @@ onMounted(() => {
   border: 1px solid;
 }
 
-/* 底部终止符 */
-.end-divider {
+/* 分页控件 */
+.pagination-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px 0;
-  font-size: 0.75rem;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 0 8px;
 }
-.end-divider span {
-  flex-shrink: 0;
-  padding: 4px 16px;
+.pagination-btn {
+  padding: 6px 16px;
   border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
   background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+  transition: all 0.2s ease;
+}
+.pagination-btn:hover:not(:disabled) {
+  background: var(--glass-bg-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination-info {
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
+  min-width: 4em;
+  text-align: center;
 }
-.end-divider::before,
-.end-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(
-    to var(--dir, right),
-    transparent,
-    var(--color-border)
-  );
-}
-.end-divider::before { --dir: right; }
-.end-divider::after { --dir: left; }
 </style>

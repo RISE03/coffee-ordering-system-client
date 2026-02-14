@@ -192,16 +192,17 @@ const terminalText = computed(() => {
 
 /* ---- 标签 ---- */
 .step-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   line-height: 1;
   color: var(--color-text-secondary);
-  opacity: 0.5;
+  opacity: 0.85;
   transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .step--done .step-label {
-  opacity: 0.7;
+  color: var(--color-text);
+  opacity: 0.9;
 }
 
 .step--active .step-label {
@@ -215,18 +216,18 @@ const terminalText = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 6px 0;
+  gap: 8px;
+  padding: 8px 0;
 }
 
 .terminal-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -234,8 +235,9 @@ const terminalText = computed(() => {
 }
 
 .terminal-text {
-  font-size: 0.6875rem;
-  color: var(--color-text-secondary);
-  opacity: 0.7;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text);
+  opacity: 0.9;
 }
 </style>

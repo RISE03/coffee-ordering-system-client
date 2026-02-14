@@ -55,11 +55,11 @@
         <NIcon><CardOutline /></NIcon>
       </template>
       <template v-if="previewing">正在核算...</template>
-      <template v-else>{{ paying ? '支付处理中...' : '立即支付' }}</template>
+      <template v-else>{{ paying ? '提交中...' : '提交订单' }}</template>
     </n-button>
 
     <p class="text-center text-xs text-[var(--color-text-secondary)] mt-4">
-      点击支付即表示同意
+      点击提交即表示同意
       <a href="#" class="text-[var(--color-primary)] hover:underline">服务条款</a>
     </p>
 

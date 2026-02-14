@@ -651,3 +651,70 @@ body,
   }
 }
 
+/* ============================================
+   Naive UI Dialog 朝暮主题覆盖
+   ============================================ */
+
+/* 对话框遮罩层 */
+.n-modal-mask {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* 对话框卡片 */
+.n-dialog {
+  background: var(--glass-bg-strong) !important;
+  backdrop-filter: var(--glass-blur-md) !important;
+  -webkit-backdrop-filter: var(--glass-blur-md) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--glass-shadow-strong) !important;
+}
+
+/* 对话框图标 */
+.n-dialog .n-dialog__icon {
+  color: var(--color-primary) !important;
+}
+
+/* 对话框标题 */
+.n-dialog .n-dialog__title {
+  color: var(--color-text) !important;
+  font-family: var(--font-serif, 'Noto Serif SC', serif);
+  font-weight: 600;
+}
+
+/* 对话框内容 */
+.n-dialog .n-dialog__content {
+  color: var(--color-text-secondary) !important;
+}
+
+/* 对话框操作区按钮 - 取消/否定按钮 */
+.n-dialog .n-dialog__action .n-button--default-type {
+  color: var(--color-text-secondary) !important;
+  background: color-mix(in srgb, var(--color-text-secondary) 8%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--color-text-secondary) 20%, transparent) !important;
+  border-radius: 9999px !important;
+}
+.n-dialog .n-dialog__action .n-button--default-type:hover {
+  background: color-mix(in srgb, var(--color-text-secondary) 16%, transparent) !important;
+  border-color: var(--color-text-secondary) !important;
+}
+
+/* 对话框操作区按钮 - 确认/肯定按钮 */
+.n-dialog .n-dialog__action .n-button--primary-type,
+.n-dialog .n-dialog__action .n-button--warning-type,
+.n-dialog .n-dialog__action .n-button--error-type {
+  color: var(--color-bg) !important;
+  background: var(--color-primary) !important;
+  border: 1px solid var(--color-primary) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.n-dialog .n-dialog__action .n-button--primary-type:hover,
+.n-dialog .n-dialog__action .n-button--warning-type:hover,
+.n-dialog .n-dialog__action .n-button--error-type:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+

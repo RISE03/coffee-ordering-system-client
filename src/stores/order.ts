@@ -35,11 +35,6 @@ export const useOrderStore = defineStore('order', () => {
   // 计算属性：当前 tab 的订单列表
   const currentOrders = computed(() => listByStatus.value[activeStatusTab.value] || [])
   const currentPage = computed(() => pageByStatus.value[activeStatusTab.value])
-  const hasMoreOrders = computed(() => {
-    const page = currentPage.value
-    if (!page) return false
-    return currentOrders.value.length < page.total
-  })
 
   /**
    * 获取订单列表
@@ -48,7 +43,6 @@ export const useOrderStore = defineStore('order', () => {
     status?: OrderStatus | 'all'
     page?: number
     size?: number
-    append?: boolean
   } = {}) {
     const statusKey = params.status ?? 'all'
     loadingList.value = true
@@ -61,10 +55,7 @@ export const useOrderStore = defineStore('order', () => {
         status: params.status && params.status !== 'all' ? params.status : undefined
       })
 
-      const previous = params.append ? listByStatus.value[statusKey] || [] : []
-      listByStatus.value[statusKey] = params.append
-        ? [...previous, ...data.list]
-        : data.list
+      listByStatus.value[statusKey] = data.list
       pageByStatus.value[statusKey] = data.page
 
       return data
@@ -217,7 +208,6 @@ export const useOrderStore = defineStore('order', () => {
     // getters
     currentOrders,
     currentPage,
-    hasMoreOrders,
     // actions
     fetchList,
     fetchDetail,

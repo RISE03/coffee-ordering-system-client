@@ -276,15 +276,14 @@ async function handleSubmit() {
       remark: form.remark || undefined
     })
 
-    const payRes = await checkoutStore.pay({ orderNo: submitRes.orderNo })
-    message.success('支付成功，为您跳转订单详情')
+    message.success('订单已提交，请前往支付')
 
     if (checkoutStore.source === 'cart') {
       await cartStore.clearCart()
     }
     checkoutStore.reset()
     Object.assign(form, checkoutStore.formDraft)
-    router.replace(`/member/orders/${payRes.orderNo}`)
+    router.replace(`/member/orders/${submitRes.orderNo}`)
   } catch (err) {
     message.error(getDisplayErrorMessage(err))
   } finally {
