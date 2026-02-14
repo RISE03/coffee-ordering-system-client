@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <!-- Back Button -->
     <div class="mb-4">
-      <n-button text @click="goBack" class="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
+      <n-button text @click="goBack" class="back-button">
         ← 返回列表
       </n-button>
     </div>
@@ -38,9 +38,16 @@
               订单号：{{ order.orderNo }}
             </p>
           </div>
-          <n-tag :type="getStatusType(order.status)" size="large" :bordered="false">
+          <span
+            class="order-status-badge"
+            :style="{
+              color: getStatusColor(order.status),
+              borderColor: getStatusColor(order.status),
+              backgroundColor: getStatusColor(order.status) + '18',
+            }"
+          >
             {{ getStatusLabel(order.status) }}
-          </n-tag>
+          </span>
         </div>
 
         <!-- Actions Section -->
@@ -62,11 +69,11 @@
           <n-timeline-item
             v-for="(event, index) in sortedTimeline"
             :key="index"
-            :type="index === 0 ? 'success' : 'default'"
+            :type="event.status === order!.status ? 'success' : 'default'"
             :title="getStatusLabel(event.status)"
             :time="formatTime(event.time)"
           >
-            {{ event.description || getStatusDescription(event.status) }}
+            {{ getStatusDescription(event.status) }}
           </n-timeline-item>
         </n-timeline>
         <div v-else class="text-[var(--color-text-secondary)] text-sm">
@@ -193,7 +200,7 @@
       </div>
 
       <!-- Order Time Footer -->
-      <div class="text-center text-sm text-[var(--color-text-secondary)] py-4">
+      <div class="order-footer-time">
         下单时间：{{ formatFullTime(order.createdAt) }}
       </div>
     </div>
@@ -207,12 +214,11 @@ import {
   NSpin,
   NResult,
   NButton,
-  NTag,
   NTimeline,
   NTimelineItem,
 } from 'naive-ui'
 import { useOrderStore } from '@/stores/order'
-import { getOrderStatusLabel, ORDER_STATUS_MAP } from '@/types/order'
+import { getOrderStatusLabel } from '@/types/order'
 import OrderActions from '@/components/member/OrderActions.vue'
 import type { OrderDetailResponse, OrderStatus, OrderTimelineEvent } from '@/types/order'
 
@@ -300,16 +306,18 @@ function getStatusLabel(status: OrderStatus): string {
   return getOrderStatusLabel(status)
 }
 
-function getStatusType(status: OrderStatus): 'default' | 'info' | 'success' | 'warning' | 'error' {
-  const colorMap: Record<string, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
-    warning: 'warning',
-    info: 'info',
-    success: 'success',
-    default: 'default',
-    error: 'error',
+function getStatusColor(status: OrderStatus): string {
+  const STATUS_COLORS: Record<string, string> = {
+    PENDING_PAYMENT: '#F59E0B',
+    PAID_WAITING: '#3B82F6',
+    IN_PREPARATION: '#8B5CF6',
+    READY_FOR_PICKUP: '#10B981',
+    COMPLETED: '#6B7280',
+    CANCELLED: '#9CA3AF',
+    REFUNDING: '#F97316',
+    REFUNDED: '#9CA3AF',
   }
-  const color = ORDER_STATUS_MAP[status]?.color || 'default'
-  return colorMap[color] || 'default'
+  return STATUS_COLORS[status] || '#6B7280'
 }
 
 /**
@@ -355,6 +363,46 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.back-button {
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+}
+.back-button:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.order-footer-time {
+  text-align: center;
+  font-size: 0.875rem;
+  padding: 12px 20px;
+  margin: 0 auto;
+  width: fit-content;
+  border-radius: 9999px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-secondary);
+}
+
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  border: 1px solid;
+}
+
 :deep(.n-timeline-item-content__title) {
   color: var(--color-text);
 }

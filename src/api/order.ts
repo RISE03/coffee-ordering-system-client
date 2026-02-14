@@ -31,6 +31,10 @@ const STATUS_INT_TO_STR: Record<number, OrderStatus> = {
   7: 'REFUNDED',
 }
 
+const STATUS_STR_TO_INT: Record<string, number> = Object.fromEntries(
+  Object.entries(STATUS_INT_TO_STR).map(([k, v]) => [v, Number(k)])
+)
+
 const PICKUP_TYPE_INT_TO_STR: Record<number, 'SELF_PICKUP' | 'DELIVERY'> = {
   0: 'SELF_PICKUP',
   1: 'DELIVERY',
@@ -112,13 +116,15 @@ export async function getOrders(params: {
   status?: OrderStatus | OrderStatus[]
 }): Promise<OrderListResponse> {
   const { page = 1, size = 10, status } = params
-  const statusParam = Array.isArray(status) ? status.join(',') : status
+  const statusParam = Array.isArray(status)
+    ? status.map(s => STATUS_STR_TO_INT[s] ?? s).join(',')
+    : status ? (STATUS_STR_TO_INT[status] ?? status) : undefined
 
   const res = await apiClient.get<any>('/member/orders', {
     params: {
       page,
       size,
-      ...(statusParam && { status: statusParam }),
+      ...(statusParam != null && { status: statusParam }),
     },
   })
 

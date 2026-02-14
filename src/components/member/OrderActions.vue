@@ -31,22 +31,14 @@
     </n-button>
 
     <!-- View detail button (only in list context) -->
-    <n-button
+    <button
       v-if="showViewDetail"
-      size="small"
+      class="view-detail-btn"
       @click="handleViewDetail"
     >
-      查看详情
-    </n-button>
+      查看详情 →
+    </button>
 
-    <!-- Back to list button (only in detail context) -->
-    <n-button
-      v-if="context === 'detail'"
-      size="small"
-      @click="handleBackToList"
-    >
-      返回订单列表
-    </n-button>
   </div>
 </template>
 
@@ -168,7 +160,23 @@ function handleViewDetail() {
   router.push(`/member/orders/${props.orderNo}`)
 }
 
-function handleBackToList() {
-  router.push('/member/orders')
-}
 </script>
+
+<style scoped>
+.view-detail-btn {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.view-detail-btn:hover {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-color: var(--color-primary);
+}
+</style>
