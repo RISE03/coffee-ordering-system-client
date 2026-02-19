@@ -46,7 +46,7 @@
               backgroundColor: getStatusColor(order.status) + '18',
             }"
           >
-            {{ getStatusLabel(order.status) }}
+            {{ getOrderStatusLabel(order.status) }}
           </span>
         </div>
 
@@ -62,23 +62,10 @@
         </div>
       </div>
 
-      <!-- Status Timeline -->
+      <!-- Order Progress -->
       <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
-        <h3 class="font-medium text-[var(--color-text)] mb-6">订单状态</h3>
-        <n-timeline v-if="sortedTimeline.length > 0">
-          <n-timeline-item
-            v-for="(event, index) in sortedTimeline"
-            :key="index"
-            :type="event.status === order!.status ? 'success' : 'default'"
-            :title="getStatusLabel(event.status)"
-            :time="formatTime(event.time)"
-          >
-            {{ getStatusDescription(event.status) }}
-          </n-timeline-item>
-        </n-timeline>
-        <div v-else class="text-[var(--color-text-secondary)] text-sm">
-          暂无状态变更记录
-        </div>
+        <h3 class="font-medium text-[var(--color-text)] mb-2">订单状态</h3>
+        <OrderProgress :status="order.status" :timeline="order.timeline" />
       </div>
 
       <!-- Pickup Info -->
@@ -214,13 +201,12 @@ import {
   NSpin,
   NResult,
   NButton,
-  NTimeline,
-  NTimelineItem,
 } from 'naive-ui'
 import { useOrderStore } from '@/stores/order'
 import { getOrderStatusLabel } from '@/types/order'
 import OrderActions from '@/components/member/OrderActions.vue'
-import type { OrderDetailResponse, OrderStatus, OrderTimelineEvent } from '@/types/order'
+import OrderProgress from '@/components/member/OrderProgress.vue'
+import type { OrderDetailResponse, OrderStatus } from '@/types/order'
 
 const route = useRoute()
 const router = useRouter()
@@ -230,14 +216,6 @@ const orderStore = useOrderStore()
 const order = ref<OrderDetailResponse | null>(null)
 
 // Computed
-const sortedTimeline = computed((): OrderTimelineEvent[] => {
-  if (!order.value?.timeline) return []
-  // 按时间倒序排列，最新的状态在最前面
-  return [...order.value.timeline].sort((a, b) => {
-    return new Date(b.time).getTime() - new Date(a.time).getTime()
-  })
-})
-
 const isPaid = computed(() => {
   if (!order.value) return false
   return ['PAID_WAITING', 'IN_PREPARATION', 'READY_FOR_PICKUP', 'COMPLETED', 'REFUNDING', 'REFUNDED'].includes(order.value.status)
@@ -274,19 +252,6 @@ function goBack() {
   router.push('/member/orders')
 }
 
-function formatTime(dateStr: string): string {
-  try {
-    const date = new Date(dateStr)
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    const hour = date.getHours().toString().padStart(2, '0')
-    const minute = date.getMinutes().toString().padStart(2, '0')
-    return `${month}月${day}日 ${hour}:${minute}`
-  } catch (e) {
-    return dateStr
-  }
-}
-
 function formatFullTime(dateStr: string): string {
   try {
     const date = new Date(dateStr)
@@ -300,10 +265,6 @@ function formatFullTime(dateStr: string): string {
   } catch (e) {
     return dateStr
   }
-}
-
-function getStatusLabel(status: OrderStatus): string {
-  return getOrderStatusLabel(status)
 }
 
 function getStatusColor(status: OrderStatus): string {
@@ -320,31 +281,7 @@ function getStatusColor(status: OrderStatus): string {
   return STATUS_COLORS[status] || '#6B7280'
 }
 
-/**
- * 获取状态的默认描述文案 - 品牌语气
- */
-function getStatusDescription(status: OrderStatus): string {
-  switch (status) {
-    case 'PENDING_PAYMENT':
-      return '订单已创建，等待您完成支付'
-    case 'PAID_WAITING':
-      return '支付成功，店铺正在确认订单'
-    case 'IN_PREPARATION':
-      return '店铺正在用心为您制作'
-    case 'READY_FOR_PICKUP':
-      return '您的订单已备好，请尽快取餐享用'
-    case 'COMPLETED':
-      return '订单已完成，感谢您的光临，期待下次相遇'
-    case 'CANCELLED':
-      return '订单已取消'
-    case 'REFUNDING':
-      return '退款申请已提交，正在处理中'
-    case 'REFUNDED':
-      return '退款已完成，款项将原路返回'
-    default:
-      return ''
-  }
-}
+// 监听路由参数变化
 
 // 监听路由参数变化，支持在详情页之间直接切换
 watch(
@@ -401,13 +338,5 @@ onMounted(() => {
   font-weight: 600;
   line-height: 1.5;
   border: 1px solid;
-}
-
-:deep(.n-timeline-item-content__title) {
-  color: var(--color-text);
-}
-
-:deep(.n-timeline-item-content__time) {
-  color: var(--color-text-secondary);
 }
 </style>

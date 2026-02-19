@@ -26,6 +26,7 @@
             <div v-else-if="i === currentIndex" class="step-pulse" />
           </div>
           <span class="step-label">{{ step.label }}</span>
+          <span v-if="getStepTime(step.key)" class="step-time">{{ getStepTime(step.key) }}</span>
         </div>
       </div>
     </template>
@@ -40,9 +41,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { OrderStatus } from '@/types/order'
+import type { OrderStatus, OrderTimelineEvent } from '@/types/order'
 
-const props = defineProps<{ status: OrderStatus }>()
+const props = defineProps<{
+  status: OrderStatus
+  timeline?: OrderTimelineEvent[]
+}>()
 
 // 正常流程步骤
 const steps = [
@@ -67,6 +71,34 @@ const isTerminal = computed(() =>
 )
 
 const currentIndex = computed(() => STATUS_INDEX[props.status] ?? 0)
+
+// 步骤 key → 对应的状态
+const STEP_STATUS: Record<string, OrderStatus> = {
+  pay: 'PENDING_PAYMENT',
+  confirm: 'PAID_WAITING',
+  make: 'IN_PREPARATION',
+  pickup: 'READY_FOR_PICKUP',
+  done: 'COMPLETED',
+}
+
+// 根据 timeline 数据获取步骤的时间
+function getStepTime(stepKey: string): string {
+  if (!props.timeline?.length) return ''
+  const status = STEP_STATUS[stepKey]
+  if (!status) return ''
+  const idx = STATUS_INDEX[status] ?? -1
+  if (idx > currentIndex.value) return ''
+  const event = props.timeline.find(e => e.status === status)
+  if (!event) return ''
+  try {
+    const d = new Date(event.time)
+    const h = d.getHours().toString().padStart(2, '0')
+    const m = d.getMinutes().toString().padStart(2, '0')
+    return `${h}:${m}`
+  } catch {
+    return ''
+  }
+}
 
 // 进度条填充百分比（基于步骤间隔）
 const fillPercent = computed(() => {
@@ -209,6 +241,20 @@ const terminalText = computed(() => {
   color: var(--color-primary);
   opacity: 1;
   font-weight: 600;
+}
+
+/* ---- 时间标签 ---- */
+.step-time {
+  font-size: 0.625rem;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.step--active .step-time {
+  color: var(--color-primary);
+  opacity: 0.8;
 }
 
 /* ---- 终态指示器 ---- */

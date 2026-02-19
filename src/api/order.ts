@@ -66,20 +66,48 @@ function mapListItem(raw: any): OrderListItem {
   }
 }
 
-function mapTimeline(raw: any[]): OrderTimelineEvent[] {
-  if (!Array.isArray(raw)) return []
-  return raw.map((e) => ({
-    status: mapStatus(e.status),
-    time: e.time,
-    description: e.description,
-  }))
+function mapTimeline(raw: any): OrderTimelineEvent[] {
+  // 优先使用 statusHistory（新接口，每步状态变更都有记录）
+  const history: any[] = raw.statusHistory ?? []
+  if (Array.isArray(history) && history.length > 0) {
+    return history.map((e) => ({
+      status: mapStatus(e.status),
+      time: e.time,
+    }))
+  }
+
+  // 旧订单 fallback：用 timeline 字段
+  const timeline: any[] = raw.timeline ?? []
+  if (Array.isArray(timeline) && timeline.length > 0) {
+    return timeline.map((e) => ({
+      status: mapStatus(e.status),
+      time: e.time,
+      description: e.description,
+    }))
+  }
+
+  // 兜底：用各时间字段构建
+  const events: OrderTimelineEvent[] = []
+  if (raw.createTime) {
+    events.push({ status: 'PENDING_PAYMENT', time: raw.createTime })
+  }
+  if (raw.payTime) {
+    events.push({ status: 'PAID_WAITING', time: raw.payTime })
+  }
+  if (raw.completeTime) {
+    events.push({ status: 'COMPLETED', time: raw.completeTime })
+  }
+  if (raw.cancelTime) {
+    events.push({ status: 'CANCELLED', time: raw.cancelTime })
+  }
+  return events
 }
 
 function mapDetail(raw: any): OrderDetailResponse {
   return {
     orderNo: raw.orderNo,
     status: mapStatus(raw.status),
-    timeline: mapTimeline(raw.timeline),
+    timeline: mapTimeline(raw),
     pickupInfo: {
       type: PICKUP_TYPE_INT_TO_STR[raw.pickupType] ?? 'SELF_PICKUP',
       name: raw.pickupName ?? '',
