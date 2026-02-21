@@ -283,6 +283,19 @@ function getStatusColor(status: OrderStatus): string {
 
 // 监听路由参数变化
 
+// 监听 store 中详情缓存的更新（SSE 推送后 store 会刷新详情）
+watch(
+  () => {
+    const orderNo = route.params.orderNo as string
+    return orderNo ? orderStore.detailMap[orderNo] : undefined
+  },
+  (newDetail) => {
+    if (newDetail && order.value && newDetail.orderNo === order.value.orderNo) {
+      order.value = newDetail
+    }
+  }
+)
+
 // 监听路由参数变化，支持在详情页之间直接切换
 watch(
   () => route.params.orderNo,

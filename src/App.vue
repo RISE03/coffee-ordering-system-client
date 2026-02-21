@@ -12,6 +12,7 @@ import {
 import { computed } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useRoute } from 'vue-router'
+import { useOrderNotification } from '@/composables/useOrderNotification'
 
 // Initialize theme store to apply theme on startup
 const themeStore = useThemeStore()
@@ -21,6 +22,9 @@ const theme = computed(() => themeStore.activeTheme === 'dusk' ? darkTheme : nul
 
 // 根据路由元信息决定是否隐藏全局背景
 const hideGlobalBg = computed(() => route.meta.hideGlobalBg === true)
+
+// 全局挂载订单通知监听（SSE 事件）
+useOrderNotification()
 </script>
 
 <template>

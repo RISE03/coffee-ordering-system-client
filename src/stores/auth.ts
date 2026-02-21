@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { User, LoginResponse } from '@/types/user'
 import { AUTH_STORAGE_KEYS } from '@/types/user'
 import { useCartStore } from '@/stores/cart'
+import { connectSse, disconnectSse } from '@/utils/sse'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -38,6 +39,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     const cartStore = useCartStore()
     cartStore.bindUser(data.user.id)
+
+    // 登录成功后建立 SSE 连接
+    connectSse(data.token)
   }
 
   /**
@@ -73,6 +77,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN)
     localStorage.removeItem(AUTH_STORAGE_KEYS.USER)
 
+    // 断开 SSE 连接
+    disconnectSse()
+
     cartStore.clearUserCache(currentUserId ?? undefined)
     cartStore.bindUser(null)
   }
@@ -88,6 +95,9 @@ export const useAuthStore = defineStore('auth', () => {
       const { authApi } = await import('@/api/auth')
       const latestUser = await authApi.getProfile()
       setUser(latestUser)
+
+      // 认证有效，建立 SSE 连接（页面刷新后恢复）
+      connectSse(token.value)
     } catch (e) {
       console.error('Auth check failed:', e)
       // Token 无效或过期，仅清理本地状态，不调用后端（token 已失效）

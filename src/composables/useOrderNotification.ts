@@ -1,0 +1,104 @@
+/**
+ * 订单通知 Composable
+ * 监听 SSE 推送的订单相关事件，弹出通知并同步本地状态
+ */
+import { onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { createDiscreteApi } from 'naive-ui'
+import { onSseEvent } from '@/utils/sse'
+import { useOrderStore } from '@/stores/order'
+import type { OrderStatus } from '@/types/order'
+
+/** 后端状态码 → 客户端状态字符串映射 */
+const STATUS_CODE_MAP: Record<number, OrderStatus> = {
+  0: 'PENDING_PAYMENT',
+  1: 'PAID_WAITING',
+  2: 'IN_PREPARATION',
+  3: 'READY_FOR_PICKUP',
+  4: 'COMPLETED',
+  5: 'CANCELLED',
+  6: 'REFUNDING',
+  7: 'REFUNDED'
+}
+
+/** 订单状态中文映射 */
+const STATUS_TEXT_MAP: Record<string, string> = {
+  PENDING_PAYMENT: '待支付',
+  PAID_WAITING: '已支付',
+  IN_PREPARATION: '制作中',
+  READY_FOR_PICKUP: '待取餐',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+  REFUNDING: '退款中',
+  REFUNDED: '已退款'
+}
+
+// 使用 Discrete API 在 composable 中使用 Naive UI notification
+const { notification } = createDiscreteApi(['notification'])
+
+export function useOrderNotification() {
+  const orderStore = useOrderStore()
+  const router = useRouter()
+  const cleanups: (() => void)[] = []
+
+  // 监听取餐通知
+  const unsubPickup = onSseEvent('pickup-notify', (data: {
+    orderNo: string
+    pickupCode: string
+    message: string
+  }) => {
+    // 弹出通知
+    notification.success({
+      title: '取餐提醒',
+      content: data.message,
+      meta: data.pickupCode ? `取餐码: ${data.pickupCode}` : undefined,
+      duration: 10000,
+      keepAliveOnHover: true,
+      onClose: () => {
+        // 点击关闭后跳转到订单详情
+        router.push(`/member/orders/${data.orderNo}`)
+      }
+    })
+
+    // 如果当前在订单详情页且是同一订单，自动刷新
+    const currentRoute = router.currentRoute.value
+    if (currentRoute.params.orderNo === data.orderNo) {
+      orderStore.fetchDetail(data.orderNo, true)
+    }
+  })
+  cleanups.push(unsubPickup)
+
+  // 监听订单状态变更
+  const unsubStatus = onSseEvent('order-status-change', (data: {
+    orderNo: string
+    newStatus: number
+    newStatusText: string
+  }) => {
+    const statusKey = STATUS_CODE_MAP[data.newStatus]
+    if (!statusKey) return
+
+    // 更新 store 中的缓存状态
+    orderStore.updateOrderStatus(data.orderNo, statusKey)
+
+    // 弹出状态变更通知
+    const statusText = STATUS_TEXT_MAP[statusKey] || data.newStatusText
+    notification.info({
+      title: '订单状态更新',
+      content: `您的订单 ${data.orderNo} 已变为「${statusText}」`,
+      duration: 5000,
+      keepAliveOnHover: true
+    })
+
+    // 如果当前在订单详情页且是同一订单，自动刷新详情
+    const currentRoute = router.currentRoute.value
+    if (currentRoute.params.orderNo === data.orderNo) {
+      orderStore.fetchDetail(data.orderNo, true)
+    }
+  })
+  cleanups.push(unsubStatus)
+
+  // 组件卸载时清理监听器
+  onUnmounted(() => {
+    cleanups.forEach(fn => fn())
+  })
+}
