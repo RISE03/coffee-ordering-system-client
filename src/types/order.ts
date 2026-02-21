@@ -40,6 +40,7 @@ export interface OrderListItem {
   orderNo: string
   status: OrderStatus
   createdAt: string
+  completeTime?: string
   itemsPreview: string
   itemsAmount: number
   discountAmount: number
@@ -104,4 +105,97 @@ export interface OrderDetailResponse {
 
 export interface CancelOrderResponse {
   status: OrderStatus
+}
+
+/**
+ * 退款申请请求
+ */
+export interface RefundApplyRequest {
+  reason: string
+  description?: string
+  images?: string[]
+}
+
+/**
+ * 退款申请响应
+ */
+export interface RefundApplyResponse {
+  status: OrderStatus
+  message?: string
+}
+
+/**
+ * 退款原因选项配置
+ */
+export interface RefundReasonOption {
+  value: string
+  label: string
+  applicableStatus: OrderStatus[]
+  requiresImages: boolean
+  requiresDescription: boolean
+}
+
+/**
+ * 退款原因选项列表
+ */
+export const REFUND_REASON_OPTIONS: RefundReasonOption[] = [
+  // PAID_WAITING 状态的退款原因
+  {
+    value: 'WRONG_ORDER',
+    label: '下错单了',
+    applicableStatus: ['PAID_WAITING'],
+    requiresImages: false,
+    requiresDescription: false
+  },
+  {
+    value: 'CANNOT_PICKUP',
+    label: '临时有事无法取餐',
+    applicableStatus: ['PAID_WAITING'],
+    requiresImages: false,
+    requiresDescription: false
+  },
+  {
+    value: 'CHANGED_MIND',
+    label: '不想要了',
+    applicableStatus: ['PAID_WAITING'],
+    requiresImages: false,
+    requiresDescription: false
+  },
+
+  // COMPLETED 状态的售后原因
+  {
+    value: 'QUALITY_ISSUE',
+    label: '商品变质/有异物',
+    applicableStatus: ['COMPLETED'],
+    requiresImages: true,
+    requiresDescription: true
+  },
+  {
+    value: 'TASTE_ISSUE',
+    label: '口味不对',
+    applicableStatus: ['COMPLETED'],
+    requiresImages: true,
+    requiresDescription: true
+  },
+  {
+    value: 'DESCRIPTION_MISMATCH',
+    label: '与描述不符',
+    applicableStatus: ['COMPLETED'],
+    requiresImages: true,
+    requiresDescription: true
+  },
+  {
+    value: 'MISSING_ITEMS',
+    label: '少货',
+    applicableStatus: ['COMPLETED'],
+    requiresImages: true,
+    requiresDescription: true
+  },
+]
+
+/**
+ * 根据订单状态获取适用的退款原因选项
+ */
+export function getRefundReasonsByStatus(status: OrderStatus): RefundReasonOption[] {
+  return REFUND_REASON_OPTIONS.filter(opt => opt.applicableStatus.includes(status))
 }

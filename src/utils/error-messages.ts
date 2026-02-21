@@ -33,6 +33,13 @@ export const BusinessErrorCode = {
   ORDER_ALREADY_PAID: 'ORDER_ALREADY_PAID',
   ORDER_EXPIRED: 'ORDER_EXPIRED',
 
+  // Refund errors
+  REFUND_NOT_ALLOWED: 'REFUND_NOT_ALLOWED',
+  REFUND_TIMEOUT: 'REFUND_TIMEOUT',
+  REFUND_ALREADY_APPLIED: 'REFUND_ALREADY_APPLIED',
+  REFUND_IMAGE_REQUIRED: 'REFUND_IMAGE_REQUIRED',
+  REFUND_DESCRIPTION_REQUIRED: 'REFUND_DESCRIPTION_REQUIRED',
+
   // Payment errors
   PAYMENT_FAILED: 'PAYMENT_FAILED',
   IDEMPOTENT_REPLAY: 'IDEMPOTENT_REPLAY',
@@ -71,6 +78,13 @@ export const ErrorMessages: Record<string, string> = {
   [BusinessErrorCode.ORDER_CANNOT_CANCEL]: '订单状态已变更，暂时无法取消',
   [BusinessErrorCode.ORDER_ALREADY_PAID]: '订单已支付，无需重复操作',
   [BusinessErrorCode.ORDER_EXPIRED]: '订单已超时关闭，欢迎重新下单',
+
+  // Refund errors - 退款相关
+  [BusinessErrorCode.REFUND_NOT_ALLOWED]: '当前订单状态不允许申请退款',
+  [BusinessErrorCode.REFUND_TIMEOUT]: '售后申请已超时，完成订单后2小时内可申请',
+  [BusinessErrorCode.REFUND_ALREADY_APPLIED]: '该订单已提交退款申请，请勿重复提交',
+  [BusinessErrorCode.REFUND_IMAGE_REQUIRED]: '售后申请需要上传商品问题图片',
+  [BusinessErrorCode.REFUND_DESCRIPTION_REQUIRED]: '请填写详细的问题说明',
 
   // Payment errors - 支付相关
   [BusinessErrorCode.PAYMENT_FAILED]: '支付遇到了小问题，请稍后重试',

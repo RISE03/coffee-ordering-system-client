@@ -105,10 +105,12 @@
                 <OrderActions
                   :order-no="order.orderNo"
                   :status="order.status"
+                  :complete-time="order.completeTime"
                   :show-view-detail="true"
                   context="list"
                   @cancelled="handleOrderCancelled"
                   @paid="handleOrderPaid"
+                  @refunded="handleRefunded"
                 />
               </div>
             </div>
@@ -291,6 +293,11 @@ function goToDetail(orderNo: string) {
 function handleOrderCancelled() {}
 
 function handleOrderPaid() {
+  loadOrders()
+}
+
+function handleRefunded() {
+  // 刷新当前标签页列表
   loadOrders()
 }
 

@@ -14,6 +14,8 @@ import type {
   CancelOrderResponse,
   OrderStatus,
   OrderTimelineEvent,
+  RefundApplyRequest,
+  RefundApplyResponse,
 } from '@/types/order'
 
 // ============================================================================
@@ -59,6 +61,7 @@ function mapListItem(raw: any): OrderListItem {
     orderNo: raw.orderNo,
     status: mapStatus(raw.status),
     createdAt: raw.createdAt,
+    completeTime: raw.completeTime ?? raw.completedAt ?? undefined,
     itemsPreview: raw.itemsPreview,
     itemsAmount: raw.itemsAmount ?? 0,
     discountAmount: raw.discountAmount ?? 0,
@@ -184,4 +187,33 @@ export async function cancelOrder(orderNo: string): Promise<CancelOrderResponse>
   return {
     status: mapStatus(raw.status ?? raw),
   }
+}
+
+/**
+ * 申请退款
+ */
+export async function refundOrder(
+  orderNo: string,
+  data: RefundApplyRequest
+): Promise<RefundApplyResponse> {
+  const res = await apiClient.post<any>(`/member/orders/${orderNo}/refund/apply`, data)
+  const raw = res.data as any
+  return {
+    status: mapStatus(raw.status ?? raw),
+    message: raw.message,
+  }
+}
+
+/**
+ * 上传退款图片
+ */
+export async function uploadRefundImage(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await apiClient.post<any>('/upload/refund-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+
+  return res.data.url || res.data.imageUrl || res.data
 }

@@ -55,9 +55,11 @@
           <OrderActions
             :order-no="order.orderNo"
             :status="order.status"
+            :complete-time="getCompleteTime(order.timeline)"
             context="detail"
             @cancelled="handleCancelled"
             @paid="handlePaid"
+            @refunded="handleRefunded"
           />
         </div>
       </div>
@@ -247,9 +249,20 @@ function handlePaid() {
   loadOrder()
 }
 
+function handleRefunded() {
+  // 退款申请成功后重新加载订单详情
+  loadOrder()
+}
+
 function goBack() {
   // 返回订单列表
   router.push('/member/orders')
+}
+
+// 从 timeline 中提取完成时间
+function getCompleteTime(timeline: OrderDetailResponse['timeline']): string | undefined {
+  const completeEvent = timeline.find(e => e.status === 'COMPLETED')
+  return completeEvent?.time
 }
 
 function formatFullTime(dateStr: string): string {

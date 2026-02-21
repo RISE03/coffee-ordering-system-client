@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getOrderDetail, getOrders, cancelOrder } from '@/api/order'
-import type { OrderDetailResponse, OrderListItem, OrderStatus } from '@/types/order'
+import { getOrderDetail, getOrders, cancelOrder, refundOrder } from '@/api/order'
+import type { OrderDetailResponse, OrderListItem, OrderStatus, RefundApplyRequest } from '@/types/order'
 import { getDisplayErrorMessage } from '@/utils/error'
 
 /**
@@ -166,6 +166,30 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   /**
+   * 申请退款
+   */
+  async function doRefundOrder(
+    orderNo: string,
+    data: RefundApplyRequest
+  ): Promise<boolean> {
+    try {
+      await refundOrder(orderNo, data)
+
+      // 同步更新本地状态为 REFUNDING
+      updateOrderStatus(orderNo, 'REFUNDING')
+
+      // 如果当前在非"全部"和"退款中"标签页，从该标签页列表移除
+      if (activeStatusTab.value !== 'all' && activeStatusTab.value !== 'REFUNDING') {
+        removeFromStatusList(orderNo, activeStatusTab.value)
+      }
+
+      return true
+    } catch (err) {
+      throw err
+    }
+  }
+
+  /**
    * 清除指定状态的列表缓存
    */
   function clearStatusCache(status: string) {
@@ -216,6 +240,7 @@ export const useOrderStore = defineStore('order', () => {
     updateOrderStatus,
     removeFromStatusList,
     doCancelOrder,
+    doRefundOrder,
     clearStatusCache,
     refreshCurrentList,
     reset

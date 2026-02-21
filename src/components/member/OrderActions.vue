@@ -25,6 +25,15 @@
       {{ paying ? '支付中...' : '去支付' }}
     </button>
 
+    <!-- Refund/After-sale button -->
+    <button
+      v-if="canRefund || canAfterSale"
+      class="action-btn refund-btn"
+      @click="showRefundDialog = true"
+    >
+      {{ refundButtonText }}
+    </button>
+
     <!-- View detail button (only in list context) -->
     <button
       v-if="showViewDetail"
@@ -33,6 +42,14 @@
     >
       查看详情 →
     </button>
+
+    <!-- Refund dialog -->
+    <RefundDialog
+      v-model="showRefundDialog"
+      :order-no="orderNo"
+      :status="status"
+      @success="handleRefunded"
+    />
 
   </div>
 </template>
@@ -45,6 +62,7 @@ import { useOrderStore } from '@/stores/order'
 import { useCheckoutStore } from '@/stores/checkout'
 import { getDisplayErrorMessage } from '@/utils/error'
 import type { OrderStatus } from '@/types/order'
+import RefundDialog from './RefundDialog.vue'
 
 // Props
 interface Props {
@@ -56,6 +74,8 @@ interface Props {
   showViewDetail?: boolean
   /** 上下文：列表页或详情页 */
   context?: 'list' | 'detail'
+  /** 订单完成时间（用于判断售后时限） */
+  completeTime?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -67,6 +87,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'cancelled'): void
   (e: 'paid'): void
+  (e: 'refunded'): void
 }>()
 
 // Composables
@@ -79,10 +100,33 @@ const checkoutStore = useCheckoutStore()
 // State
 const cancelling = ref(false)
 const paying = ref(false)
+const showRefundDialog = ref(false)
 
 // Computed - 状态判断
 const canCancel = computed(() => props.status === 'PENDING_PAYMENT')
 const canPay = computed(() => props.status === 'PENDING_PAYMENT')
+
+// 判断是否可以申请退款（PAID_WAITING）
+const canRefund = computed(() => props.status === 'PAID_WAITING')
+
+// 判断是否可以申请售后（COMPLETED + 2小时内）
+const canAfterSale = computed(() => {
+  if (props.status !== 'COMPLETED') return false
+  if (!props.completeTime) return false
+
+  const completeDate = new Date(props.completeTime)
+  const now = new Date()
+  const diffHours = (now.getTime() - completeDate.getTime()) / (1000 * 60 * 60)
+
+  return diffHours <= 2
+})
+
+// 退款/售后按钮文案
+const refundButtonText = computed(() => {
+  if (canRefund.value) return '申请退款'
+  if (canAfterSale.value) return '申请售后'
+  return ''
+})
 
 /**
  * 根据订单状态返回提示文案 - 品牌语气
@@ -161,6 +205,10 @@ function handleViewDetail() {
   router.push(`/member/orders/${props.orderNo}`)
 }
 
+function handleRefunded() {
+  emit('refunded')
+}
+
 </script>
 
 <style scoped>
@@ -197,6 +245,16 @@ function handleViewDetail() {
 .pay-btn:hover:not(:disabled) {
   filter: brightness(1.08);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.refund-btn {
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.refund-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-color: var(--color-primary);
 }
 
 .view-detail-btn {
