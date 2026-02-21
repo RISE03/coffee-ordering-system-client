@@ -426,31 +426,41 @@ onMounted(() => {
   padding: 20px 0 8px;
 }
 .pagination-btn {
-  padding: 6px 16px;
+  padding: 8px 20px;
   border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--glass-bg-strong);
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .pagination-btn:hover:not(:disabled) {
-  background: var(--glass-bg-hover);
-  color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-bg);
   border-color: var(--color-primary);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  transform: translateY(-1px);
 }
 .pagination-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 .pagination-info {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  min-width: 4em;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 5em;
   text-align: center;
+  padding: 8px 16px;
+  background: var(--glass-bg-strong);
+  border-radius: 9999px;
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 </style>
