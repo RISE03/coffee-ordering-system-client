@@ -294,7 +294,6 @@ export const useCheckoutStore = defineStore('checkout', () => {
     lastPreviewAt.value = null
     clearSnapshot()
     returnPath.value = null
-    resetFormDraft()
     localStorage.removeItem(CHECKOUT_STORAGE_KEY)
   }
 

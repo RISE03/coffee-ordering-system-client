@@ -101,6 +101,7 @@ export interface OrderDetailResponse {
   pointsEstimate?: number
   remark?: string
   createdAt: string
+  refundRejectReason?: string
 }
 
 export interface CancelOrderResponse {
@@ -160,6 +161,13 @@ export const REFUND_REASON_OPTIONS: RefundReasonOption[] = [
     applicableStatus: ['PAID_WAITING'],
     requiresImages: false,
     requiresDescription: false
+  },
+  {
+    value: 'OTHER',
+    label: '其他原因',
+    applicableStatus: ['PAID_WAITING'],
+    requiresImages: false,
+    requiresDescription: true
   },
 
   // COMPLETED 状态的售后原因

@@ -41,7 +41,7 @@
       <!-- 图片上传 -->
       <n-form-item v-if="needsImages" label="上传图片" path="images">
         <div class="upload-section">
-          <p class="upload-hint">请上传商品问题照片（最多3张）</p>
+          <p class="upload-hint">可上传商品问题照片，最多3张（可选）</p>
           <n-upload
             v-model:file-list="fileList"
             :max="3"
@@ -139,11 +139,15 @@ const isAfterSale = computed(() => props.status === 'COMPLETED')
 const dialogTitle = computed(() => isAfterSale.value ? '申请售后' : '申请退款')
 
 // 说明占位符
-const descriptionPlaceholder = computed(() =>
-  isAfterSale.value
-    ? '请详细描述商品问题，以便我们更好地为您处理（至少10字）'
-    : '可选填补充说明'
-)
+const descriptionPlaceholder = computed(() => {
+  if (isAfterSale.value) {
+    return '请详细描述商品问题，以便我们更好地为您处理（至少10字）'
+  }
+  if (formData.value.reasonValue === 'OTHER') {
+    return '请说明您的退款原因（至少10字）'
+  }
+  return '可选填补充说明'
+})
 
 // 表单验证规则
 const formRules = computed<FormRules>(() => {
@@ -169,20 +173,6 @@ const formRules = computed<FormRules>(() => {
     }
   }
 
-  if (needsImages.value) {
-    rules.images = {
-      required: true,
-      message: '请上传商品问题图片',
-      trigger: 'change',
-      validator: () => {
-        if (formData.value.images.length === 0) {
-          return new Error('请至少上传1张图片')
-        }
-        return true
-      }
-    }
-  }
-
   return rules
 })
 
@@ -190,7 +180,6 @@ const formRules = computed<FormRules>(() => {
 const canSubmit = computed(() => {
   if (!formData.value.reason) return false
   if (needsDescription.value && (!formData.value.description || formData.value.description.trim().length < 10)) return false
-  if (needsImages.value && formData.value.images.length === 0) return false
   return true
 })
 

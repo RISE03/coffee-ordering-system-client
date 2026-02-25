@@ -131,6 +131,7 @@ function mapDetail(raw: any): OrderDetailResponse {
     pointsEstimate: raw.pointsEstimate ?? undefined,
     remark: raw.remark ?? undefined,
     createdAt: raw.createdAt,
+    refundRejectReason: raw.refundRejectReason ?? undefined,
   }
 }
 
@@ -202,6 +203,13 @@ export async function refundOrder(
     status: mapStatus(raw.status ?? raw),
     message: raw.message,
   }
+}
+
+/**
+ * 撤销退款申请
+ */
+export async function cancelRefund(orderNo: string): Promise<void> {
+  await apiClient.post(`/member/orders/${orderNo}/refund/cancel`)
 }
 
 /**

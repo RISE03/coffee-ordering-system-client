@@ -97,6 +97,43 @@ export function useOrderNotification() {
   })
   cleanups.push(unsubStatus)
 
+  // 监听退款被拒绝
+  const unsubRefundRejected = onSseEvent('refund-rejected', (data: {
+    orderNo: string
+    status: number
+    statusText: string
+    rejectReason: string
+  }) => {
+    const statusKey = STATUS_CODE_MAP[data.status]
+    if (statusKey) {
+      orderStore.updateOrderStatus(data.orderNo, statusKey)
+    }
+
+    // 缓存拒绝原因
+    if (data.rejectReason) {
+      orderStore.setRefundRejectReason(data.orderNo, data.rejectReason)
+    }
+
+    // 弹出通知
+    notification.warning({
+      title: '退款申请被拒绝',
+      content: data.rejectReason || '您的退款申请未通过审核',
+      meta: `订单 ${data.orderNo}`,
+      duration: 10000,
+      keepAliveOnHover: true,
+      onClose: () => {
+        router.push(`/member/orders/${data.orderNo}`)
+      }
+    })
+
+    // 如果当前在订单详情页且是同一订单，自动刷新详情
+    const currentRoute = router.currentRoute.value
+    if (currentRoute.params.orderNo === data.orderNo) {
+      orderStore.fetchDetail(data.orderNo, true)
+    }
+  })
+  cleanups.push(unsubRefundRejected)
+
   // 组件卸载时清理监听器
   onUnmounted(() => {
     cleanups.forEach(fn => fn())

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getOrderDetail, getOrders, cancelOrder, refundOrder } from '@/api/order'
+import { getOrderDetail, getOrders, cancelOrder, refundOrder, cancelRefund } from '@/api/order'
 import type { OrderDetailResponse, OrderListItem, OrderStatus, RefundApplyRequest } from '@/types/order'
 import { getDisplayErrorMessage } from '@/utils/error'
 
@@ -31,6 +31,9 @@ export const useOrderStore = defineStore('order', () => {
 
   // 取消订单加载状态
   const cancellingOrderNo = ref<string | null>(null)
+
+  // 退款拒绝原因缓存（orderNo → rejectReason）
+  const refundRejectReasons = ref<Record<string, string>>({})
 
   // 计算属性：当前 tab 的订单列表
   const currentOrders = computed(() => listByStatus.value[activeStatusTab.value] || [])
@@ -190,6 +193,41 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   /**
+   * 撤销退款申请
+   */
+  async function doCancelRefund(orderNo: string): Promise<boolean> {
+    try {
+      await cancelRefund(orderNo)
+
+      // 强制刷新详情以获取恢复后的状态
+      const detail = await fetchDetail(orderNo, true)
+
+      // 同步更新列表缓存中的订单状态
+      if (detail) {
+        updateOrderStatus(orderNo, detail.status)
+      }
+
+      return true
+    } catch (err) {
+      throw err
+    }
+  }
+
+  /**
+   * 设置退款拒绝原因
+   */
+  function setRefundRejectReason(orderNo: string, reason: string) {
+    refundRejectReasons.value[orderNo] = reason
+  }
+
+  /**
+   * 清除退款拒绝原因
+   */
+  function clearRefundRejectReason(orderNo: string) {
+    delete refundRejectReasons.value[orderNo]
+  }
+
+  /**
    * 清除指定状态的列表缓存
    */
   function clearStatusCache(status: string) {
@@ -216,6 +254,7 @@ export const useOrderStore = defineStore('order', () => {
     errorDetail.value = null
     activeStatusTab.value = 'all'
     cancellingOrderNo.value = null
+    refundRejectReasons.value = {}
   }
 
   return {
@@ -229,6 +268,7 @@ export const useOrderStore = defineStore('order', () => {
     errorDetail,
     activeStatusTab,
     cancellingOrderNo,
+    refundRejectReasons,
     // getters
     currentOrders,
     currentPage,
@@ -241,6 +281,9 @@ export const useOrderStore = defineStore('order', () => {
     removeFromStatusList,
     doCancelOrder,
     doRefundOrder,
+    doCancelRefund,
+    setRefundRejectReason,
+    clearRefundRejectReason,
     clearStatusCache,
     refreshCurrentList,
     reset

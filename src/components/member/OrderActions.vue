@@ -34,6 +34,16 @@
       {{ refundButtonText }}
     </button>
 
+    <!-- Cancel refund button (REFUNDING state) -->
+    <button
+      v-if="canCancelRefund"
+      class="action-btn cancel-btn"
+      :disabled="cancellingRefund"
+      @click="handleCancelRefund"
+    >
+      {{ cancellingRefund ? '撤销中...' : '撤销退款' }}
+    </button>
+
     <!-- View detail button (only in list context) -->
     <button
       v-if="showViewDetail"
@@ -88,6 +98,7 @@ const emit = defineEmits<{
   (e: 'cancelled'): void
   (e: 'paid'): void
   (e: 'refunded'): void
+  (e: 'refundCancelled'): void
 }>()
 
 // Composables
@@ -100,6 +111,7 @@ const checkoutStore = useCheckoutStore()
 // State
 const cancelling = ref(false)
 const paying = ref(false)
+const cancellingRefund = ref(false)
 const showRefundDialog = ref(false)
 
 // Computed - 状态判断
@@ -108,6 +120,9 @@ const canPay = computed(() => props.status === 'PENDING_PAYMENT')
 
 // 判断是否可以申请退款（PAID_WAITING）
 const canRefund = computed(() => props.status === 'PAID_WAITING')
+
+// 判断是否可以撤销退款（REFUNDING 状态）
+const canCancelRefund = computed(() => props.status === 'REFUNDING')
 
 // 判断是否可以申请售后（COMPLETED + 2小时内）
 const canAfterSale = computed(() => {
@@ -203,6 +218,27 @@ async function handlePay() {
 
 function handleViewDetail() {
   router.push(`/member/orders/${props.orderNo}`)
+}
+
+function handleCancelRefund() {
+  dialog.warning({
+    title: '撤销退款',
+    content: '确定要撤销退款申请吗？撤销后订单将恢复原状态。',
+    positiveText: '确认撤销',
+    negativeText: '再想想',
+    onPositiveClick: async () => {
+      cancellingRefund.value = true
+      try {
+        await orderStore.doCancelRefund(props.orderNo)
+        message.success('退款申请已撤销')
+        emit('refundCancelled')
+      } catch (error) {
+        message.error(getDisplayErrorMessage(error))
+      } finally {
+        cancellingRefund.value = false
+      }
+    },
+  })
 }
 
 function handleRefunded() {

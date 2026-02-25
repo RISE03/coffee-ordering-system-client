@@ -52,6 +52,11 @@
 
         <!-- Actions Section -->
         <div class="mt-4 pt-4 border-t border-[var(--color-border)]">
+          <!-- 退款拒绝原因提示 -->
+          <div v-if="refundRejectReason" class="refund-reject-alert mb-4">
+            <div class="refund-reject-title">退款申请未通过</div>
+            <div class="refund-reject-reason">{{ refundRejectReason }}</div>
+          </div>
           <OrderActions
             :order-no="order.orderNo"
             :status="order.status"
@@ -60,6 +65,7 @@
             @cancelled="handleCancelled"
             @paid="handlePaid"
             @refunded="handleRefunded"
+            @refund-cancelled="handleRefundCancelled"
           />
         </div>
       </div>
@@ -223,6 +229,12 @@ const isPaid = computed(() => {
   return ['PAID_WAITING', 'IN_PREPARATION', 'READY_FOR_PICKUP', 'COMPLETED', 'REFUNDING', 'REFUNDED'].includes(order.value.status)
 })
 
+// 退款拒绝原因（优先取接口返回的，SSE 缓存作为补充）
+const refundRejectReason = computed(() => {
+  if (!order.value) return ''
+  return order.value.refundRejectReason || orderStore.refundRejectReasons[order.value.orderNo] || ''
+})
+
 // Methods
 async function loadOrder() {
   const orderNo = route.params.orderNo as string
@@ -251,6 +263,11 @@ function handlePaid() {
 
 function handleRefunded() {
   // 退款申请成功后重新加载订单详情
+  loadOrder()
+}
+
+function handleRefundCancelled() {
+  // 撤销退款后重新加载订单详情
   loadOrder()
 }
 
@@ -364,5 +381,25 @@ onMounted(() => {
   font-weight: 600;
   line-height: 1.5;
   border: 1px solid;
+}
+
+.refund-reject-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #F97316 8%, transparent);
+  border: 1px solid color-mix(in srgb, #F97316 25%, transparent);
+}
+
+.refund-reject-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #F97316;
+  margin-bottom: 4px;
+}
+
+.refund-reject-reason {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 </style>
