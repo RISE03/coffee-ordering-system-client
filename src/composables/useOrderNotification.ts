@@ -41,16 +41,28 @@ export function useOrderNotification() {
   const router = useRouter()
   const cleanups: (() => void)[] = []
 
-  // 监听取餐通知
+  // 判断订单是否为外卖
+  function isDelivery(orderNo: string): boolean {
+    const detail = orderStore.detailMap[orderNo]
+    if (detail) return detail.pickupInfo.type === 'DELIVERY'
+    for (const list of Object.values(orderStore.listByStatus)) {
+      const item = list.find(o => o.orderNo === orderNo)
+      if (item) return item.pickupType === 1
+    }
+    return false
+  }
+
+  // 监听取餐/配送通知
   const unsubPickup = onSseEvent('pickup-notify', (data: {
     orderNo: string
     pickupCode: string
     message: string
   }) => {
-    // 弹出通知
+    const delivery = isDelivery(data.orderNo)
+    const defaultMsg = delivery ? '您的订单正在配送中，请留意接收' : '您的餐品已备好，请尽快取餐享用'
     notification.success({
-      title: '取餐提醒',
-      content: data.message,
+      title: delivery ? '配送提醒' : '取餐提醒',
+      content: delivery ? defaultMsg : (data.message || defaultMsg),
       meta: data.pickupCode ? `取餐码: ${data.pickupCode}` : undefined,
       duration: 10000,
       keepAliveOnHover: true,
@@ -81,7 +93,10 @@ export function useOrderNotification() {
     orderStore.updateOrderStatus(data.orderNo, statusKey)
 
     // 弹出状态变更通知
-    const statusText = STATUS_TEXT_MAP[statusKey] || data.newStatusText
+    let statusText = STATUS_TEXT_MAP[statusKey] || data.newStatusText
+    if (statusKey === 'READY_FOR_PICKUP' && isDelivery(data.orderNo)) {
+      statusText = '待配送'
+    }
     notification.info({
       title: '订单状态更新',
       content: `您的订单 ${data.orderNo} 已变为「${statusText}」`,

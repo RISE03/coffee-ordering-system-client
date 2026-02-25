@@ -46,16 +46,17 @@ import type { OrderStatus, OrderTimelineEvent } from '@/types/order'
 const props = defineProps<{
   status: OrderStatus
   timeline?: OrderTimelineEvent[]
+  pickupType?: number // 0=自取, 1=外卖
 }>()
 
-// 正常流程步骤
-const steps = [
+// 正常流程步骤（第4步根据配送方式切换文案）
+const steps = computed(() => [
   { key: 'pay', label: '下单' },
   { key: 'confirm', label: '支付' },
   { key: 'make', label: '制作' },
-  { key: 'pickup', label: '取餐' },
+  { key: 'pickup', label: props.pickupType === 1 ? '配送' : '取餐' },
   { key: 'done', label: '完成' },
-]
+])
 
 // 状态 → 步骤索引
 const STATUS_INDEX: Record<string, number> = {
@@ -104,8 +105,8 @@ function getStepTime(stepKey: string): string {
 const fillPercent = computed(() => {
   const idx = currentIndex.value
   if (idx <= 0) return 0
-  if (idx >= steps.length - 1) return 100
-  return (idx / (steps.length - 1)) * 100
+  if (idx >= steps.value.length - 1) return 100
+  return (idx / (steps.value.length - 1)) * 100
 })
 
 const terminalIcon = computed(() => {

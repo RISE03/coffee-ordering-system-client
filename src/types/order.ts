@@ -41,6 +41,7 @@ export interface OrderListItem {
   status: OrderStatus
   createdAt: string
   completeTime?: string
+  pickupType: number // 0=自取, 1=外卖
   itemsPreview: string
   itemsAmount: number
   discountAmount: number

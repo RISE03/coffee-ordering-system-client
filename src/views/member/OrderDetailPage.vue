@@ -46,7 +46,7 @@
               backgroundColor: getStatusColor(order.status) + '18',
             }"
           >
-            {{ getOrderStatusLabel(order.status) }}
+            {{ order.status === 'READY_FOR_PICKUP' && order.pickupInfo.type === 'DELIVERY' ? '待配送' : getOrderStatusLabel(order.status) }}
           </span>
         </div>
 
@@ -73,7 +73,7 @@
       <!-- Order Progress -->
       <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
         <h3 class="font-medium text-[var(--color-text)] mb-2">订单状态</h3>
-        <OrderProgress :status="order.status" :timeline="order.timeline" />
+        <OrderProgress :status="order.status" :timeline="order.timeline" :pickup-type="order.pickupInfo.type === 'DELIVERY' ? 1 : 0" />
       </div>
 
       <!-- Pickup Info -->

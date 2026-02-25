@@ -70,7 +70,7 @@
                   backgroundColor: getStatusColor(order.status) + '18',
                 }"
               >
-                {{ getStatusLabel(order.status) }}
+                {{ getStatusLabel(order.status, order.pickupType) }}
               </span>
               <span class="text-xs text-[var(--color-text-secondary)]">
                 {{ formatTime(order.createdAt) }}
@@ -86,7 +86,7 @@
             </p>
 
             <!-- 订单进度条 -->
-            <OrderProgress :status="order.status" />
+            <OrderProgress :status="order.status" :pickup-type="order.pickupType" />
 
             <!-- 分隔线 -->
             <div class="my-3 border-t border-[var(--color-border)] opacity-40" />
@@ -162,7 +162,7 @@ const statusTabs = [
   { value: 'PENDING_PAYMENT', label: '待支付' },
   { value: 'PAID_WAITING', label: '已支付' },
   { value: 'IN_PREPARATION', label: '制作中' },
-  { value: 'READY_FOR_PICKUP', label: '待取餐' },
+  { value: 'READY_FOR_PICKUP', label: '待取餐/配送' },
   { value: 'COMPLETED', label: '已完成' },
   { value: 'CANCELLED', label: '已取消' },
   { value: 'REFUNDING', label: '退款中' },
@@ -222,7 +222,7 @@ const emptyDescription = computed(() => {
     case 'PENDING_PAYMENT': return '暂无待支付的订单'
     case 'PAID_WAITING':
     case 'IN_PREPARATION': return '暂无制作中的订单'
-    case 'READY_FOR_PICKUP': return '暂无待取餐的订单'
+    case 'READY_FOR_PICKUP': return '暂无待取餐/配送的订单'
     case 'COMPLETED': return '还没有已完成的订单'
     case 'CANCELLED': return '没有已取消的订单'
     case 'REFUNDING': return '暂无退款中的订单'
@@ -320,7 +320,8 @@ function formatTime(dateStr: string): string {
   return `${month}月${day}日 ${hour}:${minute}`
 }
 
-function getStatusLabel(status: OrderStatus): string {
+function getStatusLabel(status: OrderStatus, pickupType?: number): string {
+  if (status === 'READY_FOR_PICKUP' && pickupType === 1) return '待配送'
   return getOrderStatusLabel(status)
 }
 
