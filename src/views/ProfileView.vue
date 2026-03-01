@@ -14,8 +14,8 @@
             {{ authStore.user?.nickname || authStore.user?.username }}
           </h1>
           <div class="flex items-center gap-2 text-sm flex-wrap">
-            <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary)] bg-opacity-20 text-[var(--color-primary)] font-medium text-xs">
-              {{ authStore.user?.levelName || '会员' }}
+            <span class="px-2.5 py-1 rounded-full font-medium text-xs" style="background-color: var(--color-primary); color: var(--color-bg);">
+              Lv.{{ authStore.user?.level }} {{ authStore.user?.levelName || '会员' }}
             </span>
             <span class="text-[var(--color-text-secondary)] text-xs">ID: {{ authStore.user?.id }}</span>
           </div>
@@ -48,7 +48,9 @@
             <n-icon class="mr-2 text-[var(--color-primary)]"><TimeOutline /></n-icon>
             光阴值 (积分)
           </h3>
-          <p class="text-[var(--color-text-secondary)] text-sm mb-4">当前可用: 0</p>
+          <p class="text-[var(--color-primary)] text-2xl font-bold mb-4">
+            {{ pointsInfo?.balance ?? '--' }}
+          </p>
           <button class="w-full glass-button text-sm text-[var(--color-text-secondary)] opacity-60" disabled>
             积分商城 (即将开放)
           </button>
@@ -71,14 +73,26 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { NAvatar, NIcon, useMessage } from 'naive-ui'
 import { ReceiptOutline, TimeOutline, TicketOutline } from '@vicons/ionicons5'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { getMyPoints, type PointsInfo } from '@/api/user'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const message = useMessage()
+
+const pointsInfo = ref<PointsInfo | null>(null)
+
+onMounted(async () => {
+  try {
+    pointsInfo.value = await getMyPoints()
+  } catch (e) {
+    console.error('获取积分信息失败', e)
+  }
+})
 
 const handleLogout = async () => {
   await authStore.logout()
