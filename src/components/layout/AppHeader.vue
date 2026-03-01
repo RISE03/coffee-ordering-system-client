@@ -41,7 +41,7 @@
         class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" 
         active-class="text-primary font-medium"
       >
-        我的订单
+        时光账单
       </router-link>
     </div>
 
@@ -117,7 +117,7 @@
             active-class="text-primary font-bold"
             @click="showMobileMenu = false"
           >
-            我的订单
+            时光账单
           </router-link>
           
           <div class="h-px bg-gray-200 dark:bg-gray-700 my-2"></div>

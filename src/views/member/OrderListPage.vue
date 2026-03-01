@@ -3,7 +3,7 @@
     <!-- 粘性头部：标题 + 筛选栏 -->
     <div class="sticky-header mb-4">
       <div class="px-4 pt-6 pb-2 flex items-center justify-between">
-        <h1 class="text-xl font-bold text-[var(--color-text)]">我的订单</h1>
+        <h1 class="text-xl font-bold text-[var(--color-text)]">时光账单</h1>
         <span v-if="totalCount > 0" class="text-xs text-[var(--color-text-secondary)]">
           共 {{ totalCount }} 单
         </span>

@@ -76,7 +76,7 @@ const routes: RouteRecordRaw[] = [
         path: 'member/orders',
         name: 'order-list',
         component: OrderListPage,
-        meta: { title: '我的订单', requiresAuth: true }
+        meta: { title: '时光账单', requiresAuth: true }
       },
       {
         path: 'member/orders/:orderNo',
