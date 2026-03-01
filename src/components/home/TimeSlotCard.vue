@@ -24,6 +24,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const isInCart = computed(() => props.cartQuantity > 0)
 
+const isSoldOut = computed(() => props.product.stock === null || (typeof props.product.stock === 'number' && props.product.stock <= 0))
+const isLowStock = computed(() => {
+  const s = props.product.stock
+  return typeof s === 'number' && s > 0 && s <= 5
+})
+
 const emit = defineEmits<{
   (e: 'click'): void
   (e: 'add-to-cart', productId: number): void
@@ -81,6 +87,13 @@ function handleAddToCart(event: Event) {
         {{ product.tag }}
       </div>
 
+      <!-- 售罄遮罩 -->
+      <div v-if="isSoldOut" class="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+        <span class="text-white font-bold tracking-widest bg-black/50 px-4 py-1.5 rounded-full"
+          :class="[size === 'large' ? 'text-lg' : 'text-sm']"
+        >售罄</span>
+      </div>
+
       <!-- 已加购数量角标 -->
       <Transition name="cart-badge">
         <div
@@ -124,17 +137,28 @@ function handleAddToCart(event: Event) {
 
       <!-- 价格和操作 -->
       <div class="flex items-center justify-between">
-        <span
-          class="font-bold"
-          :class="[size === 'large' ? 'text-2xl' : 'text-lg']"
-          :style="{ color: priceColor }"
-        >
-          {{ formattedPrice }}
-        </span>
+        <div>
+          <span
+            class="font-bold"
+            :class="[size === 'large' ? 'text-2xl' : 'text-lg']"
+            :style="{ color: priceColor }"
+          >
+            {{ formattedPrice }}
+          </span>
+          <p v-if="isLowStock" class="text-xs text-orange-500 font-semibold low-stock-pulse">仅剩 {{ product.stock }} 件</p>
+        </div>
 
-        <!-- 加入购物车按钮 / 已打烊按钮 -->
+        <!-- 加入购物车按钮 / 售罄 / 已打烊 -->
         <button
-          v-if="isOpen"
+          v-if="isSoldOut"
+          class="closed-button rounded-full flex items-center justify-center cursor-not-allowed"
+          :class="[size === 'large' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs']"
+          disabled
+        >
+          售罄
+        </button>
+        <button
+          v-else-if="isOpen"
           class="rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
           :class="[size === 'large' ? 'w-12 h-12' : 'w-9 h-9']"
           :style="{
@@ -217,5 +241,15 @@ function handleAddToCart(event: Event) {
 .cart-badge-leave-to {
   opacity: 0;
   transform: scale(0);
+}
+
+/* 低库存脉冲动画 */
+.low-stock-pulse {
+  animation: stock-pulse 2s ease-in-out infinite;
+}
+
+@keyframes stock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 </style>

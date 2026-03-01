@@ -50,6 +50,8 @@
           <p class="text-3xl font-bold text-[var(--color-primary)] mt-2">
             ¥{{ product.price.toFixed(2) }}
           </p>
+          <p v-if="isSoldOut" class="text-sm text-red-500 font-medium mt-1">已售罄</p>
+          <p v-else-if="isLowStock" class="text-sm text-orange-500 font-semibold mt-1 low-stock-pulse">仅剩 {{ product.stock }} 件</p>
         </div>
 
         <!-- 描述 -->
@@ -90,7 +92,7 @@
             <n-input-number
               v-model:value="quantity"
               :min="1"
-              :max="99"
+              :max="maxQuantity"
               :show-button="false"
               size="small"
               class="w-16 text-center"
@@ -99,7 +101,7 @@
             <n-button
               size="small"
               circle
-              :disabled="quantity >= 99"
+              :disabled="quantity >= maxQuantity"
               @click="quantity++"
             >
               <template #icon>
@@ -132,7 +134,10 @@
         </div>
 
         <!-- 不可购买提示 -->
-        <div v-if="!isProductAvailable(product)" class="text-center text-red-500">
+        <div v-if="isSoldOut" class="text-center text-red-500">
+          该商品已售罄，看看其他好物吧
+        </div>
+        <div v-else-if="!isProductAvailable(product)" class="text-center text-red-500">
           该商品暂时不可购买
         </div>
       </div>
@@ -168,7 +173,10 @@ interface Product {
   available?: boolean
   description?: string
   timePeriods?: string[]
+  stock?: number
 }
+
+const LOW_STOCK_THRESHOLD = 5
 
 const route = useRoute()
 const router = useRouter()
@@ -216,6 +224,9 @@ function isProductAvailable(item: Product | null): boolean {
   if (!item) {
     return false
   }
+  if (item.stock === null || (typeof item.stock === 'number' && item.stock <= 0)) {
+    return false
+  }
   if (typeof item.available === 'boolean') {
     return item.available
   }
@@ -224,6 +235,23 @@ function isProductAvailable(item: Product | null): boolean {
   }
   return true
 }
+
+const isSoldOut = computed(() => {
+  return product.value?.stock === null || (typeof product.value?.stock === 'number' && product.value.stock <= 0)
+})
+
+const isLowStock = computed(() => {
+  const s = product.value?.stock
+  return typeof s === 'number' && s > 0 && s <= LOW_STOCK_THRESHOLD
+})
+
+const maxQuantity = computed(() => {
+  const s = product.value?.stock
+  if (typeof s === 'number' && s > 0) {
+    return Math.min(s, 99)
+  }
+  return 99
+})
 
 function handleBack() {
   if (!backTarget.value) {
@@ -401,5 +429,15 @@ onMounted(() => {
 
 :deep(.n-input-number .n-input__input-el) {
   text-align: center;
+}
+
+/* 低库存脉冲动画 */
+.low-stock-pulse {
+  animation: stock-pulse 2s ease-in-out infinite;
+}
+
+@keyframes stock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 </style>

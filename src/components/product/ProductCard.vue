@@ -27,6 +27,12 @@ const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
 
 const isInCart = computed(() => props.cartQuantity > 0)
 
+const isSoldOut = computed(() => props.product.stock === null || (typeof props.product.stock === 'number' && props.product.stock <= 0))
+const isLowStock = computed(() => {
+  const s = props.product.stock
+  return typeof s === 'number' && s > 0 && s <= 5
+})
+
 // 标签颜色映射
 const tagColorMap: Record<string, string> = {
   '新品': 'bg-emerald-500/90',
@@ -83,8 +89,13 @@ const displayTags = computed(() => {
         <span class="text-sm">暂无图片</span>
       </div>
 
+      <!-- 售罄遮罩 -->
+      <div v-if="isSoldOut" class="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+        <span class="text-white text-lg font-bold tracking-widest bg-black/50 px-4 py-1.5 rounded-full">售罄</span>
+      </div>
+
       <!-- Quick Action Overlay (Desktop) -->
-      <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hidden md:flex">
+      <div v-if="!isSoldOut" class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hidden md:flex">
         <button
           v-if="!isInCart"
           @click.stop="emit('add-to-cart', product.id)"
@@ -137,38 +148,56 @@ const displayTags = computed(() => {
       </div>
 
       <div class="mt-2 flex items-center justify-between">
-        <span class="text-lg font-bold text-[var(--color-primary)] font-sans">
-          {{ displayPrice }}
-        </span>
+        <div>
+          <span class="text-lg font-bold text-[var(--color-primary)] font-sans">
+            {{ displayPrice }}
+          </span>
+          <p v-if="isSoldOut" class="text-[10px] text-red-500 font-medium">已售罄</p>
+          <p v-else-if="isLowStock" class="text-xs text-orange-500 font-semibold low-stock-pulse">仅剩 {{ product.stock }} 件</p>
+        </div>
 
         <!-- Mobile Add Button -->
-        <button
-          v-if="!isInCart"
-          @click.stop="emit('add-to-cart', product.id)"
-          class="md:hidden p-2 -mr-1 rounded-full glass-button active:scale-95 border-none bg-transparent shadow-none hover:bg-[var(--glass-bg-hover)]"
-        >
-          <NIcon :component="AddCircleOutline" class="text-3xl text-[var(--color-primary)]" />
-        </button>
-        <!-- Mobile: 已加购显示数量调整器 -->
-        <div
-          v-else
-          class="md:hidden flex items-center gap-0.5 -mr-1"
-        >
+        <template v-if="!isSoldOut">
           <button
-            @click.stop="emit('remove-from-cart', product.id)"
-            class="p-1 rounded-full active:scale-90 transition-all"
-          >
-            <NIcon :component="RemoveCircleOutline" class="text-2xl text-[var(--color-primary)]" />
-          </button>
-          <span class="w-5 text-center font-bold text-sm text-[var(--color-text)]">{{ cartQuantity }}</span>
-          <button
+            v-if="!isInCart"
             @click.stop="emit('add-to-cart', product.id)"
-            class="p-1 rounded-full active:scale-90 transition-all"
+            class="md:hidden p-2 -mr-1 rounded-full glass-button active:scale-95 border-none bg-transparent shadow-none hover:bg-[var(--glass-bg-hover)]"
           >
-            <NIcon :component="AddCircleOutline" class="text-2xl text-[var(--color-primary)]" />
+            <NIcon :component="AddCircleOutline" class="text-3xl text-[var(--color-primary)]" />
           </button>
-        </div>
+          <!-- Mobile: 已加购显示数量调整器 -->
+          <div
+            v-else
+            class="md:hidden flex items-center gap-0.5 -mr-1"
+          >
+            <button
+              @click.stop="emit('remove-from-cart', product.id)"
+              class="p-1 rounded-full active:scale-90 transition-all"
+            >
+              <NIcon :component="RemoveCircleOutline" class="text-2xl text-[var(--color-primary)]" />
+            </button>
+            <span class="w-5 text-center font-bold text-sm text-[var(--color-text)]">{{ cartQuantity }}</span>
+            <button
+              @click.stop="emit('add-to-cart', product.id)"
+              class="p-1 rounded-full active:scale-90 transition-all"
+            >
+              <NIcon :component="AddCircleOutline" class="text-2xl text-[var(--color-primary)]" />
+            </button>
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 低库存脉冲动画 */
+.low-stock-pulse {
+  animation: stock-pulse 2s ease-in-out infinite;
+}
+
+@keyframes stock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+</style>

@@ -91,6 +91,7 @@ import { useTimeFlowStore } from '@/stores/timeflow'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useMessage } from 'naive-ui'
+import { getDisplayErrorMessage } from '@/utils/error'
 import { TIME_FLOW_SLOTS } from '@/constants/timeflow'
 import type { TimeFlowSlot } from '@/types/timeflow'
 import DynamicTimeHeader from '@/components/home/DynamicTimeHeader.vue'
@@ -144,8 +145,8 @@ async function handleAddToCart(productId: number) {
       quantity: 1
     })
     message.success('已加入购物车')
-  } catch {
-    message.error('添加失败，请重试')
+  } catch (err) {
+    message.error(getDisplayErrorMessage(err))
   }
 }
 

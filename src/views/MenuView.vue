@@ -112,6 +112,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useCartStore, CART_QUANTITY_MIN } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useMessage, NSkeleton } from 'naive-ui'
+import { getDisplayErrorMessage } from '@/utils/error'
 import { getProducts } from '@/api/products'
 import type { Product } from '@/types/product'
 import ProductCard from '@/components/product/ProductCard.vue'
@@ -282,8 +283,8 @@ const handleAddToCart = async (productId: number) => {
       quantity: 1
     })
     message.success('已加入购物车')
-  } catch {
-    message.error('添加失败，请重试')
+  } catch (err) {
+    message.error(getDisplayErrorMessage(err))
   }
 }
 

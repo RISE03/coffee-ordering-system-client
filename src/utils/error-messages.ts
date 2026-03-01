@@ -21,6 +21,7 @@ export const BusinessErrorCode = {
   // Checkout errors
   PRICE_CHANGED: 'PRICE_CHANGED',
   STOCK_UNAVAILABLE: 'STOCK_UNAVAILABLE',
+  STOCK_DEDUCT_FAILED: 'STOCK_DEDUCT_FAILED',
   COUPON_INVALID: 'COUPON_INVALID',
   COUPON_EXPIRED: 'COUPON_EXPIRED',
   COUPON_USED: 'COUPON_USED',
@@ -66,7 +67,8 @@ export const ErrorMessages: Record<string, string> = {
 
   // Checkout errors - 结算相关
   [BusinessErrorCode.PRICE_CHANGED]: '价格刚刚有了小变动，请确认后再下单',
-  [BusinessErrorCode.STOCK_UNAVAILABLE]: '抱歉，部分商品暂时售罄，请调整订单后重试',
+  [BusinessErrorCode.STOCK_UNAVAILABLE]: '抱歉，部分商品库存不足，请调整数量后重试',
+  [BusinessErrorCode.STOCK_DEDUCT_FAILED]: '手慢了一步，商品库存刚刚被抢光了，请调整订单后重试',
   [BusinessErrorCode.COUPON_INVALID]: '这张优惠券暂时无法使用，换一张试试？',
   [BusinessErrorCode.COUPON_EXPIRED]: '这张优惠券已过期，下次记得早点用哦',
   [BusinessErrorCode.COUPON_USED]: '这张优惠券已经用过了，看看其他优惠吧',

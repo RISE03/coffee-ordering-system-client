@@ -42,6 +42,8 @@ export interface Product {
   categoryId: number
   /** 商品状态（1=上架，0=下架） */
   status?: number
+  /** 库存数量（null 表示售罄） */
+  stock?: number | null
   /** 商品描述 */
   description?: string
   /** 标签（如"醒神推荐"、"晚霞"） */
