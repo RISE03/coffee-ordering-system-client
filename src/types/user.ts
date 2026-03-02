@@ -141,6 +141,16 @@ export interface UpdateUserRequest {
   avatar?: string
 }
 
+/**
+ * 修改密码请求
+ */
+export interface ChangePasswordRequest {
+  /** 旧密码 */
+  oldPassword: string
+  /** 新密码 */
+  newPassword: string
+}
+
 // ============================================================================
 // 认证状态类型
 // ============================================================================

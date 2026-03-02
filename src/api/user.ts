@@ -5,7 +5,7 @@
  */
 
 import apiClient from './client'
-import type { User } from '@/types/user'
+import type { User, UpdateUserRequest, ChangePasswordRequest } from '@/types/user'
 
 // ============================================================================
 // 用户信息接口
@@ -18,6 +18,22 @@ import type { User } from '@/types/user'
 export async function getCurrentUser(): Promise<User> {
   const response = await apiClient.get<User>('/user/me')
   return response.data
+}
+
+/**
+ * 更新当前用户资料
+ * PUT /api/user/me
+ */
+export async function updateUserProfile(data: UpdateUserRequest): Promise<void> {
+  await apiClient.put('/user/profile', data)
+}
+
+/**
+ * 修改密码
+ * PUT /api/user/password
+ */
+export async function changePassword(data: ChangePasswordRequest): Promise<void> {
+  await apiClient.put('/user/password', data)
 }
 
 // ============================================================================

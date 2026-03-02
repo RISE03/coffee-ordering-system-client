@@ -83,6 +83,18 @@ const routes: RouteRecordRaw[] = [
         name: 'order-detail',
         component: OrderDetailPage,
         meta: { title: '订单详情', requiresAuth: true }
+      },
+      {
+        path: 'points',
+        name: 'points-center',
+        component: () => import('@/views/PointsCenterView.vue'),
+        meta: { title: '光阴小铺', requiresAuth: true }
+      },
+      {
+        path: 'coupons',
+        name: 'my-coupons',
+        component: () => import('@/views/MyCouponsView.vue'),
+        meta: { title: '我的优惠券', requiresAuth: true }
       }
     ]
   },

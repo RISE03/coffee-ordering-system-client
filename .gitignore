@@ -45,3 +45,8 @@ coverage
 *.tmp
 *.temp
 .cache
+
+# AI tools
+.claude/
+.gemini/
+openspec/
