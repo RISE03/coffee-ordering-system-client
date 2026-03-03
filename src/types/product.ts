@@ -36,6 +36,8 @@ export interface Product {
   englishName?: string
   /** 价格 */
   price: number
+  /** 会员价基准值（Lv.4 繁星可享受的价格，null 表示不启用会员折扣） */
+  memberPrice?: number | null
   /** 商品图片 URL */
   imageUrl?: string
   /** 所属分类 ID */

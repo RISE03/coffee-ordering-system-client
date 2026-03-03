@@ -11,14 +11,24 @@
 
     <div class="space-y-3 mb-6">
       <div class="flex justify-between text-[var(--color-text-secondary)] text-sm">
-        <span>商品总额</span>
+        <span>商品原价</span>
         <span class="font-medium">￥{{ itemsAmount.toFixed(2) }}</span>
       </div>
 
-      <div class="flex justify-between items-center text-sm transition-colors duration-300" 
-           :class="discountAmount > 0 ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-secondary)]'">
-        <span>优惠抵扣</span>
-        <span class="font-medium">{{ discountAmount > 0 ? '-' : '' }}￥{{ discountAmount.toFixed(2) }}</span>
+      <div
+        v-if="memberDiscountAmount > 0"
+        class="flex justify-between items-center text-sm text-[var(--color-primary)]"
+      >
+        <span>会员优惠</span>
+        <span class="font-medium">-￥{{ memberDiscountAmount.toFixed(2) }}</span>
+      </div>
+
+      <div
+        v-if="couponDiscount > 0"
+        class="flex justify-between items-center text-sm text-[var(--color-primary)]"
+      >
+        <span>优惠券</span>
+        <span class="font-medium">-￥{{ couponDiscount.toFixed(2) }}</span>
       </div>
     </div>
 
@@ -76,6 +86,7 @@ import { SparklesOutline, CardOutline } from '@vicons/ionicons5'
 
 interface Props {
   itemsAmount: number
+  memberDiscountAmount?: number
   discountAmount?: number
   payAmount: number
   pointsEstimate?: number
@@ -87,6 +98,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  memberDiscountAmount: 0,
   discountAmount: 0,
   pointsEstimate: 0,
   paying: false,
@@ -107,6 +119,11 @@ const lastUpdatedText = computed(() => {
   const d = new Date(props.lastUpdated)
   return `更新于 ${d.toLocaleTimeString()}`
 })
+
+/** 后端 discountAmount 是总折扣，需减去会员折扣部分得到纯优惠券折扣 */
+const couponDiscount = computed(() =>
+  Math.max(0, props.discountAmount - props.memberDiscountAmount)
+)
 
 function handlePay() {
   if (!props.paying && !props.disabled && !props.previewing) {

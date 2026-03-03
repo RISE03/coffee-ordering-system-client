@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
 import { AddCircleOutline, RemoveCircleOutline } from '@vicons/ionicons5'
 import type { Product } from '@/types/product'
+import { useAuthStore } from '@/stores/auth'
 
 interface Props {
   product: Product
@@ -21,9 +22,31 @@ const emit = defineEmits<{
   (e: 'view-detail', productId: number): void
 }>()
 
+const authStore = useAuthStore()
 const isDawn = computed(() => props.theme === 'dawn')
 
-const displayPrice = computed(() => `¥${props.product.price.toFixed(2)}`)
+/**
+ * 根据等级计算实际价格
+ * 公式：priceLevel(L) = P - (P - Pm) * (L / 4)
+ * 仅在 0 < memberPrice < price 时生效
+ */
+const levelPrice = computed(() => {
+  const { price, memberPrice } = props.product
+  const level = authStore.user?.level
+  if (!level || !memberPrice || memberPrice <= 0 || memberPrice >= price) return null
+  const discount = (price - memberPrice) * (level / 4)
+  return Math.round((price - discount) * 100) / 100
+})
+
+// 展示给用户的实际价格（有会员价时用等级价，否则用原价）
+const displayPrice = computed(() =>
+  `¥${(levelPrice.value ?? props.product.price).toFixed(2)}`
+)
+
+// 原价（仅在等级价生效时才展示划线原价）
+const originalPrice = computed(() =>
+  levelPrice.value !== null ? `¥${props.product.price.toFixed(2)}` : null
+)
 
 const isInCart = computed(() => props.cartQuantity > 0)
 
@@ -149,9 +172,14 @@ const displayTags = computed(() => {
 
       <div class="mt-2 flex items-center justify-between">
         <div>
-          <span class="text-lg font-bold text-[var(--color-primary)] font-sans">
-            {{ displayPrice }}
-          </span>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-lg font-bold text-[var(--color-primary)] font-sans">
+              {{ displayPrice }}
+            </span>
+            <span v-if="originalPrice" class="text-xs text-[var(--color-text-secondary)] line-through opacity-60 font-sans">
+              {{ originalPrice }}
+            </span>
+          </div>
           <p v-if="isSoldOut" class="text-[10px] text-red-500 font-medium">已售罄</p>
           <p v-else-if="isLowStock" class="text-xs text-orange-500 font-semibold low-stock-pulse">仅剩 {{ product.stock }} 件</p>
         </div>

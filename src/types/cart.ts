@@ -119,7 +119,10 @@ export interface CheckoutPreviewItem {
   productId: number
   name: string
   image: string
+  /** 会员价（实际单价） */
   unitPrice: number
+  /** 原价（用于划线展示，无会员折扣时与 unitPrice 相同） */
+  originalPrice?: number
   quantity: number
   subtotal: number
   available: boolean
@@ -131,6 +134,9 @@ export interface CheckoutPreviewItem {
  */
 export interface PriceDetail {
   itemsAmount: number
+  /** 会员折扣金额（> 0 时才展示） */
+  memberDiscountAmount?: number
+  /** 优惠券折扣金额 */
   discountAmount: number
   payAmount: number
 }

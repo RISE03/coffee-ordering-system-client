@@ -16,9 +16,13 @@
             {{ authStore.user?.nickname || authStore.user?.username }}
           </h1>
           <span
-            class="level-badge mt-2"
+            class="level-badge mt-2 cursor-pointer"
             :class="`level-${authStore.user?.level ?? 1}`"
+            @click="$router.push('/member/level')"
           >
+            <n-icon :size="11" class="level-badge-icon">
+              <component :is="levelIconMap[authStore.user?.level ?? 1]" />
+            </n-icon>
             Lv.{{ authStore.user?.level }} {{ authStore.user?.levelName || '会员' }}
           </span>
           <span class="text-xs text-[var(--color-text-secondary)] mt-1.5">
@@ -212,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, type Component } from 'vue'
 import {
   NAvatar, NIcon, NModal, NForm, NFormItem, NInput, NButton,
   useMessage, useDialog, type FormInst, type FormRules
@@ -226,6 +230,10 @@ import {
   LogOutOutline,
   PersonOutline,
   LockClosedOutline,
+  PartlySunnyOutline,
+  SunnyOutline,
+  SparklesOutline,
+  StarOutline,
 } from '@vicons/ionicons5'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
@@ -239,6 +247,14 @@ const message = useMessage()
 const dialog = useDialog()
 
 const pointsInfo = ref<PointsInfo | null>(null)
+
+// 各等级对应的图标组件
+const levelIconMap: Record<number, Component> = {
+  1: PartlySunnyOutline,
+  2: SunnyOutline,
+  3: SparklesOutline,
+  4: StarOutline,
+}
 
 onMounted(async () => {
   try {
@@ -493,6 +509,18 @@ function handleLogout() {
   font-weight: 600;
   color: #fff;
   letter-spacing: 0.5px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.level-badge:hover {
+  transform: scale(1.07);
+  filter: brightness(1.12);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.level-badge:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
 }
 
 /* Lv.1 晨曦 - 柔橙渐变 */
@@ -650,5 +678,12 @@ function handleLogout() {
 
 .logout-button:active {
   transform: scale(0.98);
+}
+
+/* 等级徽章内图标 */
+.level-badge-icon {
+  margin-right: 4px;
+  vertical-align: middle;
+  opacity: 0.9;
 }
 </style>

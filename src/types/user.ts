@@ -39,6 +39,18 @@ export function getMemberLevelName(level: MemberLevel): string {
   return MEMBER_LEVEL_NAMES[level] || '未知等级'
 }
 
+/**
+ * 等级配置（来自 GET /api/member/levels）
+ */
+export interface LevelConfig {
+  /** 等级数值 1~4 */
+  level: MemberLevel
+  /** 等级名称 */
+  name: string
+  /** 该等级起始门槛金额（元） */
+  minAmount: number
+}
+
 // ============================================================================
 // 用户实体
 // ============================================================================
@@ -63,6 +75,12 @@ export interface User {
   level: MemberLevel
   /** 等级名称（后端返回） */
   levelName: string
+  /** 累计消费金额（元） */
+  totalConsumeAmount?: number
+  /** 当前等级起始门槛（元） */
+  currentLevelMinAmount?: number
+  /** 下一等级门槛（元），满级 Lv.4 时为 null */
+  nextLevelMinAmount?: number | null
 }
 
 /**

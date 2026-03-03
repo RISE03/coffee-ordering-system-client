@@ -397,9 +397,17 @@ onMounted(async () => {
                   </div>
                   
                   <div class="flex justify-between items-end">
-                    <p class="text-sm text-[var(--color-text-secondary)] bg-[var(--color-bg)] px-2 py-0.5 rounded inline-block border border-[var(--color-border)]">
-                      ￥{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}
-                    </p>
+                    <div class="flex items-baseline gap-1.5">
+                      <p class="text-sm text-[var(--color-text-secondary)] bg-[var(--color-bg)] px-2 py-0.5 rounded inline-block border border-[var(--color-border)]">
+                        ￥{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}
+                      </p>
+                      <p
+                        v-if="item.originalPrice && item.originalPrice > item.unitPrice"
+                        class="text-xs text-[var(--color-text-secondary)] line-through opacity-60"
+                      >
+                        ￥{{ item.originalPrice.toFixed(2) }}
+                      </p>
+                    </div>
                     <p v-if="item.available === false" class="text-xs text-red-500 font-medium">
                       {{ item.reason || '无法结算' }}
                     </p>
@@ -539,6 +547,7 @@ onMounted(async () => {
         <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-8">
           <CheckoutSummary
             :items-amount="price.itemsAmount"
+            :member-discount-amount="price.memberDiscountAmount"
             :discount-amount="price.discountAmount"
             :pay-amount="price.payAmount"
             :points-estimate="checkoutStore.preview?.pointsEstimate || 0"

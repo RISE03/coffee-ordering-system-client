@@ -100,7 +100,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }))
   )
   const hasSnapshot = computed(() => itemsSnapshot.value.length > 0)
-  const price = computed(() => preview.value?.price ?? { itemsAmount: 0, discountAmount: 0, payAmount: 0 })
+  const price = computed(() => preview.value?.price ?? { itemsAmount: 0, memberDiscountAmount: 0, discountAmount: 0, payAmount: 0 })
   const usableCoupons = computed(() => coupons.value.usable)
   const unusableCoupons = computed(() => coupons.value.unusable)
   const selectedCoupon = computed(() =>

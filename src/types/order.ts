@@ -66,6 +66,8 @@ export interface OrderTimelineEvent {
 export interface OrderItem {
   name: string
   unitPrice: number
+  /** 原价（用于划线价展示） */
+  originalPrice?: number
   quantity: number
   subtotal: number
   image?: string
@@ -86,6 +88,8 @@ export interface OrderCouponInfo {
 
 export interface PriceBreakdown {
   itemsAmount: number
+  /** 会员折扣金额 */
+  memberDiscountAmount?: number
   discountAmount: number
   payAmount: number
 }

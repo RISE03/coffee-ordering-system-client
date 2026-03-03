@@ -125,9 +125,17 @@
                 <span class="text-[var(--color-text-secondary)] ml-2">x{{ item.quantity }}</span>
               </div>
               <div class="flex justify-between mt-1">
-                <span class="text-sm text-[var(--color-text-secondary)]">
-                  ¥{{ item.unitPrice.toFixed(2) }}
-                </span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-sm text-[var(--color-text-secondary)]">
+                    ¥{{ item.unitPrice.toFixed(2) }}
+                  </span>
+                  <span
+                    v-if="item.originalPrice && item.originalPrice > item.unitPrice"
+                    class="text-xs text-[var(--color-text-secondary)] line-through opacity-60"
+                  >
+                    ¥{{ item.originalPrice.toFixed(2) }}
+                  </span>
+                </div>
                 <span class="text-[var(--color-primary)] font-medium">
                   ¥{{ item.subtotal.toFixed(2) }}
                 </span>
@@ -153,15 +161,22 @@
         <h3 class="font-medium text-[var(--color-text)] mb-4">订单金额</h3>
         <div class="space-y-2">
           <div class="flex justify-between text-[var(--color-text-secondary)]">
-            <span>商品金额</span>
+            <span>商品原价</span>
             <span>¥{{ order.priceBreakdown.itemsAmount.toFixed(2) }}</span>
           </div>
           <div
-            v-if="order.priceBreakdown.discountAmount > 0"
+            v-if="order.priceBreakdown.memberDiscountAmount && order.priceBreakdown.memberDiscountAmount > 0"
             class="flex justify-between text-[var(--color-primary)]"
           >
-            <span>优惠券抵扣</span>
-            <span>-¥{{ order.priceBreakdown.discountAmount.toFixed(2) }}</span>
+            <span>会员优惠</span>
+            <span>-¥{{ order.priceBreakdown.memberDiscountAmount.toFixed(2) }}</span>
+          </div>
+          <div
+            v-if="couponDiscount > 0"
+            class="flex justify-between text-[var(--color-primary)]"
+          >
+            <span>优惠券</span>
+            <span>-¥{{ couponDiscount.toFixed(2) }}</span>
           </div>
           <div class="border-t border-[var(--color-border)] my-3"></div>
           <div class="flex justify-between items-center">
@@ -227,6 +242,13 @@ const order = ref<OrderDetailResponse | null>(null)
 const isPaid = computed(() => {
   if (!order.value) return false
   return ['PAID_WAITING', 'IN_PREPARATION', 'READY_FOR_PICKUP', 'COMPLETED', 'REFUNDING', 'REFUNDED'].includes(order.value.status)
+})
+
+/** 后端 discountAmount 是总折扣，减去会员折扣得到纯优惠券折扣 */
+const couponDiscount = computed(() => {
+  if (!order.value) return 0
+  const { discountAmount, memberDiscountAmount } = order.value.priceBreakdown
+  return Math.max(0, discountAmount - (memberDiscountAmount ?? 0))
 })
 
 // 退款拒绝原因（优先取接口返回的，SSE 缓存作为补充）

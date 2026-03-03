@@ -107,6 +107,13 @@ function mapTimeline(raw: any): OrderTimelineEvent[] {
 }
 
 function mapDetail(raw: any): OrderDetailResponse {
+  const items = raw.items ?? []
+  // 从 items 的 originalPrice 和 unitPrice 差值计算会员折扣总额
+  const memberDiscountAmount = items.reduce((sum: number, item: any) => {
+    const orig = item.originalPrice ?? item.unitPrice
+    return sum + (orig - item.unitPrice) * item.quantity
+  }, 0)
+
   return {
     orderNo: raw.orderNo,
     status: mapStatus(raw.status),
@@ -121,9 +128,10 @@ function mapDetail(raw: any): OrderDetailResponse {
     coupon: raw.couponUsed
       ? { name: raw.couponUsed.name, discountAmount: raw.couponUsed.discountAmount }
       : undefined,
-    items: raw.items ?? [],
+    items,
     priceBreakdown: {
       itemsAmount: raw.totalAmount ?? raw.itemsAmount ?? 0,
+      memberDiscountAmount: memberDiscountAmount > 0 ? memberDiscountAmount : undefined,
       discountAmount: raw.discountAmount ?? 0,
       payAmount: raw.payAmount ?? 0,
     },

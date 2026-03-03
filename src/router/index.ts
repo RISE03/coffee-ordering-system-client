@@ -85,6 +85,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '订单详情', requiresAuth: true }
       },
       {
+        path: 'member/level',
+        name: 'level-detail',
+        component: () => import('@/views/member/LevelDetailPage.vue'),
+        meta: { title: '我的等级', requiresAuth: true }
+      },
+      {
         path: 'points',
         name: 'points-center',
         component: () => import('@/views/PointsCenterView.vue'),

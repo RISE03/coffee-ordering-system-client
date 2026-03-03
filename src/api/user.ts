@@ -5,7 +5,7 @@
  */
 
 import apiClient from './client'
-import type { User, UpdateUserRequest, ChangePasswordRequest } from '@/types/user'
+import type { User, UpdateUserRequest, ChangePasswordRequest, LevelConfig } from '@/types/user'
 
 // ============================================================================
 // 用户信息接口
@@ -34,6 +34,15 @@ export async function updateUserProfile(data: UpdateUserRequest): Promise<void> 
  */
 export async function changePassword(data: ChangePasswordRequest): Promise<void> {
   await apiClient.put('/user/password', data)
+}
+
+/**
+ * 获取全部等级配置（无需登录）
+ * GET /api/member/levels
+ */
+export async function getLevelConfigs(): Promise<LevelConfig[]> {
+  const response = await apiClient.get<LevelConfig[]>('/member/levels')
+  return response.data
 }
 
 // ============================================================================
