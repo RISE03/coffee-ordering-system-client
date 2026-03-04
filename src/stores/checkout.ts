@@ -19,6 +19,7 @@ import type {
   PickupType
 } from '@/types/cart'
 import { getDisplayErrorMessage } from '@/utils/error'
+import { ensureCanOrderNow } from '@/utils/order-availability'
 
 const CHECKOUT_STORAGE_KEY = 'dawn_dusk_checkout_ctx'
 const CHECKOUT_FORM_KEY = 'dawn_dusk_checkout_form'
@@ -274,6 +275,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function submit(data: Omit<InternalSubmitParams, 'source'>) {
+    await ensureCanOrderNow(true)
     return submitCheckout({
       ...data,
       source: source.value
@@ -281,6 +283,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function pay(data: PayOrderRequest) {
+    await ensureCanOrderNow(true)
     return payOrder(data, idempotencyKey.value)
   }
 

@@ -9,6 +9,7 @@ import {
 } from './error-messages'
 
 export type NormalizedErrorType = 'network' | 'business' | 'http' | 'unknown'
+export const STORE_CLOSED_ERROR_CODE = 400600
 
 export interface NormalizedError {
   code?: string | number
@@ -88,10 +89,21 @@ export function normalizeError(error: unknown): NormalizedError {
 
   // Error 对象
   if (error instanceof Error) {
+    const withCode = error as Error & { code?: string | number; status?: number }
     const message = isNetworkError(error)
       ? NETWORK_ERROR_MESSAGE
-      : mapMessageFromCode(undefined, error.message)
-    return { message, type: isNetworkError(error) ? 'network' : 'unknown' }
+      : mapMessageFromCode(withCode.code, error.message)
+    const type: NormalizedErrorType = isNetworkError(error)
+      ? 'network'
+      : withCode.code !== undefined
+        ? 'business'
+        : 'unknown'
+    return {
+      code: withCode.code,
+      status: withCode.status,
+      message,
+      type
+    }
   }
 
   // 兜底
@@ -117,6 +129,17 @@ export function getDisplayErrorMessage(error: unknown): string {
     return NETWORK_ERROR_MESSAGE
   }
   return normalized.message
+}
+
+/**
+ * 判断是否为“门店已打烊”错误
+ */
+export function isStoreClosedError(error: unknown): boolean {
+  const normalized = normalizeError(error)
+  return (
+    normalized.code === STORE_CLOSED_ERROR_CODE ||
+    normalized.code === BusinessErrorCode.STORE_CLOSED
+  )
 }
 
 /**

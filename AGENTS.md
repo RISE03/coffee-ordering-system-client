@@ -10,6 +10,10 @@
 - 所有代码注释、文档、提交信息使用中文，专有名词保留原文即可。
 - 所有文件的读取、写入、提交等操作必须统一使用 UTF-8 编码
 
+## 工具约定
+- 在本仓库执行代码搜索、文件枚举时，优先使用项目内 ripgrep：`.\tools\rg\rg.exe`。
+- 仅当 `.\tools\rg\rg.exe` 不存在或不可执行时，才回退到系统 `rg` 或其他等价工具。
+
 ## 项目结构与模块组织
 - `src/` 为应用根目录：`views/` 存放路由页面（首页、菜单、购物车、登录/注册、会员结算与订单）；`components/` 拆分通用 UI（`common/`、`layout/`、`member/`）；`stores/` 放置 Pinia 状态（`auth`、`cart`、`theme`）；`api/` 封装 axios 拦截器与 `/api` 前缀；`router/index.ts` 定义路由与登录/访客守卫；`types/` 集中 DTO 与存储键；`utils/` 放工具函数；`composables/` 放可复用组合式函数；`tests/` 放 Vitest 相关测试与初始化；`style.css` 启动 Tailwind 与主题变量；`assets/` 存静态资源。
 - `public/` 为原样输出的静态文件；`index.html` 是 Vite 入口；`dist/` 为构建产物。

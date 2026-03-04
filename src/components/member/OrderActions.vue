@@ -70,8 +70,9 @@ import { useRouter } from 'vue-router'
 import { useDialog, useMessage } from 'naive-ui'
 import { useOrderStore } from '@/stores/order'
 import { useCheckoutStore } from '@/stores/checkout'
-import { getDisplayErrorMessage } from '@/utils/error'
+import { getDisplayErrorMessage, isStoreClosedError } from '@/utils/error'
 import type { OrderStatus } from '@/types/order'
+import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 import RefundDialog from './RefundDialog.vue'
 
 // Props
@@ -195,6 +196,11 @@ function handleCancel() {
 }
 
 async function handlePay() {
+  const canProceed = await guardOrderEntry(message)
+  if (!canProceed) {
+    return
+  }
+
   dialog.warning({
     title: '确认支付',
     content: `确定要支付订单 ${props.orderNo} 吗？`,
@@ -208,6 +214,9 @@ async function handlePay() {
         message.success('支付成功')
         emit('paid')
       } catch (error) {
+        if (isStoreClosedError(error)) {
+          return
+        }
         message.error(getDisplayErrorMessage(error))
       } finally {
         paying.value = false

@@ -8,6 +8,7 @@ import { useCartStore, CART_QUANTITY_MIN, CART_QUANTITY_MAX } from '@/stores/car
 import { useCheckoutStore } from '@/stores/checkout'
 import type { CartItem } from '@/types/cart'
 import { getDisplayErrorMessage } from '@/utils/error'
+import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 
 const router = useRouter()
 const route = useRoute()
@@ -167,11 +168,17 @@ function handleGoShopping() {
   router.push('/menu')
 }
 
-function goCheckout() {
+async function goCheckout() {
   if (cartStore.isEmpty) {
     message.info('购物车还是空的，先去挑选一些好物吧')
     return
   }
+
+  const canProceed = await guardOrderEntry(message)
+  if (!canProceed) {
+    return
+  }
+
   checkoutStore.reset()
   checkoutStore.setSource('cart')
   checkoutStore.setCartSnapshot(cartStore.items)

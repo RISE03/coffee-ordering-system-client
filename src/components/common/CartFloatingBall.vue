@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { NIcon, NBadge } from 'naive-ui'
+import { NIcon, NBadge, useMessage } from 'naive-ui'
 import { CartOutline, CloseOutline } from '@vicons/ionicons5'
 import { useCartStore } from '@/stores/cart'
+import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const message = useMessage()
 
 const isExpanded = ref(false)
 
@@ -29,7 +31,12 @@ const goToCart = () => {
   router.push('/member/cart')
 }
 
-const goToCheckout = () => {
+const goToCheckout = async () => {
+  const canProceed = await guardOrderEntry(message)
+  if (!canProceed) {
+    return
+  }
+
   isExpanded.value = false
   router.push('/member/checkout')
 }

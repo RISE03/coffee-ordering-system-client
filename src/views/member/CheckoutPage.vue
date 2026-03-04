@@ -28,7 +28,8 @@ import CheckoutSummary from '@/components/member/CheckoutSummary.vue'
 import { useCartStore } from '@/stores/cart'
 import { useCheckoutStore } from '@/stores/checkout'
 import type { BuyNowState, CheckoutItem, CheckoutSource, PickupType } from '@/types/cart'
-import { getDisplayErrorMessage } from '@/utils/error'
+import { getDisplayErrorMessage, isStoreClosedError } from '@/utils/error'
+import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 
 const route = useRoute()
 const router = useRouter()
@@ -252,6 +253,11 @@ function handleBack() {
 }
 
 async function handleSubmit() {
+  const canProceed = await guardOrderEntry(message)
+  if (!canProceed) {
+    return
+  }
+
   try {
     await formRef.value?.validate()
   } catch {
@@ -285,6 +291,9 @@ async function handleSubmit() {
     Object.assign(form, checkoutStore.formDraft)
     router.replace(`/member/orders/${submitRes.orderNo}`)
   } catch (err) {
+    if (isStoreClosedError(err)) {
+      return
+    }
     message.error(getDisplayErrorMessage(err))
   } finally {
     submitting.value = false

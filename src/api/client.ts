@@ -5,7 +5,11 @@ import {
   type ApiResponse,
   isUnauthorizedError
 } from '@/types/api'
-import { normalizeError, mapMessageFromCode } from '@/utils/error'
+import {
+  normalizeError,
+  mapMessageFromCode,
+  STORE_CLOSED_ERROR_CODE
+} from '@/utils/error'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
@@ -68,7 +72,11 @@ apiClient.interceptors.response.use(
         }
         handleUnauthorized(displayMsg, config)
       } else {
-        message.error(displayMsg)
+        if (res.code === STORE_CLOSED_ERROR_CODE) {
+          message.warning(displayMsg)
+        } else {
+          message.error(displayMsg)
+        }
       }
 
       return Promise.reject(buildError(displayMsg, res.code))

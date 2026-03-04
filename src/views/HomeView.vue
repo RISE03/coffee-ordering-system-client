@@ -37,32 +37,6 @@
               {{ currentDisplaySlotConfig?.description }}
             </p>
 
-            <!-- 时段专属优惠横幅 -->
-            <div
-              v-if="currentDisplaySlotConfig?.promotion"
-              class="mt-4 inline-flex items-center gap-3 px-5 py-3 rounded-full promotion-banner"
-              :style="{
-                backgroundColor: currentDisplaySlotConfig.colors.primary + '20',
-                borderColor: currentDisplaySlotConfig.colors.accent
-              }"
-            >
-              <span
-                v-if="currentDisplaySlotConfig.promotion.tag"
-                class="px-2 py-0.5 rounded text-xs font-bold"
-                :style="{
-                  backgroundColor: currentDisplaySlotConfig.colors.tagBg || currentDisplaySlotConfig.colors.primary,
-                  color: currentDisplaySlotConfig.colors.tagText || currentDisplaySlotConfig.colors.text
-                }"
-              >
-                {{ currentDisplaySlotConfig.promotion.tag }}
-              </span>
-              <span
-                class="font-medium"
-                :style="{ color: currentDisplaySlotConfig.colors.text }"
-              >
-                {{ currentDisplaySlotConfig.promotion.title }}
-              </span>
-            </div>
           </div>
 
           <!-- Bento Grid 商品布局 -->
@@ -194,10 +168,4 @@ onMounted(async () => {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* 优惠横幅样式 */
-.promotion-banner {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid;
-}
 </style>

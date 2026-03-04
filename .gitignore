@@ -50,3 +50,6 @@ coverage
 .claude/
 .gemini/
 openspec/
+
+# 本地开发辅助资源（不需要提交）
+tools/rg/

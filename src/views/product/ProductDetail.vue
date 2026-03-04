@@ -161,6 +161,7 @@ import { useCheckoutStore } from '@/stores/checkout'
 import apiClient from '@/api/client'
 import { getDisplayErrorMessage } from '@/utils/error'
 import type { CartItem } from '@/types/cart'
+import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 
 // Product interface (simplified for this component)
 interface Product {
@@ -321,8 +322,12 @@ async function handleAddToCart() {
   }
 }
 
-function handleBuyNow() {
+async function handleBuyNow() {
   if (!product.value) return
+  const canProceed = await guardOrderEntry(message)
+  if (!canProceed) {
+    return
+  }
 
   // 构建一次性结算快照，不触碰购物车
   const item: CartItem = {

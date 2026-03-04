@@ -16,6 +16,7 @@ import type {
   PickupType,
   UsableCouponsResponse,
 } from '@/types/cart'
+import { normalizeCouponUnusableReason } from '@/utils/coupon'
 
 // ---- 后端原始优惠券字段 → 前端 CouponInfo 映射 ----
 
@@ -46,7 +47,7 @@ function mapCoupon(raw: RawCoupon): CouponInfo {
     validFrom: raw.expireTime,
     validTo: raw.expireTime,
     usable: raw.usable,
-    reason: raw.unusableReason ?? undefined,
+    reason: normalizeCouponUnusableReason(raw.unusableReason, raw.thresholdAmount),
   }
 }
 

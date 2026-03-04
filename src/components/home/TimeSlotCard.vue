@@ -145,10 +145,17 @@ function handleAddToCart(event: Event) {
           >
             {{ formattedPrice }}
           </span>
+          <p
+            v-if="!isOpen && !isSoldOut"
+            class="text-[11px] font-medium"
+            :style="{ color: slotColors.textSecondary }"
+          >
+            打烊可先加购
+          </p>
           <p v-if="isLowStock" class="text-xs text-orange-500 font-semibold low-stock-pulse">仅剩 {{ product.stock }} 件</p>
         </div>
 
-        <!-- 加入购物车按钮 / 售罄 / 已打烊 -->
+        <!-- 加入购物车按钮 / 售罄 -->
         <button
           v-if="isSoldOut"
           class="closed-button rounded-full flex items-center justify-center cursor-not-allowed"
@@ -158,7 +165,7 @@ function handleAddToCart(event: Event) {
           售罄
         </button>
         <button
-          v-else-if="isOpen"
+          v-else
           class="rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
           :class="[size === 'large' ? 'w-12 h-12' : 'w-9 h-9']"
           :style="{
@@ -181,16 +188,6 @@ function handleAddToCart(event: Event) {
             <line x1="12" y1="4" x2="12" y2="20" />
             <line x1="4" y1="12" x2="20" y2="12" />
           </svg>
-        </button>
-
-        <!-- 已打烊状态按钮 -->
-        <button
-          v-else
-          class="closed-button rounded-full flex items-center justify-center cursor-not-allowed"
-          :class="[size === 'large' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs']"
-          disabled
-        >
-          已打烊
         </button>
       </div>
     </div>

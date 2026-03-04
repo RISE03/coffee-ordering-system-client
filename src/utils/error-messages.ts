@@ -27,6 +27,7 @@ export const BusinessErrorCode = {
   COUPON_USED: 'COUPON_USED',
   COUPON_THRESHOLD_NOT_MET: 'COUPON_THRESHOLD_NOT_MET',
   PREVIEW_EXPIRED: 'PREVIEW_EXPIRED',
+  STORE_CLOSED: 'STORE_CLOSED',
 
   // Order errors
   ORDER_NOT_FOUND: 'ORDER_NOT_FOUND',
@@ -74,6 +75,7 @@ export const ErrorMessages: Record<string, string> = {
   [BusinessErrorCode.COUPON_USED]: '这张优惠券已经用过了，看看其他优惠吧',
   [BusinessErrorCode.COUPON_THRESHOLD_NOT_MET]: '订单金额未达到优惠券使用门槛，再加点好物？',
   [BusinessErrorCode.PREVIEW_EXPIRED]: '预览已过期，请刷新后重新确认',
+  [BusinessErrorCode.STORE_CLOSED]: '当前已打烊，可先加入购物车，营业后再下单',
 
   // Order errors - 订单相关
   [BusinessErrorCode.ORDER_NOT_FOUND]: '找不到这个订单，请检查订单号',
