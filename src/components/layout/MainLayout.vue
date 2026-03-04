@@ -22,16 +22,8 @@
       :native-scrollbar="false"
     >
       <!-- Global Header -->
-      <HomeHeader
-        :brand-title="'朝暮'"
-        :brand-subtitle="'Dawn & Dusk'"
-        :points="points"
-        :avatar-url="authStore.user?.avatar"
-        :is-guest="!authStore.isLoggedIn"
-        @click-profile="router.push('/profile')"
-        @login="router.push('/login')"
-      />
-      
+      <HomeHeader />
+
       <!-- Content Area -->
       <n-layout-content
         class="flex-1 bg-transparent pt-20 pb-24"
@@ -56,21 +48,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NLayout, NLayoutContent } from 'naive-ui'
 import { useThemeStore } from '@/stores/theme'
-import { useAuthStore } from '@/stores/auth'
-import { getMyPoints } from '@/api/user'
 import HomeHeader from './HomeHeader.vue'
 import BottomNav from './BottomNav.vue'
 
 const router = useRouter()
 const route = useRoute()
 const themeStore = useThemeStore()
-const authStore = useAuthStore()
-
-const points = ref(0)
 
 // Determine active nav key based on current route
 const activeNavKey = computed(() => {
@@ -99,27 +86,8 @@ const handleBottomNav = (key: string) => {
   }
 }
 
-const fetchPoints = async () => {
-  if (authStore.isLoggedIn) {
-    try {
-      const data = await getMyPoints()
-      points.value = data.balance
-    } catch (e) {
-      console.error('Failed to fetch points', e)
-    }
-  } else {
-    points.value = 0
-  }
-}
-
-// Watch for auth changes to re-fetch points
-watch(() => authStore.isLoggedIn, () => {
-  fetchPoints()
-})
-
 onMounted(() => {
   themeStore.applyTheme()
-  fetchPoints()
 })
 </script>
 
