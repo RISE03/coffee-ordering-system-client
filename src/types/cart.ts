@@ -231,8 +231,14 @@ export interface CouponInfo {
   id: number
   /** Coupon name */
   name: string
-  /** Discount amount */
+  /** 优惠类型：full_reduction=满减，discount=折扣 */
+  type: string
+  /** 满减优惠金额（仅 full_reduction 类型有效） */
   discountAmount: number
+  /** 折扣率，如 0.85 表示 8.5 折（仅 discount 类型有效） */
+  discountRate?: number | null
+  /** 折扣最高优惠上限（仅 discount 类型有效） */
+  maxDiscountAmount?: number | null
   /** Minimum order amount threshold */
   threshold: number
   /** Validity start date */

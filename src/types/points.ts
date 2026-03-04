@@ -46,12 +46,16 @@ export interface CouponTemplate {
   id: number
   /** 优惠券名称 */
   name: string
-  /** 优惠类型（如 DISCOUNT 满减） */
+  /** 优惠类型：full_reduction=满减，discount=折扣 */
   type: string
   /** 满减门槛金额 */
   thresholdAmount: number
-  /** 优惠金额 */
+  /** 满减优惠金额（仅 full_reduction 类型有效） */
   discountAmount: number
+  /** 折扣率，如 0.85 表示 8.5 折（仅 discount 类型有效） */
+  discountRate?: number | null
+  /** 折扣最高优惠上限（仅 discount 类型有效） */
+  maxDiscountAmount?: number | null
   /** 所需积分 */
   requiredPoints: number
   /** 领取后有效天数 */
@@ -78,12 +82,16 @@ export interface UserCoupon {
   templateId: number
   /** 优惠券名称 */
   name: string
-  /** 优惠类型 */
+  /** 优惠类型：full_reduction=满减，discount=折扣 */
   type: string
   /** 满减门槛 */
   thresholdAmount: number
-  /** 优惠金额 */
+  /** 满减优惠金额（仅 full_reduction 类型有效） */
   discountAmount: number
+  /** 折扣率，如 0.85 表示 8.5 折（仅 discount 类型有效） */
+  discountRate?: number | null
+  /** 折扣最高优惠上限（仅 discount 类型有效） */
+  maxDiscountAmount?: number | null
   /** 状态 */
   status: UserCouponStatus
   /** 领取时间 */

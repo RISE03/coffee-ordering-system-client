@@ -55,10 +55,23 @@
           <!-- 左侧金额 -->
           <div class="coupon-card-left">
             <div class="coupon-card-amount">
-              <span class="currency">￥</span>
-              <span class="value">{{ coupon.discountAmount }}</span>
+              <template v-if="coupon.type === 'discount'">
+                <span class="value">{{ formatDiscountRate(coupon.discountRate) }}</span>
+                <span class="currency">折</span>
+              </template>
+              <template v-else>
+                <span class="currency">￥</span>
+                <span class="value">{{ coupon.discountAmount }}</span>
+              </template>
             </div>
-            <div class="coupon-card-threshold">满{{ coupon.thresholdAmount }}元可用</div>
+            <div class="coupon-card-threshold">
+              <template v-if="coupon.type === 'discount' && coupon.maxDiscountAmount">
+                最多减¥{{ coupon.maxDiscountAmount }}
+              </template>
+              <template v-else>
+                满{{ coupon.thresholdAmount }}元可用
+              </template>
+            </div>
           </div>
           <!-- 右侧信息 -->
           <div class="coupon-card-right">
@@ -121,6 +134,12 @@ function formatDate(timeStr: string): string {
   const d = new Date(timeStr)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`
+}
+
+function formatDiscountRate(rate: number | null | undefined): string {
+  if (!rate) return '-'
+  const val = rate * 10
+  return val % 1 === 0 ? String(val) : val.toFixed(1)
 }
 </script>
 
@@ -242,6 +261,10 @@ function formatDate(timeStr: string): string {
 }
 .coupon-card-amount .value {
   font-size: 26px;
+}
+/* 折扣券：折扣率字号适配 */
+.coupon-card-amount .value:has(+ .currency) {
+  font-size: 28px;
 }
 
 .coupon-card--disabled .coupon-card-amount {

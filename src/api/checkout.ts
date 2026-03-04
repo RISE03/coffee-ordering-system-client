@@ -10,11 +10,56 @@ import type {
   CheckoutPreviewResponse,
   CheckoutSubmitRequest,
   CheckoutSubmitResponse,
+  CouponInfo,
   PayOrderRequest,
   PayOrderResponse,
   PickupType,
   UsableCouponsResponse,
 } from '@/types/cart'
+
+// ---- 后端原始优惠券字段 → 前端 CouponInfo 映射 ----
+
+/** 后端返回的优惠券原始结构 */
+interface RawCoupon {
+  couponId: number
+  name: string
+  type: string
+  thresholdAmount: number
+  discountAmount: number
+  discountRate?: number | null
+  maxDiscountAmount?: number | null
+  expireTime: string
+  usable: boolean
+  unusableReason?: string | null
+}
+
+/** 将后端原始优惠券映射为前端 CouponInfo */
+function mapCoupon(raw: RawCoupon): CouponInfo {
+  return {
+    id: raw.couponId,
+    name: raw.name,
+    type: raw.type,
+    discountAmount: raw.discountAmount,
+    discountRate: raw.discountRate ?? null,
+    maxDiscountAmount: raw.maxDiscountAmount ?? null,
+    threshold: raw.thresholdAmount,
+    validFrom: raw.expireTime,
+    validTo: raw.expireTime,
+    usable: raw.usable,
+    reason: raw.unusableReason ?? undefined,
+  }
+}
+
+/** 将后端优惠券列表对映射为前端 { usable, unusable } 格式 */
+function mapCouponsResponse(raw: {
+  usableCoupons?: RawCoupon[]
+  unusableCoupons?: RawCoupon[]
+}): UsableCouponsResponse {
+  return {
+    usable: (raw.usableCoupons ?? []).map(mapCoupon),
+    unusable: (raw.unusableCoupons ?? []).map(mapCoupon),
+  }
+}
 
 /** 前端内部提交参数（使用语义化字符串） */
 export interface InternalSubmitParams {
@@ -45,8 +90,19 @@ export function generateIdempotencyKey(): string {
 export async function previewCheckout(
   data: CheckoutPreviewRequest
 ): Promise<CheckoutPreviewResponse> {
-  const res = await apiClient.post<CheckoutPreviewResponse>('/member/checkout/preview', data)
-  return res.data as CheckoutPreviewResponse
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res = await apiClient.post<any>('/member/checkout/preview', data)
+  const raw = res.data
+
+  // 后端将 usableCoupons / unusableCoupons 放在顶层，前端需要映射为 coupons: { usable, unusable }
+  const mapped: CheckoutPreviewResponse = {
+    items: raw.items,
+    coupons: mapCouponsResponse(raw),
+    price: raw.price,
+    pointsEstimate: raw.pointsEstimate,
+    generatedAt: raw.generatedAt,
+  }
+  return mapped
 }
 
 /**
@@ -97,10 +153,12 @@ export async function payOrder(
  * Get usable coupons for a given order amount
  */
 export async function getUsableCouponsForAmount(amount: number): Promise<UsableCouponsResponse> {
-  const res = await apiClient.get<UsableCouponsResponse>('/member/coupons/usable', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res = await apiClient.get<any>('/member/coupons/usable', {
     params: { amount }
   })
-  return res.data as UsableCouponsResponse
+  // 后端返回 { usableCoupons, unusableCoupons }，映射为前端 { usable, unusable }
+  return mapCouponsResponse(res.data)
 }
 
 // 兼容旧命名，避免调用方变更遗漏

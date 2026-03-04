@@ -1,9 +1,7 @@
 <template>
   <div class="coupon-selector">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-medium text-[var(--color-text)]">优惠券</h3>
+    <div v-if="selectedCouponId" class="flex justify-end mb-3">
       <n-button
-        v-if="selectedCouponId"
         text
         type="error"
         size="small"
@@ -39,11 +37,22 @@
         >
           <div class="coupon-left">
             <div class="coupon-amount">
-              <span class="currency">￥</span>
-              <span class="value">{{ coupon.discountAmount }}</span>
+              <template v-if="coupon.type === 'discount'">
+                <span class="value">{{ formatDiscountRate(coupon.discountRate) }}</span>
+                <span class="currency">折</span>
+              </template>
+              <template v-else>
+                <span class="currency">￥</span>
+                <span class="value">{{ coupon.discountAmount }}</span>
+              </template>
             </div>
             <div class="coupon-threshold">
-              满{{ coupon.threshold }}元可用
+              <template v-if="coupon.type === 'discount' && coupon.maxDiscountAmount">
+                最多减¥{{ coupon.maxDiscountAmount }}
+              </template>
+              <template v-else>
+                满{{ coupon.threshold }}元可用
+              </template>
             </div>
           </div>
           <div class="coupon-right">
@@ -77,11 +86,22 @@
               >
                 <div class="coupon-left">
                   <div class="coupon-amount">
-                    <span class="currency">￥</span>
-                    <span class="value">{{ coupon.discountAmount }}</span>
+                    <template v-if="coupon.type === 'discount'">
+                      <span class="value">{{ formatDiscountRate(coupon.discountRate) }}</span>
+                      <span class="currency">折</span>
+                    </template>
+                    <template v-else>
+                      <span class="currency">￥</span>
+                      <span class="value">{{ coupon.discountAmount }}</span>
+                    </template>
                   </div>
                   <div class="coupon-threshold">
-                    满{{ coupon.threshold }}元可用
+                    <template v-if="coupon.type === 'discount' && coupon.maxDiscountAmount">
+                      最多减¥{{ coupon.maxDiscountAmount }}
+                    </template>
+                    <template v-else>
+                      满{{ coupon.threshold }}元可用
+                    </template>
                   </div>
                 </div>
                 <div class="coupon-right">
@@ -187,6 +207,12 @@ function formatValidity(from: string, to: string): string {
   }
 
   return `${formatDate(fromDate)} - ${formatDate(toDate)}`
+}
+
+function formatDiscountRate(rate: number | null | undefined): string {
+  if (!rate) return '-'
+  const val = rate * 10
+  return val % 1 === 0 ? String(val) : val.toFixed(1)
 }
 </script>
 

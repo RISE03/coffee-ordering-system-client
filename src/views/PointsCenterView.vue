@@ -63,10 +63,23 @@
           >
             <div class="template-left">
               <div class="template-amount">
-                <span class="currency">￥</span>
-                <span class="value">{{ tpl.discountAmount }}</span>
+                <template v-if="tpl.type === 'discount'">
+                  <span class="value">{{ formatDiscountRate(tpl.discountRate) }}</span>
+                  <span class="currency">折</span>
+                </template>
+                <template v-else>
+                  <span class="currency">￥</span>
+                  <span class="value">{{ tpl.discountAmount }}</span>
+                </template>
               </div>
-              <div class="template-threshold">满{{ tpl.thresholdAmount }}元可用</div>
+              <div class="template-threshold">
+                <template v-if="tpl.type === 'discount' && tpl.maxDiscountAmount">
+                  最多减¥{{ tpl.maxDiscountAmount }}
+                </template>
+                <template v-else>
+                  满{{ tpl.thresholdAmount }}元可用
+                </template>
+              </div>
             </div>
             <div class="template-right">
               <div class="template-name">{{ tpl.name }}</div>
@@ -265,6 +278,12 @@ function formatTime(timeStr: string): string {
   const d = new Date(timeStr)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function formatDiscountRate(rate: number | null | undefined): string {
+  if (!rate) return '-'
+  const val = rate * 10
+  return val % 1 === 0 ? String(val) : val.toFixed(1)
 }
 </script>
 

@@ -528,18 +528,19 @@ onMounted(async () => {
             <div v-if="!previewReady" class="text-sm text-[var(--color-text-secondary)] py-4 text-center bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg">
               确认价格后将显示可用的优惠券
             </div>
-            
-            <NAlert v-if="couponWarning" type="warning" show-icon class="mb-3 rounded-lg">
-              {{ couponWarning }}
-            </NAlert>
-            
-            <CouponSelector
-              v-else
-              :usable="checkoutStore.usableCoupons"
-              :unusable="checkoutStore.unusableCoupons"
-              v-model:selected-coupon-id="checkoutStore.selectedCouponId"
-              :loading="checkoutStore.couponLoading"
-            />
+
+            <template v-else>
+              <NAlert v-if="couponWarning" type="warning" show-icon class="mb-3 rounded-lg">
+                {{ couponWarning }}
+              </NAlert>
+
+              <CouponSelector
+                :usable="checkoutStore.usableCoupons"
+                :unusable="checkoutStore.unusableCoupons"
+                v-model:selected-coupon-id="checkoutStore.selectedCouponId"
+                :loading="checkoutStore.couponLoading"
+              />
+            </template>
           </div>
         </div>
 
