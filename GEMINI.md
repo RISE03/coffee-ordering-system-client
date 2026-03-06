@@ -1,4 +1,4 @@
-﻿# 项目指南 (GEMINI.md)
+# 项目指南 (GEMINI.md)
 
 > **⚠️ 核心指令 / CRITICAL**
 > **请务必全程使用【简体中文】进行对话、回复、解释代码和编写文档。**
@@ -18,12 +18,12 @@
 
 **技术栈**：
 *   **核心框架**：Vue 3 (Composition API, `<script setup>`)
-*   **构建工具**：Vite 7.x
-*   **语言**：TypeScript 5.x
+*   **构建工具**：Vite 7.2+
+*   **语言**：TypeScript 5.9+
 *   **UI 组件库**：Naive UI
 *   **状态管理**：Pinia
 *   **路由**：Vue Router 4
-*   **样式**：Tailwind CSS + CSS 变量主题切换
+*   **样式**：Tailwind CSS v4 + CSS 变量主题切换
 *   **HTTP 客户端**：Axios
 *   **单元测试**：Vitest
 
@@ -39,8 +39,8 @@
 | 命令 | 说明 |
 | :--- | :--- |
 | `npm install` | 安装项目依赖 |
-| `npm run dev` | 启动开发服务器 (默认端口 5174，支持局域网访问) |
-| `npm run build` | 执行类型检查 (`vue-tsc`) 并构建生产版本 |
+| `npm run dev` | 启动开发服务器 (默认端口 5174) |
+| `npm run build` | 执行类型检查并构建生产版本 |
 | `npm run preview` | 预览构建后的生产版本 |
 | `npm run test` | 运行单元测试 (Vitest) |
 | `npm run test:run` | 单元测试单次运行 (CI 模式) |
@@ -48,54 +48,61 @@
 
 ### 后端对接
 *   **API 地址**：默认后端运行在 `http://localhost:8080` (Spring Boot)。
-*   **代理配置**：开发环境代理可在 `vite.config.ts` 中的 `server.proxy` 配置。
+*   **代理配置**：详见 `vite.config.ts` 中的 `server.proxy`。
 *   **认证方式**：JWT Token (`Authorization: Bearer <token>`)。
 
 ## 3. 目录结构说明
 
 ```text
 C:\D\task\DawnDusk\frontend-client\
-├── .specify/              # 项目详细规格说明书与设计文档 (重要参考)
-│   ├── markdown/          # 需求、UI设计、接口定义、数据库设计等
-│   └── ...
-├── specs/                 # 具体的实施规格与任务清单 (如 001-client-spa-specs)
+├── bug/                   # 缺陷追踪与复盘文档目录 (记录关键 Bug 修复与复盘)
+├── public/                # 静态资源 (不经过构建过程，包含 images/, vite.svg)
 ├── src/                   # 源代码目录 (@)
-│   ├── api/               # API 接口封装 (Axios)
-│   ├── assets/            # 静态资源
-│   ├── components/        # 公共组件
-│   ├── composables/       # 组合式函数 (Hooks)
-│   ├── router/            # 路由配置
-│   ├── stores/            # 状态管理 (Pinia)
-│   ├── tests/             # 单元测试
-│   ├── types/             # TypeScript 类型定义
-│   ├── utils/             # 工具函数
+│   ├── api/               # API 接口封装 (按模块划分：auth, cart, checkout, coupon, order, products 等)
+│   ├── assets/            # 构建资源 (由 Vite 处理的资源)
+│   ├── components/        # 组件目录
+│   │   ├── common/        # 通用组件 (SearchBar, EmptyState, Skeleton 等)
+│   │   ├── home/          # 首页业务组件 (BentoGrid, TimelineNav 等)
+│   │   ├── layout/        # 页面布局组件 (AppHeader, BottomNav, MainLayout 等)
+│   │   ├── login/         # 登录注册相关视觉组件
+│   │   ├── member/        # 会员/订单详情业务组件
+│   │   └── product/       # 商品展示组件
+│   ├── composables/       # 组合式函数 (自定义 Hooks，如 useTimeSlot, useOrderAvailabilityGuard)
+│   ├── constants/         # 全局业务常量 (如 timeflow 阶段定义)
+│   ├── router/            # 路由配置 (Vue Router 4)
+│   ├── stores/            # 状态管理 (Pinia stores 及其 .spec.ts 测试文件)
+│   ├── tests/             # 全局测试配置与环境 setup
+│   ├── types/             # TypeScript 类型定义 (按业务模型划分)
+│   ├── utils/             # 工具函数 (格式化、错误处理、SSE、优惠券计算等)
 │   ├── views/             # 页面视图
+│   │   ├── member/        # 会员中心相关子页面 (Checkout, OrderList, OrderDetail 等)
+│   │   └── product/       # 商品详情页面
 │   ├── App.vue            # 根组件
-│   ├── main.ts            # 入口文件
-│   └── style.css          # 全局样式
-├── CLAUDE.md              # AI 助手协作指南 (包含路径规范等)
+│   ├── main.ts            # 入口文件 (挂载 Pinia, Router, 初始化主题与认证)
+│   └── style.css          # 全局样式 (集成 Tailwind CSS v4)
+├── tools/                 # 辅助工具
 ├── vite.config.ts         # Vite 配置文件
-├── tsconfig.json          # TypeScript 配置文件
-├── package.json           # 依赖与脚本配置
-└── README.md              # 项目基础说明
+├── tailwind.config.js     # Tailwind 配置文件
+├── package.json           # 依赖与脚本
+└── README.md              # 基础项目说明
 ```
 
 ## 4. 开发规范与约定
 
-### 文件操作规范 (Windows)
-*   **绝对路径**：在进行文件读取、写入或编辑时，**必须**使用包含盘符的完整绝对路径。
-*   **反斜杠**：路径分隔符必须使用反斜杠 (`\`)，严禁使用正斜杠 (`/`)。
-    *   ✅ 正确：`C:\D\task\DawnDusk\frontend-client\src\App.vue`
-    *   ❌ 错误：`C:/D/task/DawnDusk/frontend-client/src/App.vue`
+### 模块职责
+*   **API 交互**：统一在 `src/api/` 下定义请求函数，严禁在组件内直接使用 axios。
+*   **状态管理**：跨页面逻辑（如购物车、用户信息、全局主题）必须使用 Pinia Store。
+*   **业务逻辑**：复杂的逻辑应提取到 `src/composables/` 或 `src/utils/` 中。
 
-### 编码规范
-*   **语言**：代码注释、文档、提交信息均使用**简体中文**。
-*   **字符集**：所有文件必须使用 **UTF-8** 编码。
-*   **Vue 风格**：使用 Vue 3 Composition API 和 `<script setup>` 语法糖。
-*   **组件名**：多单词大驼峰命名 (PascalCase)，如 `UserProfile.vue`。
+### 编码约定
+*   **绝对路径**：文件编辑与读取必须使用包含盘符的完整绝对路径。
+*   **路径别名**：代码内部引用推荐使用 `@/` 前缀。
+*   **Vue 风格**：强制使用 `<script setup>` 和 Composition API。
+*   **类型安全**：所有数据模型必须在 `src/types/` 定义，严禁在业务代码中滥用 `any`。
+
+### 质量保证
+*   **单元测试**：核心业务模块（Stores, Utils）应具备对应的 `.spec.ts` 文件。
+*   **缺陷复盘**：修复重大 Bug 后，需在 `bug/` 目录下创建复盘文档。
 
 ### 文档参考
-在进行功能开发前，请务必查阅 `.specify/markdown/` 下的相关文档，特别是：
-*   `需求规格说明书`：理解业务逻辑。
-*   `接口设计说明`：确认后端 API 接口定义。
-*   `页面与模块结构设计`：确认页面布局与组件划分。
+*   在开发前应查阅 `bug/` 目录下的历史问题复盘，以规避已知坑点。
