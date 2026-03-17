@@ -37,7 +37,7 @@
       </div>
 
       <EmptyState
-        v-else-if="coupons.length === 0"
+        v-else-if="filteredCoupons.length === 0"
         title="暂无优惠券"
         description="去光阴小铺用光阴值兑换优惠券吧！"
         icon="🎫"
@@ -46,11 +46,16 @@
       />
 
       <div v-else class="flex flex-col gap-3">
+        <div class="list-meta">
+          <span>共 {{ filteredCoupons.length }} 张</span>
+          <span>显示 {{ pageStart }} - {{ pageEnd }} 张</span>
+        </div>
+
         <div
           v-for="coupon in coupons"
           :key="coupon.id"
           class="glass-card coupon-card"
-          :class="{ 'coupon-card--disabled': activeStatus !== 'unused' }"
+          :class="{ 'coupon-card--disabled': coupon.status !== 'unused' }"
         >
           <!-- 左侧金额 -->
           <div class="coupon-card-left">
@@ -82,11 +87,31 @@
           </div>
           <!-- 状态标签（已使用/已过期） -->
           <div
-            v-if="activeStatus !== 'unused'"
+            v-if="coupon.status !== 'unused'"
             class="coupon-card-status"
           >
-            {{ activeStatus === 'used' ? '已使用' : '已过期' }}
+            {{ coupon.status === 'used' ? '已使用' : '已过期' }}
           </div>
+        </div>
+
+        <div v-if="totalPages > 1" class="pagination-bar">
+          <button
+            class="pagination-btn"
+            :disabled="currentPageDisplay <= 1"
+            @click="goToPage(currentPageDisplay - 1)"
+          >
+            ‹ 上一页
+          </button>
+          <span class="pagination-info">
+            {{ currentPageDisplay }} / {{ totalPages }}
+          </span>
+          <button
+            class="pagination-btn"
+            :disabled="currentPageDisplay >= totalPages"
+            @click="goToPage(currentPageDisplay + 1)"
+          >
+            下一页 ›
+          </button>
         </div>
       </div>
 
@@ -95,39 +120,81 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { NIcon, NSpin, useMessage } from 'naive-ui'
 import { ChevronBackOutline } from '@vicons/ionicons5'
 import { useRouter } from 'vue-router'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { getMyCoupons } from '@/api/coupon'
 import type { UserCoupon, UserCouponStatus } from '@/types/points'
+import { paginateList } from '@/utils/pagination'
 
 const message = useMessage()
 const router = useRouter()
 
 const activeStatus = ref<UserCouponStatus>('unused')
-const coupons = ref<UserCoupon[]>([])
+const allCoupons = ref<UserCoupon[]>([])
 const loading = ref(false)
+const currentPage = ref(1)
+const PAGE_SIZE = 6
+
+const filteredCoupons = computed(() => (
+  allCoupons.value.filter(coupon => coupon.status === activeStatus.value)
+))
+
+const pagination = computed(() => (
+  paginateList(filteredCoupons.value, currentPage.value, PAGE_SIZE)
+))
+
+const coupons = computed(() => pagination.value.list)
+const totalPages = computed(() => pagination.value.totalPages)
+const currentPageDisplay = computed(() => pagination.value.page)
+const pageStart = computed(() => pagination.value.start)
+const pageEnd = computed(() => pagination.value.end)
 
 onMounted(() => {
   loadCoupons()
 })
 
+watch(totalPages, (nextTotalPages) => {
+  if (nextTotalPages === 0) {
+    currentPage.value = 1
+    return
+  }
+
+  if (currentPage.value > nextTotalPages) {
+    currentPage.value = nextTotalPages
+  }
+})
+
 function switchTab(status: UserCouponStatus) {
+  if (activeStatus.value === status) return
   activeStatus.value = status
-  loadCoupons()
+  currentPage.value = 1
+  scrollToTop()
+}
+
+function goToPage(page: number) {
+  if (totalPages.value === 0) return
+
+  currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
+  scrollToTop()
 }
 
 async function loadCoupons() {
   loading.value = true
   try {
-    coupons.value = await getMyCoupons(activeStatus.value)
+    allCoupons.value = await getMyCoupons()
+    currentPage.value = 1
   } catch {
     message.error('获取优惠券失败')
   } finally {
     loading.value = false
   }
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function formatDate(timeStr: string): string {
@@ -227,6 +294,16 @@ function formatDiscountRate(rate: number | null | undefined): string {
   background: color-mix(in srgb, var(--color-text) 6%, transparent);
 }
 
+.list-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
 /* 优惠券卡片 */
 .coupon-card {
   display: flex;
@@ -308,5 +385,52 @@ function formatDiscountRate(rate: number | null | undefined): string {
   color: var(--color-text-secondary);
   background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent);
   transform: rotate(35deg);
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0 2px;
+}
+
+.pagination-btn {
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: var(--color-bg);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 28%, transparent);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  min-width: 72px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
 }
 </style>
