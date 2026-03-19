@@ -36,7 +36,7 @@
         :error="error"
         loading-text="正在登录中..."
         error-text="登录遇到了一点问题"
-        @retry="handleLogin"
+        @retry="handleRetry"
       >
         <div class="login-card glass-form p-8">
           <n-form
@@ -142,7 +142,7 @@ const rules: FormRules = {
 }
 
 // 使用 useRequestState 管理请求状态
-const { loading, error, run } = useRequestState()
+const { loading, error, run, reset } = useRequestState()
 
 const handleLogin = (e?: Event) => {
   e?.preventDefault()
@@ -154,6 +154,11 @@ const handleLogin = (e?: Event) => {
   })
 }
 
+
+const handleRetry = () => {
+  // 失败态下表单会被卸载，先恢复到表单视图，保留用户已填写内容
+  reset()
+}
 const submitLogin = () => {
   run(async () => {
     const data = await authApi.login({

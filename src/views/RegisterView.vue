@@ -36,7 +36,7 @@
         :error="error"
         loading-text="正在注册中..."
         error-text="注册遇到了一点问题"
-        @retry="handleRegister"
+        @retry="handleRetry"
       >
         <div class="register-card glass-form p-8">
           <n-form
@@ -164,7 +164,7 @@ const rules: FormRules = {
 }
 
 // 使用 useRequestState 管理请求状态
-const { loading, error, run } = useRequestState()
+const { loading, error, run, reset } = useRequestState()
 
 const handleRegister = (e?: Event) => {
   e?.preventDefault()
@@ -176,6 +176,11 @@ const handleRegister = (e?: Event) => {
   })
 }
 
+
+const handleRetry = () => {
+  // 失败态下表单会被卸载，先恢复到表单视图，保留用户已填写内容
+  reset()
+}
 const submitRegister = () => {
   run(async () => {
     await authApi.register({
