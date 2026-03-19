@@ -6,6 +6,7 @@ import MenuView from '@/views/MenuView.vue'
 import CartView from '@/views/CartView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import ProductDetail from '@/views/product/ProductDetail.vue'
 import CheckoutPage from '@/views/member/CheckoutPage.vue'
@@ -27,6 +28,12 @@ const routes: RouteRecordRaw[] = [
     name: 'register',
     component: RegisterView,
     meta: { title: '注册', guestOnly: true, hideGlobalBg: true }
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPasswordView,
+    meta: { title: '忘记密码', guestOnly: true, hideGlobalBg: true }
   },
   // 主布局页面
   {

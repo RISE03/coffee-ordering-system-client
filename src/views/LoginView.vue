@@ -76,11 +76,18 @@
               </n-button>
             </div>
 
-            <div class="mt-6 text-center text-sm login-footer-text">
-              还没有账号？
-              <router-link to="/register" class="login-link">
-                立即注册
-              </router-link>
+            <div class="mt-6 text-center text-sm login-footer-text space-y-3">
+              <div>
+                <router-link to="/forgot-password" class="login-link">
+                  忘记密码？
+                </router-link>
+              </div>
+              <div>
+                还没有账号？
+                <router-link to="/register" class="login-link">
+                  立即注册
+                </router-link>
+              </div>
             </div>
           </n-form>
         </div>
@@ -134,6 +141,10 @@ const formValue = reactive({
   username: '',
   password: ''
 })
+
+if (typeof route.query.username === 'string') {
+  formValue.username = route.query.username
+}
 
 // 表单验证规则
 const rules: FormRules = {

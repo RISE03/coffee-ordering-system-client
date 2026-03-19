@@ -15,6 +15,7 @@ import router from '@/router'
 
 type RequestConfigWithAuthFlag = InternalAxiosRequestConfig & {
   skipAuthRedirect?: boolean
+  skipErrorMessage?: boolean
 }
 
 // 仅这些接口返回 401 时，才认为登录态失效并触发强制登出
@@ -72,10 +73,13 @@ apiClient.interceptors.response.use(
         }
         handleUnauthorized(displayMsg, config)
       } else {
-        if (res.code === STORE_CLOSED_ERROR_CODE) {
-          message.warning(displayMsg)
-        } else {
-          message.error(displayMsg)
+        const config = response.config as RequestConfigWithAuthFlag
+        if (!config?.skipErrorMessage) {
+          if (res.code === STORE_CLOSED_ERROR_CODE) {
+            message.warning(displayMsg)
+          } else {
+            message.error(displayMsg)
+          }
         }
       }
 
@@ -95,7 +99,7 @@ apiClient.interceptors.response.use(
         return Promise.reject(error)
       }
       handleUnauthorized(normalized.message, config)
-    } else {
+    } else if (!config?.skipErrorMessage) {
       message.error(normalized.message)
     }
 

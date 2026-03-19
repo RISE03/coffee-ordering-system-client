@@ -150,6 +150,41 @@ export interface RegisterResponse {
 }
 
 /**
+ * 获取重置密码验证码请求
+ */
+export interface ForgotPasswordCodeRequest {
+  /** 用户名 */
+  username: string
+}
+
+/**
+ * 获取重置密码验证码响应
+ */
+export interface ForgotPasswordCodeResponse {
+  /** 演示环境直接返回的验证码 */
+  verifyCode: string
+  /** 验证码有效期（秒） */
+  expireSeconds: number
+}
+
+/**
+ * 忘记密码重置请求
+ */
+export interface ForgotPasswordResetRequest {
+  /** 用户名 */
+  username: string
+  /** 验证码 */
+  verifyCode: string
+  /** 新密码 */
+  newPassword: string
+}
+
+/**
+ * 忘记密码重置响应
+ */
+export type ForgotPasswordResetResponse = null
+
+/**
  * 更新用户信息请求
  */
 export interface UpdateUserRequest {
