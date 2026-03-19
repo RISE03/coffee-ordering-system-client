@@ -49,7 +49,7 @@
             <n-form-item path="username" label="用户名">
               <n-input
                 v-model:value="formValue.username"
-                placeholder="请输入用户名 (3-20位字母数字下划线)"
+                placeholder="请输入用户名 (4-20位字母数字下划线)"
                 @keydown.enter.prevent
               />
             </n-form-item>
@@ -123,7 +123,7 @@ import ShapeBackground from '@/components/login/ShapeBackground.vue'
 import ThemeSwitcher from '@/components/common/ThemeSwitcher.vue'
 import { useRequestState } from '@/composables/useRequestState'
 import { authApi } from '@/api/auth'
-import { USERNAME_RULES, PASSWORD_RULES } from '@/types/user'
+import { REGISTER_USERNAME_RULES, REGISTER_PASSWORD_RULES } from '@/types/user'
 
 const router = useRouter()
 const message = useMessage()
@@ -145,8 +145,8 @@ const formValue = reactive({
 
 // 表单验证规则
 const rules: FormRules = {
-  username: USERNAME_RULES,
-  password: PASSWORD_RULES,
+  username: REGISTER_USERNAME_RULES,
+  password: REGISTER_PASSWORD_RULES,
   confirmPassword: [
     {
       required: true,
@@ -176,11 +176,11 @@ const handleRegister = (e?: Event) => {
   })
 }
 
-
 const handleRetry = () => {
   // 失败态下表单会被卸载，先恢复到表单视图，保留用户已填写内容
   reset()
 }
+
 const submitRegister = () => {
   run(async () => {
     await authApi.register({

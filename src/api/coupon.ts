@@ -15,7 +15,7 @@ const USED_STATUS_SET = new Set(['1', 'used', '已使用'])
 const EXPIRED_STATUS_SET = new Set(['2', 'expired', '已过期'])
 
 function normalizeDateInput(value: string): string {
-  const normalized = value.trim().replaceAll('.', '-')
+  const normalized = value.trim().replace(/\./g, '-')
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
     return `${normalized}T23:59:59.999`

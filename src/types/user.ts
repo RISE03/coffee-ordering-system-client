@@ -4,6 +4,8 @@
  * 定义用户实体、认证请求/响应及相关类型
  */
 
+import type { FormItemRule } from 'naive-ui'
+
 // ============================================================================
 // 用户基础类型
 // ============================================================================
@@ -204,50 +206,83 @@ export function createInitialAuthState(): AuthState {
 // ============================================================================
 
 /**
- * 用户名验证规则
+ * 注册用户名验证规则
  * - 必填
- * - 3-20 个字符
+ * - 4-20 个字符
  * - 仅包含字母、数字、下划线
  */
-export const USERNAME_RULES = {
-  required: true,
-  minLength: 3,
-  maxLength: 20,
-  pattern: /^[a-zA-Z0-9_]+$/,
-  messages: {
-    required: '请输入用户名',
-    minLength: '用户名至少 3 个字符',
-    maxLength: '用户名最多 20 个字符',
-    pattern: '用户名只能包含字母、数字和下划线',
+export const REGISTER_USERNAME_RULES: FormItemRule[] = [
+  {
+    required: true,
+    message: '请输入用户名',
+    trigger: ['input', 'blur'],
   },
-} as const
+  {
+    min: 4,
+    max: 20,
+    message: '用户名长度需在 4-20 个字符之间',
+    trigger: 'blur',
+  },
+  {
+    pattern: /^[a-zA-Z0-9_]+$/,
+    message: '用户名只能包含字母、数字和下划线',
+    trigger: ['input', 'blur'],
+  },
+]
 
 /**
- * 密码验证规则
+ * 登录用户名验证规则
+ * - 必填
+ */
+export const LOGIN_USERNAME_RULES: FormItemRule[] = [
+  {
+    required: true,
+    message: '请输入用户名',
+    trigger: ['input', 'blur'],
+  },
+]
+
+/**
+ * 注册密码验证规则
  * - 必填
  * - 6-32 个字符
  */
-export const PASSWORD_RULES = {
-  required: true,
-  minLength: 6,
-  maxLength: 32,
-  messages: {
-    required: '请输入密码',
-    minLength: '密码至少 6 个字符',
-    maxLength: '密码最多 32 个字符',
+export const REGISTER_PASSWORD_RULES: FormItemRule[] = [
+  {
+    required: true,
+    message: '请输入密码',
+    trigger: ['input', 'blur'],
   },
-} as const
+  {
+    min: 6,
+    max: 32,
+    message: '密码长度需在 6-32 个字符之间',
+    trigger: 'blur',
+  },
+]
+
+/**
+ * 登录密码验证规则
+ * - 必填
+ */
+export const LOGIN_PASSWORD_RULES: FormItemRule[] = [
+  {
+    required: true,
+    message: '请输入密码',
+    trigger: ['input', 'blur'],
+  },
+]
 
 /**
  * 手机号验证规则（中国大陆）
  */
-export const MOBILE_RULES = {
-  required: false,
-  pattern: /^1[3-9]\d{9}$/,
-  messages: {
-    pattern: '请输入有效的手机号码',
+export const MOBILE_RULES: FormItemRule[] = [
+  {
+    pattern: /^1[3-9]\d{9}$/,
+    message: '请输入有效的手机号码',
+    trigger: 'blur',
   },
-} as const
+]
 
 // ============================================================================
 // 本地存储键名

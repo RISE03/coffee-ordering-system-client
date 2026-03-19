@@ -114,7 +114,7 @@ import ShapeBackground from '@/components/login/ShapeBackground.vue'
 import ThemeSwitcher from '@/components/common/ThemeSwitcher.vue'
 import { useRequestState } from '@/composables/useRequestState'
 import { authApi } from '@/api/auth'
-import { USERNAME_RULES, PASSWORD_RULES } from '@/types/user'
+import { LOGIN_USERNAME_RULES, LOGIN_PASSWORD_RULES } from '@/types/user'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -137,8 +137,8 @@ const formValue = reactive({
 
 // 表单验证规则
 const rules: FormRules = {
-  username: USERNAME_RULES,
-  password: PASSWORD_RULES
+  username: LOGIN_USERNAME_RULES,
+  password: LOGIN_PASSWORD_RULES
 }
 
 // 使用 useRequestState 管理请求状态
@@ -154,11 +154,11 @@ const handleLogin = (e?: Event) => {
   })
 }
 
-
 const handleRetry = () => {
   // 失败态下表单会被卸载，先恢复到表单视图，保留用户已填写内容
   reset()
 }
+
 const submitLogin = () => {
   run(async () => {
     const data = await authApi.login({

@@ -27,7 +27,13 @@ import CouponSelector from '@/components/member/CouponSelector.vue'
 import CheckoutSummary from '@/components/member/CheckoutSummary.vue'
 import { useCartStore } from '@/stores/cart'
 import { useCheckoutStore } from '@/stores/checkout'
-import type { BuyNowState, CheckoutItem, CheckoutSource, PickupType } from '@/types/cart'
+import type {
+  BuyNowState,
+  CheckoutItem,
+  CheckoutPreviewItem,
+  CheckoutSource,
+  PickupType
+} from '@/types/cart'
 import { getDisplayErrorMessage, isStoreClosedError } from '@/utils/error'
 import { guardOrderEntry } from '@/composables/useOrderAvailabilityGuard'
 
@@ -77,13 +83,14 @@ const formRules: FormRules = {
 
 const checkoutItems = computed<CheckoutItem[]>(() => checkoutStore.checkoutItems)
 
-const previewItems = computed(() => {
+const previewItems = computed<CheckoutPreviewItem[]>(() => {
   if (checkoutStore.preview?.items?.length) {
     return checkoutStore.preview.items
   }
   // 预览未加载时用快照兜底展示
   return checkoutStore.itemsSnapshot.map((item) => ({
     ...item,
+    originalPrice: undefined,
     available: true,
     reason: undefined
   }))

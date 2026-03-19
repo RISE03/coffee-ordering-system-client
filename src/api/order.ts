@@ -62,6 +62,7 @@ function mapListItem(raw: any): OrderListItem {
     status: mapStatus(raw.status),
     createdAt: raw.createdAt,
     completeTime: raw.completeTime ?? raw.completedAt ?? undefined,
+    pickupType: Number(raw.pickupType ?? 0),
     itemsPreview: raw.itemsPreview,
     itemsAmount: raw.itemsAmount ?? 0,
     discountAmount: raw.discountAmount ?? 0,
